@@ -26,8 +26,6 @@ type Projects struct {
 func GetProjects(baseUrl string, limit int) Projects {
 	url := fmt.Sprintf("%s/rest/api/1.0/projects/?limit=%d", baseUrl, limit)
 
-	fmt.Println(url)
-
 	resp, err := http.Get(url)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
