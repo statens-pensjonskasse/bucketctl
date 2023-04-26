@@ -37,7 +37,7 @@ func GetProjects(baseUrl string, limit int) Projects {
 
 	var result Projects
 	if err := json.Unmarshal(body, &result); err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		pterm.Error.Println(err.Error())
 		os.Exit(1)
 	}
 

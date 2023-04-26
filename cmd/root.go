@@ -1,12 +1,14 @@
 package cmd
 
 import (
-	"fmt"
+	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"gobit/cmd/config"
 	"gobit/cmd/project"
+	"gobit/pkg"
 	"os"
+	"path/filepath"
 )
 
 var (
@@ -18,7 +20,7 @@ var (
 	rootCmd = &cobra.Command{
 		Use:   "gobit",
 		Short: "gobit - enkel CLI for Bitbucket",
-		Long:  `gobit lalala`,
+		Long:  `GoBit lalala`,
 		Run: func(cmd *cobra.Command, args []string) {
 		},
 	}
@@ -26,7 +28,7 @@ var (
 
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		pterm.Error.Println(err.Error())
 		os.Exit(1)
 	}
 }
@@ -34,7 +36,7 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default $HOME/.gobit.yaml")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default $HOME/.gobit/config.yaml")
 	rootCmd.PersistentFlags().StringVar(&baseUrl, "baseUrl", "http://git.spk.no", "base url for BitBucket instance")
 	rootCmd.PersistentFlags().IntVar(&limit, "limit", 100, "max return values")
 	rootCmd.PersistentFlags().StringVar(&userToken, "token", "", "token for user")
@@ -43,8 +45,6 @@ func init() {
 	viper.BindPFlag("token", rootCmd.PersistentFlags().Lookup("token"))
 	viper.BindPFlag("baseUrl", rootCmd.PersistentFlags().Lookup("baseUrl"))
 	viper.BindPFlag("limit", rootCmd.PersistentFlags().Lookup("limit"))
-
-	viper.SetDefault("config", viper.ConfigFileUsed())
 
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(project.RootCmd)
@@ -58,15 +58,20 @@ func initConfig() {
 		home, err := os.UserHomeDir()
 		cobra.CheckErr(err)
 
-		viper.AddConfigPath(".")
-		viper.AddConfigPath(home + "/.gobit")
+		viper.AddConfigPath(filepath.Join(home, ".gobit"))
+		viper.SetConfigName("config")
 		viper.SetConfigType("yaml")
-		viper.SetConfigName(".gobit")
+
+		cfgFile = filepath.Join(home, ".gobit", "config.yaml")
 	}
 
 	viper.AutomaticEnv()
 
+	pkg.CreateFileIfNotExists(cfgFile)
+
 	if err := viper.ReadInConfig(); err != nil {
-		fmt.Fprintln(os.Stderr, "Error reading config file: ", viper.ConfigFileUsed())
+		pterm.Error.Println("Error reading config file:", viper.ConfigFileUsed())
 	}
+
+	viper.SetDefault("config", viper.ConfigFileUsed())
 }
