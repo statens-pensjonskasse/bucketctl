@@ -7,13 +7,6 @@ import (
 	"sort"
 )
 
-var getCmd = &cobra.Command{
-	Use:     "get",
-	Aliases: []string{"g", "list", "l"},
-	Short:   "Get config",
-	Run:     getConfig,
-}
-
 func getConfig(cmd *cobra.Command, args []string) {
 	var keys = viper.AllKeys()
 	sort.Strings(keys)

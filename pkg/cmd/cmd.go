@@ -4,9 +4,10 @@ import (
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"gobit/cmd/config"
-	"gobit/cmd/project"
 	"gobit/pkg"
+	"gobit/pkg/cmd/config"
+	"gobit/pkg/cmd/project"
+	"gobit/pkg/cmd/version"
 	"os"
 	"path/filepath"
 )
@@ -21,8 +22,6 @@ var (
 		Use:   "gobit",
 		Short: "gobit - enkel CLI for Bitbucket",
 		Long:  `GoBit lalala`,
-		Run: func(cmd *cobra.Command, args []string) {
-		},
 	}
 )
 
@@ -37,7 +36,7 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default $HOME/.gobit/config.yaml")
-	rootCmd.PersistentFlags().StringVar(&baseUrl, "baseUrl", "http://git.spk.no", "base url for BitBucket instance")
+	rootCmd.PersistentFlags().StringVar(&baseUrl, "baseUrl", "https://git.spk.no", "base url for BitBucket instance")
 	rootCmd.PersistentFlags().IntVar(&limit, "limit", 100, "max return values")
 	rootCmd.PersistentFlags().StringVar(&userToken, "token", "", "token for user")
 
@@ -46,9 +45,9 @@ func init() {
 	viper.BindPFlag("baseUrl", rootCmd.PersistentFlags().Lookup("baseUrl"))
 	viper.BindPFlag("limit", rootCmd.PersistentFlags().Lookup("limit"))
 
-	rootCmd.AddCommand(versionCmd)
-	rootCmd.AddCommand(project.RootCmd)
-	rootCmd.AddCommand(config.RootCmd)
+	rootCmd.AddCommand(version.Cmd)
+	rootCmd.AddCommand(project.Cmd)
+	rootCmd.AddCommand(config.Cmd)
 }
 
 func initConfig() {

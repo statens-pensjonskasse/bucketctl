@@ -1,17 +1,16 @@
-package cmd
+package version
 
 import (
-	"fmt"
+	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 )
 
-func init() {
-}
+const version = "0.0.1"
 
-var versionCmd = &cobra.Command{
+var Cmd = &cobra.Command{
 	Use:   "version",
 	Short: "Print version number",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("GoBit version 0.0.1")
+		pterm.Println("GoBit version", version)
 	},
 }

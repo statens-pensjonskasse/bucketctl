@@ -1,7 +1,7 @@
 package main
 
 import (
-	"gobit/cmd"
+	"gobit/pkg/cmd"
 )
 
 func main() {
