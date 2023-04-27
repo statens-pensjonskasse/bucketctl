@@ -21,7 +21,7 @@ type Project struct {
 }
 
 type projects struct {
-	pkg.Response
+	pkg.BitbucketResponse
 	Values []Project `json:"values"`
 }
 
@@ -55,13 +55,12 @@ var listPermissionsCmd = &cobra.Command{
 	Run: listPermissions,
 }
 
-func getProject(baseUrl string, projectKey string, limit int) Project {
+func getProject(baseUrl string, projectKey string, limit int) (Project, error) {
 	url := fmt.Sprintf("%s/rest/api/1.0/projects/%s/?limit=%d", baseUrl, projectKey, limit)
 
 	resp, err := http.Get(url)
 	if err != nil {
-		pterm.Error.Println(err.Error())
-		os.Exit(1)
+		return Project{}, err
 	}
 
 	defer resp.Body.Close()
@@ -73,5 +72,5 @@ func getProject(baseUrl string, projectKey string, limit int) Project {
 		os.Exit(1)
 	}
 
-	return result
+	return result, nil
 }

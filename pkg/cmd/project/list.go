@@ -6,31 +6,25 @@ import (
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"io"
-	"net/http"
+	"gobit/pkg"
 	"os"
 	"strconv"
 )
 
-func getProjects(baseUrl string, limit int) projects {
+func getProjects(baseUrl string, limit int) (projects, error) {
 	url := fmt.Sprintf("%s/rest/api/1.0/projects/?limit=%d", baseUrl, limit)
 
-	resp, err := http.Get(url)
+	body, err := pkg.GetRequestBody(url, "")
 	if err != nil {
-		pterm.Error.Println(err.Error())
-		os.Exit(1)
+		return projects{}, err
 	}
-
-	defer resp.Body.Close()
-	body, err := io.ReadAll(resp.Body)
 
 	var result projects
 	if err := json.Unmarshal(body, &result); err != nil {
-		pterm.Error.Println(err.Error())
-		os.Exit(1)
+		return projects{}, err
 	}
 
-	return result
+	return result, nil
 }
 
 func printProjects(projects []Project) {
@@ -50,9 +44,14 @@ func listProjects(cmd *cobra.Command, args []string) {
 	var baseUrl = viper.GetString("baseUrl")
 	var limit = viper.GetInt("limit")
 
-	var projects = getProjects(baseUrl, limit)
+	projects, err := getProjects(baseUrl, limit)
+	if err != nil {
+		pterm.Error.Println(err)
+		os.Exit(1)
+	}
 
 	printProjects(projects.Values)
+
 	if !projects.IsLastPage {
 		pterm.Warning.Println("Not all projects fetched, try with a higher limit")
 	}

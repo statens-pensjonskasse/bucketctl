@@ -7,14 +7,23 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"gobit/pkg"
-	"io"
-	"net/http"
 	"os"
+	"strings"
 )
 
 type Group struct {
 	Name string `json:"name"`
 }
+
+type Perm int
+
+const (
+	PROJECT_ADMIN = iota
+	PROJECT_WRITE
+	PROJECT_READ
+)
+
+type PermissionSet map[string][]string
 
 type Permission struct {
 	Permission string `json:"permission"`
@@ -22,42 +31,43 @@ type Permission struct {
 }
 
 type permissions struct {
-	pkg.Response
+	pkg.BitbucketResponse
 	Values []Permission `json:"values"`
 }
 
-func getProjectPermissions(baseUrl string, projectKey string, token string, limit int) permissions {
+func getProjectPermissions(baseUrl string, projectKey string, token string, limit int) (permissions, error) {
 	url := fmt.Sprintf("%s/rest/api/1.0/projects/%s/permissions/groups?limit=%d", baseUrl, projectKey, limit)
 
-	client := http.Client{}
-	req, _ := http.NewRequest("GET", url, nil)
-	req.Header.Set("Authorization", "Bearer "+token)
-
-	resp, err := client.Do(req)
+	body, err := pkg.GetRequestBody(url, token)
 	if err != nil {
-		pterm.Error.Println(err.Error())
-		os.Exit(1)
+		return permissions{}, err
 	}
-
-	defer resp.Body.Close()
-	body, err := io.ReadAll(resp.Body)
 
 	var result permissions
 	if err := json.Unmarshal(body, &result); err != nil {
-		pterm.Error.Println(err.Error())
-		os.Exit(1)
+		return permissions{}, err
 	}
 
-	return result
+	return result, nil
 }
 
 func printPermissions(permissions []Permission) {
 	var data [][]string
 
-	data = append(data, []string{"Permission", "Group"})
+	data = append(data, []string{"Permission", "Groups"})
 
-	for _, perm := range permissions {
-		row := []string{perm.Permission, perm.Group.Name}
+	groupedPermissions := make(PermissionSet)
+
+	for _, p := range permissions {
+		groupedPermissions[p.Permission] = append(groupedPermissions[p.Permission], p.Group.Name)
+	}
+
+	for key, _ := range groupedPermissions {
+		var groups string
+		for _, g := range groupedPermissions[key] {
+			groups += g + "\n"
+		}
+		row := []string{key, strings.Trim(groups, "\n")}
 		data = append(data, row)
 	}
 
@@ -70,9 +80,14 @@ func listPermissions(cmd *cobra.Command, args []string) {
 	var token = viper.GetString("token")
 	var limit = viper.GetInt("limit")
 
-	permissions := getProjectPermissions(baseUrl, projectKey, token, limit)
+	permissions, err := getProjectPermissions(baseUrl, projectKey, token, limit)
+	if err != nil {
+		pterm.Error.Println(err)
+		os.Exit(1)
+	}
 
 	printPermissions(permissions.Values)
+
 	if !permissions.IsLastPage {
 		pterm.Warning.Println("Not all permissions fetched, try with a higher limit")
 	}
