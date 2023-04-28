@@ -68,7 +68,7 @@ func getProject(baseUrl string, projectKey string, limit int) (Project, error) {
 
 	var result Project
 	if err := json.Unmarshal(body, &result); err != nil {
-		pterm.Error.Println(err.Error())
+		pterm.Error.Println(err)
 		os.Exit(1)
 	}
 
