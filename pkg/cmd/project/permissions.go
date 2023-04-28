@@ -58,6 +58,13 @@ func ParsePermission(s string) (Permission, error) {
 
 type PermissionSet map[Permission][]string
 
+type ProjectPermissions struct {
+	Groups []Group
+	User   []User
+}
+
+type PSet map[Permission]*ProjectPermissions
+
 type Group struct {
 	Name string `json:"name"`
 }
@@ -92,7 +99,7 @@ type userPermissions struct {
 	Values []UserPermission `json:"values"`
 }
 
-func getProjectPermissions(baseUrl string, projectKey string, token string, limit int) (groupPermissions, error) {
+func getProjectGroupPermissions(baseUrl string, projectKey string, token string, limit int) (groupPermissions, error) {
 	groupPermissionsUrl := fmt.Sprintf("%s/rest/api/1.0/projects/%s/permissions/groups?limit=%d", baseUrl, projectKey, limit)
 
 	body, err := pkg.GetRequestBody(groupPermissionsUrl, token)
@@ -100,31 +107,70 @@ func getProjectPermissions(baseUrl string, projectKey string, token string, limi
 		return groupPermissions{}, err
 	}
 
-	var result groupPermissions
-	if err := json.Unmarshal(body, &result); err != nil {
+	var groups groupPermissions
+	if err := json.Unmarshal(body, &groups); err != nil {
 		return groupPermissions{}, err
 	}
 
-	return result, nil
+	return groups, nil
 }
 
-func printPermissions(permissions []GroupPermission) {
+func getProjectUserPermissions(baseUrl string, projectKey string, token string, limit int) (userPermissions, error) {
+	userPermissionsUrl := fmt.Sprintf("%s/rest/api/1.0/projects/%s/permissions/users?limit=%d", baseUrl, projectKey, limit)
+
+	body, err := pkg.GetRequestBody(userPermissionsUrl, token)
+	if err != nil {
+		return userPermissions{}, err
+	}
+
+	var users userPermissions
+	if err := json.Unmarshal(body, &users); err != nil {
+		return userPermissions{}, err
+	}
+
+	return users, nil
+}
+
+func printGroupPermissions(permissions []GroupPermission) {
 	var data [][]string
 
 	data = append(data, []string{"Permission", "Groups"})
 
-	groupedPermissions := make(PermissionSet)
+	permissionSet := make(PermissionSet)
 
 	for _, p := range permissions {
-		groupedPermissions[p.Permission] = append(groupedPermissions[p.Permission], p.Group.Name)
+		permissionSet[p.Permission] = append(permissionSet[p.Permission], p.Group.Name)
 	}
 
-	for key, _ := range groupedPermissions {
+	for permission, _ := range permissionSet {
 		var groups string
-		for _, g := range groupedPermissions[key] {
+		for _, g := range permissionSet[permission] {
 			groups += g + "\n"
 		}
-		row := []string{PermissionType[uint8(key)], strings.Trim(groups, "\n")}
+		row := []string{PermissionType[uint8(permission)], strings.Trim(groups, "\n")}
+		data = append(data, row)
+	}
+
+	pterm.DefaultTable.WithHasHeader().WithData(data).Render()
+}
+
+func printUserPermissions(permissions []UserPermission) {
+	var data [][]string
+
+	data = append(data, []string{"Permission", "Users"})
+
+	permissionSet := make(PermissionSet)
+
+	for _, p := range permissions {
+		permissionSet[p.Permission] = append(permissionSet[p.Permission], p.User.Name)
+	}
+
+	for permission, _ := range permissionSet {
+		var users string
+		for _, g := range permissionSet[permission] {
+			users += g + "\n"
+		}
+		row := []string{PermissionType[uint8(permission)], strings.Trim(users, "\n")}
 		data = append(data, row)
 	}
 
@@ -137,15 +183,38 @@ func listPermissions(cmd *cobra.Command, args []string) {
 	var token = viper.GetString("token")
 	var limit = viper.GetInt("limit")
 
-	permissions, err := getProjectPermissions(baseUrl, projectKey, token, limit)
+	gPerms, err := getProjectGroupPermissions(baseUrl, projectKey, token, limit)
 	if err != nil {
 		pterm.Error.Println(err)
 		os.Exit(1)
 	}
 
-	printPermissions(permissions.Values)
+	//userPermissions, err := getProjectUserPermissions(baseUrl, projectKey, token, limit)
+	//if err != nil {
+	//	pterm.Error.Println(err)
+	//	os.Exit(1)
+	//}
 
-	if !permissions.IsLastPage {
-		pterm.Warning.Println("Not all groupPermissions fetched, try with a higher limit")
+	pSet := make(PSet)
+	pSet[None] = new(ProjectPermissions)
+	pSet[Read] = new(ProjectPermissions)
+	pSet[Write] = new(ProjectPermissions)
+	pSet[Admin] = new(ProjectPermissions)
+	for _, gp := range gPerms.Values {
+		pSet[gp.Permission].Groups = append(pSet[gp.Permission].Groups, gp.Group)
 	}
+
+	pterm.Println(pSet)
+	pterm.Println(pSet[3].Groups)
+
+	//	printGroupPermissions(groupPermissions.Values)
+	//	printUserPermissions(userPermissions.Values)
+	//
+	//	if !groupPermissions.IsLastPage {
+	//		pterm.Warning.Println("Not all groupPermissions fetched, try with a higher limit")
+	//	}
+	//
+	//	if !userPermissions.IsLastPage {
+	//		pterm.Warning.Println("Not all userPermissions fetched, try with a higher limit")
+	//	}
 }
