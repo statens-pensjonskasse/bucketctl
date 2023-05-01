@@ -1,11 +1,9 @@
 package pkg
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/pterm/pterm"
-	"gopkg.in/yaml.v3"
 	"io"
 	"io/fs"
 	"net/http"
@@ -66,16 +64,16 @@ func GetRequestBody(url string, token string) ([]byte, error) {
 	return io.ReadAll(resp.Body)
 }
 
-func PrintData(data interface{}) {
-	yamlData, err := yaml.Marshal(&data)
-	if err != nil {
-		pterm.Error.Println("Error while Marshaling. %v", err)
-	}
-	pterm.Println(string(yamlData))
+type Group struct {
+	Name string `json:"name"`
+}
 
-	jsonData, err := json.MarshalIndent(&data, "", "  ")
-	if err != nil {
-		pterm.Error.Println("Error while Marshaling. %v", err)
-	}
-	pterm.Println(string(jsonData))
+type User struct {
+	Name         string `json:"name" yaml:"name"`
+	EmailAddress string `json:"emailAddress" yaml:"emailAddress"`
+	Active       bool   `json:"active" yaml:"active"`
+	DisplayName  string `json:"displayName" yaml:"displayName"`
+	Id           int    `json:"id" yaml:"id"`
+	Slug         string `json:"slug" yaml:"slug"`
+	Type         string `json:"type" yaml:"type"`
 }

@@ -13,10 +13,11 @@ import (
 )
 
 var (
-	cfgFile   string
-	baseUrl   string
-	userToken string
-	limit     int
+	cfgFile      string
+	baseUrl      string
+	userToken    string
+	limit        int
+	outputFormat pkg.OutputFormatType
 
 	rootCmd = &cobra.Command{
 		Use:   "gobit",
@@ -35,15 +36,17 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default $HOME/.gobit/config.yaml")
-	rootCmd.PersistentFlags().StringVar(&baseUrl, "baseUrl", "https://git.spk.no", "base url for BitBucket instance")
-	rootCmd.PersistentFlags().IntVar(&limit, "limit", 100, "max return values")
-	rootCmd.PersistentFlags().StringVar(&userToken, "token", "", "token for user")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "Config file (default $HOME/.gobit/config.yaml")
+	rootCmd.PersistentFlags().StringVar(&baseUrl, "baseUrl", "https://git.spk.no", "Base url for BitBucket instance")
+	rootCmd.PersistentFlags().IntVarP(&limit, "limit", "l", 100, "Max return values")
+	rootCmd.PersistentFlags().StringVarP(&userToken, "token", "t", "", "Token for user")
+	rootCmd.PersistentFlags().VarP(&outputFormat, "output", "o", "Output format. One of: pretty, yaml, json")
 
 	viper.BindPFlag("config", rootCmd.PersistentFlags().Lookup("config"))
-	viper.BindPFlag("token", rootCmd.PersistentFlags().Lookup("token"))
 	viper.BindPFlag("baseUrl", rootCmd.PersistentFlags().Lookup("baseUrl"))
 	viper.BindPFlag("limit", rootCmd.PersistentFlags().Lookup("limit"))
+	viper.BindPFlag("token", rootCmd.PersistentFlags().Lookup("token"))
+	viper.BindPFlag("output", rootCmd.PersistentFlags().Lookup("output"))
 
 	rootCmd.AddCommand(version.Cmd)
 	rootCmd.AddCommand(project.Cmd)

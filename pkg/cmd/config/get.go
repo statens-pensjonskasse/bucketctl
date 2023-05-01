@@ -1,14 +1,26 @@
 package config
 
 import (
-	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"gobit/pkg"
 	"sort"
 )
 
+func prettyFormatConfig(settings map[string]interface{}) [][]string {
+	var data [][]string
+	data = append(data, []string{"Key", "Value"})
+
+	for key, _ := range settings {
+		row := []string{key, viper.GetString(key)}
+		data = append(data, row)
+	}
+
+	return data
+}
+
 func getConfig(cmd *cobra.Command, args []string) {
-	var keys = viper.AllKeys()
+	keys := viper.AllKeys()
 	sort.Strings(keys)
 
 	var data [][]string
@@ -19,5 +31,5 @@ func getConfig(cmd *cobra.Command, args []string) {
 		data = append(data, row)
 	}
 
-	pterm.DefaultTable.WithHasHeader().WithData(data).Render()
+	pkg.PrintData(viper.AllSettings(), prettyFormatConfig)
 }

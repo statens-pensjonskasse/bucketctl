@@ -27,7 +27,7 @@ func getProjects(baseUrl string, limit int) (projects, error) {
 	return result, nil
 }
 
-func printProjects(projects []Project) {
+func prettyFormatProjects(projects []Project) [][]string {
 	var data [][]string
 
 	data = append(data, []string{"ID", "Key", "Name", "Description"})
@@ -37,7 +37,7 @@ func printProjects(projects []Project) {
 		data = append(data, row)
 	}
 
-	pterm.DefaultTable.WithHasHeader().WithData(data).Render()
+	return data
 }
 
 func listProjects(cmd *cobra.Command, args []string) {
@@ -50,7 +50,7 @@ func listProjects(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	printProjects(projects.Values)
+	pkg.PrintData(projects.Values, prettyFormatProjects)
 
 	if !projects.IsLastPage {
 		pterm.Warning.Println("Not all projects fetched, try with a higher limit")

@@ -7,14 +7,12 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"gobit/pkg"
-	"gopkg.in/yaml.v3"
 	"os"
 	"strings"
 )
 
 var (
 	PermissionTypes = []string{
-		"NONE",
 		"PROJECT_READ",
 		"REPO_CREATE",
 		"PROJECT_WRITE",
@@ -23,8 +21,8 @@ var (
 )
 
 type GivenPermissions struct {
-	Groups []Group `yaml:"groups,omitempty"`
-	Users  []User  `yaml:"users,omitempty"`
+	Groups []pkg.Group `yaml:"groups,omitempty"`
+	Users  []pkg.User  `yaml:"users,omitempty"`
 }
 
 type PermissionSet struct {
@@ -33,13 +31,9 @@ type PermissionSet struct {
 
 type PSet map[string]*GivenPermissions
 
-type Group struct {
-	Name string `json:"name"`
-}
-
 type GroupPermission struct {
-	Group      Group  `json:"group"`
-	Permission string `json:"permission"`
+	Group      pkg.Group `json:"group"`
+	Permission string    `json:"permission"`
 }
 
 type groupPermissions struct {
@@ -47,19 +41,9 @@ type groupPermissions struct {
 	Values []GroupPermission `json:"values"`
 }
 
-type User struct {
-	Name         string `json:"name"`
-	EmailAddress string `json:"emailAddress"`
-	Active       bool   `json:"active"`
-	DisplayName  string `json:"displayName"`
-	Id           int    `json:"id"`
-	Slug         string `json:"slug"`
-	Type         string `json:"type"`
-}
-
 type UserPermission struct {
-	User       User   `json:"user"`
-	Permission string `json:"permission"`
+	User       pkg.User `json:"user"`
+	Permission string   `json:"permission"`
 }
 
 type userPermissions struct {
@@ -99,7 +83,7 @@ func getProjectUserPermissions(baseUrl string, projectKey string, token string, 
 	return users, nil
 }
 
-func printProjectPermissions(pSet *PermissionSet) {
+func prettyFormatProjectPermissions(pSet *PermissionSet) [][]string {
 	var data [][]string
 
 	data = append(data, []string{"Permission", "Groups", "Users"})
@@ -121,7 +105,7 @@ func printProjectPermissions(pSet *PermissionSet) {
 		}
 	}
 
-	pterm.DefaultTable.WithHasHeader().WithData(data).Render()
+	return data
 }
 
 func listPermissions(cmd *cobra.Command, args []string) {
@@ -156,25 +140,13 @@ func listPermissions(cmd *cobra.Command, args []string) {
 		pSet.Permissions[up.Permission].Users = append(pSet.Permissions[up.Permission].Users, up.User)
 	}
 
-	printProjectPermissions(pSet)
-
-	yamlData, err := yaml.Marshal(&pSet)
-	if err != nil {
-		pterm.Error.Println("Error while Marshaling. %v", err)
-	}
-	pterm.Println(string(yamlData))
-
-	jsonData, err := json.MarshalIndent(&pSet, "", "  ")
-	if err != nil {
-		pterm.Error.Println("Error while Marshaling. %v", err)
-	}
-	pterm.Println(string(jsonData))
+	pkg.PrintData(pSet, prettyFormatProjectPermissions)
 
 	if !projectGroupPermissions.IsLastPage {
-		pterm.Warning.Println("Not all groupPermissions fetched, try with a higher limit")
+		pterm.Warning.Println("Not all Group Permissions fetched, try with a higher limit")
 	}
 
 	if !projectUserPermissions.IsLastPage {
-		pterm.Warning.Println("Not all projectUserPermissions fetched, try with a higher limit")
+		pterm.Warning.Println("Not all User Permissions fetched, try with a higher limit")
 	}
 }

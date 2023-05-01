@@ -5,8 +5,9 @@ import (
 )
 
 var Cmd = &cobra.Command{
-	Use:   "config",
-	Short: "Get or set config",
+	Use:     "config",
+	Short:   "Get or set config",
+	Aliases: []string{"conf"},
 }
 
 func init() {
