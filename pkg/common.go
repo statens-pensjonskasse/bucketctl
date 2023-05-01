@@ -1,9 +1,11 @@
 package pkg
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/pterm/pterm"
+	"gopkg.in/yaml.v3"
 	"io"
 	"io/fs"
 	"net/http"
@@ -62,4 +64,18 @@ func GetRequestBody(url string, token string) ([]byte, error) {
 	}
 	defer resp.Body.Close()
 	return io.ReadAll(resp.Body)
+}
+
+func PrintData(data interface{}) {
+	yamlData, err := yaml.Marshal(&data)
+	if err != nil {
+		pterm.Error.Println("Error while Marshaling. %v", err)
+	}
+	pterm.Println(string(yamlData))
+
+	jsonData, err := json.MarshalIndent(&data, "", "  ")
+	if err != nil {
+		pterm.Error.Println("Error while Marshaling. %v", err)
+	}
+	pterm.Println(string(jsonData))
 }
