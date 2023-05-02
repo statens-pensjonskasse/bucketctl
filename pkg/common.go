@@ -65,7 +65,7 @@ func GetRequestBody(url string, token string) ([]byte, error) {
 }
 
 type Group struct {
-	Name string `json:"name"`
+	Name string `json:"name" yaml:"name"`
 }
 
 type User struct {

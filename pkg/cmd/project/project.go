@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"gobit/pkg"
 	"io"
 	"net/http"
@@ -20,14 +19,10 @@ type Project struct {
 	Public      bool   `json:"public"`
 }
 
-type projects struct {
+type Projects struct {
 	pkg.BitbucketResponse
 	Values []Project `json:"values"`
 }
-
-var (
-	key string
-)
 
 var Cmd = &cobra.Command{
 	Use:     "project",
@@ -36,23 +31,15 @@ var Cmd = &cobra.Command{
 }
 
 func init() {
-	Cmd.PersistentFlags().StringVarP(&key, "key", "k", "", "Project key")
-	viper.BindPFlag("key", Cmd.PersistentFlags().Lookup("key"))
-
-	Cmd.AddCommand(listCmd)
-	Cmd.AddCommand(listPermissionsCmd)
+	Cmd.AddCommand(PermissionsCmd)
+	Cmd.AddCommand(listProjectsCmd)
 }
 
-var listCmd = &cobra.Command{
+var listProjectsCmd = &cobra.Command{
 	Use:     "list",
 	Aliases: []string{"l"},
 	Short:   "List Bitbucket projects",
 	Run:     listProjects,
-}
-
-var listPermissionsCmd = &cobra.Command{
-	Use: "permissions",
-	Run: listPermissions,
 }
 
 func getProject(baseUrl string, projectKey string, limit int) (Project, error) {

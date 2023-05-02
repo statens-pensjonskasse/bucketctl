@@ -5,10 +5,7 @@ import (
 	"fmt"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"gobit/pkg"
-	"os"
-	"strings"
 )
 
 var (
@@ -21,19 +18,17 @@ var (
 )
 
 type GivenPermissions struct {
-	Groups []pkg.Group `yaml:"groups,omitempty"`
-	Users  []pkg.User  `yaml:"users,omitempty"`
+	Groups []string `json:"groups,omitempty" yaml:"groups,omitempty"`
+	Users  []string `json:"users,omitempty" yaml:"users,omitempty"`
 }
 
 type PermissionSet struct {
-	Permissions map[string]*GivenPermissions `xml:"permissions"`
+	Permissions map[string]*GivenPermissions
 }
 
-type PSet map[string]*GivenPermissions
-
-type GroupPermission struct {
-	Group      pkg.Group `json:"group"`
-	Permission string    `json:"permission"`
+type ProjectPermissions struct {
+	Project     string        `json:"project" yaml:"project,inline"`
+	Permissions PermissionSet `json:"permissions" yaml:"permissions"`
 }
 
 type groupPermissions struct {
@@ -41,14 +36,30 @@ type groupPermissions struct {
 	Values []GroupPermission `json:"values"`
 }
 
+type userPermissions struct {
+	pkg.BitbucketResponse
+	Values []UserPermission `json:"values"`
+}
+
+type GroupPermission struct {
+	Group      pkg.Group `json:"group"`
+	Permission string    `json:"permission"`
+}
+
 type UserPermission struct {
 	User       pkg.User `json:"user"`
 	Permission string   `json:"permission"`
 }
 
-type userPermissions struct {
-	pkg.BitbucketResponse
-	Values []UserPermission `json:"values"`
+var PermissionsCmd = &cobra.Command{
+	Use:     "permissions",
+	Short:   "Bitbucket project permission commands",
+	Aliases: []string{"perm"},
+}
+
+func init() {
+	PermissionsCmd.AddCommand(ListProjectPermissionsCmd)
+	PermissionsCmd.AddCommand(listAllPermissionsCmd)
 }
 
 func getProjectGroupPermissions(baseUrl string, projectKey string, token string, limit int) (groupPermissions, error) {
@@ -83,70 +94,40 @@ func getProjectUserPermissions(baseUrl string, projectKey string, token string, 
 	return users, nil
 }
 
-func prettyFormatProjectPermissions(pSet *PermissionSet) [][]string {
-	var data [][]string
-
-	data = append(data, []string{"Permission", "Groups", "Users"})
-
-	for permission, v := range pSet.Permissions {
-		var users string
-		for _, u := range v.Users {
-			users += u.Name + "\n"
-		}
-		users = strings.Trim(users, "\n")
-		var groups string
-		for _, g := range v.Groups {
-			groups += g.Name + "\n"
-		}
-		groups = strings.Trim(groups, "\n")
-
-		if len(groups)+len(users) > 0 {
-			data = append(data, []string{permission, groups, users})
-		}
+func GetProjectPermissions(baseUrl string, projectKey string, limit int, token string) (*PermissionSet, error) {
+	permissionSet := &PermissionSet{
+		Permissions: make(map[string]*GivenPermissions),
 	}
 
-	return data
-}
-
-func listPermissions(cmd *cobra.Command, args []string) {
-	var baseUrl = viper.GetString("baseUrl")
-	var projectKey = viper.GetString("key")
-	var token = viper.GetString("token")
-	var limit = viper.GetInt("limit")
+	for _, permission := range PermissionTypes {
+		permissionSet.Permissions[permission] = new(GivenPermissions)
+	}
 
 	projectGroupPermissions, err := getProjectGroupPermissions(baseUrl, projectKey, token, limit)
 	if err != nil {
-		pterm.Error.Println(err)
-		os.Exit(1)
-	}
-
-	projectUserPermissions, err := getProjectUserPermissions(baseUrl, projectKey, token, limit)
-	if err != nil {
-		pterm.Error.Println(err)
-		os.Exit(1)
-	}
-
-	pSet := &PermissionSet{
-		Permissions: make(map[string]*GivenPermissions),
-	}
-	for _, permission := range PermissionTypes {
-		pSet.Permissions[permission] = new(GivenPermissions)
+		return &PermissionSet{}, err
 	}
 
 	for _, gp := range projectGroupPermissions.Values {
-		pSet.Permissions[gp.Permission].Groups = append(pSet.Permissions[gp.Permission].Groups, gp.Group)
+		permissionSet.Permissions[gp.Permission].Groups = append(permissionSet.Permissions[gp.Permission].Groups, gp.Group.Name)
 	}
-	for _, up := range projectUserPermissions.Values {
-		pSet.Permissions[up.Permission].Users = append(pSet.Permissions[up.Permission].Users, up.User)
-	}
-
-	pkg.PrintData(pSet, prettyFormatProjectPermissions)
 
 	if !projectGroupPermissions.IsLastPage {
 		pterm.Warning.Println("Not all Group Permissions fetched, try with a higher limit")
 	}
 
+	projectUserPermissions, err := getProjectUserPermissions(baseUrl, projectKey, token, limit)
+	if err != nil {
+		return &PermissionSet{}, err
+	}
+
+	for _, up := range projectUserPermissions.Values {
+		permissionSet.Permissions[up.Permission].Users = append(permissionSet.Permissions[up.Permission].Users, up.User.Name)
+	}
+
 	if !projectUserPermissions.IsLastPage {
 		pterm.Warning.Println("Not all User Permissions fetched, try with a higher limit")
 	}
+
+	return permissionSet, nil
 }

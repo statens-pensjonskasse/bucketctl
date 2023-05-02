@@ -11,17 +11,17 @@ import (
 	"strconv"
 )
 
-func getProjects(baseUrl string, limit int) (projects, error) {
+func GetProjects(baseUrl string, limit int) (Projects, error) {
 	url := fmt.Sprintf("%s/rest/api/1.0/projects/?limit=%d", baseUrl, limit)
 
 	body, err := pkg.GetRequestBody(url, "")
 	if err != nil {
-		return projects{}, err
+		return Projects{}, err
 	}
 
-	var result projects
+	var result Projects
 	if err := json.Unmarshal(body, &result); err != nil {
-		return projects{}, err
+		return Projects{}, err
 	}
 
 	return result, nil
@@ -44,7 +44,7 @@ func listProjects(cmd *cobra.Command, args []string) {
 	var baseUrl = viper.GetString("baseUrl")
 	var limit = viper.GetInt("limit")
 
-	projects, err := getProjects(baseUrl, limit)
+	projects, err := GetProjects(baseUrl, limit)
 	if err != nil {
 		pterm.Error.Println(err)
 		os.Exit(1)
