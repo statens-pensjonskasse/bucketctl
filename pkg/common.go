@@ -1,13 +1,16 @@
 package pkg
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/pterm/pterm"
+	"gopkg.in/yaml.v3"
 	"io"
 	"io/fs"
 	"net/http"
 	"os"
+	"strings"
 )
 
 type BitbucketResponse struct {
@@ -17,6 +20,20 @@ type BitbucketResponse struct {
 	Start         int    `json:"start"`
 	NextPageStart int    `json:"nextPageStart"`
 	Values        []byte `json:"values"`
+}
+
+type Group struct {
+	Name string `json:"name" yaml:"name"`
+}
+
+type User struct {
+	Name         string `json:"name" yaml:"name"`
+	EmailAddress string `json:"emailAddress" yaml:"emailAddress"`
+	Active       bool   `json:"active" yaml:"active"`
+	DisplayName  string `json:"displayName" yaml:"displayName"`
+	Id           int    `json:"id" yaml:"id"`
+	Slug         string `json:"slug" yaml:"slug"`
+	Type         string `json:"type" yaml:"type"`
 }
 
 func CreateFileIfNotExists(file string) {
@@ -32,11 +49,16 @@ func CreateFileIfNotExists(file string) {
 	}
 }
 
-func HttpRequest(method string, url string, body io.Reader, token string) (*http.Response, error) {
+func HttpRequest(method string, url string, body io.Reader, token string, params ...map[string]string) (*http.Response, error) {
 	client := http.Client{}
 	req, _ := http.NewRequest(method, url, body)
 	if token != "" {
 		req.Header.Set("Authorization", "Bearer "+token)
+	}
+	if params != nil && len(params) > 0 {
+		for key, val := range params[0] {
+			req.URL.Query().Set(key, val)
+		}
 	}
 
 	resp, err := client.Do(req)
@@ -55,6 +77,10 @@ func GetRequest(url string, token string) (*http.Response, error) {
 	return HttpRequest("GET", url, nil, token)
 }
 
+func DeleteRequestWithParams(url string, token string, params map[string]string) (*http.Response, error) {
+	return HttpRequest("DELETE", url, nil, token, params)
+}
+
 func GetRequestBody(url string, token string) ([]byte, error) {
 	resp, err := GetRequest(url, token)
 	if err != nil {
@@ -64,16 +90,23 @@ func GetRequestBody(url string, token string) ([]byte, error) {
 	return io.ReadAll(resp.Body)
 }
 
-type Group struct {
-	Name string `json:"name" yaml:"name"`
-}
+func ReadConfigFile[T interface{}](filename string, obj T) error {
+	file, err := os.ReadFile(filename)
+	if err != nil {
+		return err
+	}
 
-type User struct {
-	Name         string `json:"name" yaml:"name"`
-	EmailAddress string `json:"emailAddress" yaml:"emailAddress"`
-	Active       bool   `json:"active" yaml:"active"`
-	DisplayName  string `json:"displayName" yaml:"displayName"`
-	Id           int    `json:"id" yaml:"id"`
-	Slug         string `json:"slug" yaml:"slug"`
-	Type         string `json:"type" yaml:"type"`
+	if strings.HasSuffix(filename, ".yaml") {
+		if err := yaml.Unmarshal(file, &obj); err != nil {
+			return err
+		}
+	} else if strings.HasSuffix(filename, ".json") {
+		if err := json.Unmarshal(file, &obj); err != nil {
+			return err
+		}
+	} else {
+		return errors.New("forventet fil med enten .yaml eller .json ending")
+	}
+
+	return nil
 }

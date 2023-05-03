@@ -6,9 +6,6 @@ import (
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 	"gobit/pkg"
-	"io"
-	"net/http"
-	"os"
 )
 
 type Project struct {
@@ -19,7 +16,7 @@ type Project struct {
 	Public      bool   `json:"public"`
 }
 
-type Projects struct {
+type ProjectsResponse struct {
 	pkg.BitbucketResponse
 	Values []Project `json:"values"`
 }
@@ -42,22 +39,22 @@ var listProjectsCmd = &cobra.Command{
 	Run:     listProjects,
 }
 
-func getProject(baseUrl string, projectKey string, limit int) (Project, error) {
-	url := fmt.Sprintf("%s/rest/api/1.0/projects/%s/?limit=%d", baseUrl, projectKey, limit)
+func GetProjects(baseUrl string, limit int) ([]Project, error) {
+	url := fmt.Sprintf("%s/rest/api/1.0/projects/?limit=%d", baseUrl, limit)
 
-	resp, err := http.Get(url)
+	body, err := pkg.GetRequestBody(url, "")
 	if err != nil {
-		return Project{}, err
+		return []Project{}, err
 	}
 
-	defer resp.Body.Close()
-	body, err := io.ReadAll(resp.Body)
-
-	var result Project
-	if err := json.Unmarshal(body, &result); err != nil {
-		pterm.Error.Println(err)
-		os.Exit(1)
+	var projectsResponse ProjectsResponse
+	if err := json.Unmarshal(body, &projectsResponse); err != nil {
+		return []Project{}, err
 	}
 
-	return result, nil
+	if !projectsResponse.IsLastPage {
+		pterm.Warning.Println("Not all projects fetched, try with a higher limit")
+	}
+
+	return projectsResponse.Values, nil
 }

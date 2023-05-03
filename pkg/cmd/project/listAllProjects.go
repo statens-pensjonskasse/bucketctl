@@ -1,8 +1,6 @@
 package project
 
 import (
-	"encoding/json"
-	"fmt"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -10,22 +8,6 @@ import (
 	"os"
 	"strconv"
 )
-
-func GetProjects(baseUrl string, limit int) (Projects, error) {
-	url := fmt.Sprintf("%s/rest/api/1.0/projects/?limit=%d", baseUrl, limit)
-
-	body, err := pkg.GetRequestBody(url, "")
-	if err != nil {
-		return Projects{}, err
-	}
-
-	var result Projects
-	if err := json.Unmarshal(body, &result); err != nil {
-		return Projects{}, err
-	}
-
-	return result, nil
-}
 
 func prettyFormatProjects(projects []Project) [][]string {
 	var data [][]string
@@ -50,9 +32,5 @@ func listProjects(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	pkg.PrintData(projects.Values, prettyFormatProjects)
-
-	if !projects.IsLastPage {
-		pterm.Warning.Println("Not all projects fetched, try with a higher limit")
-	}
+	pkg.PrintData(projects, prettyFormatProjects)
 }
