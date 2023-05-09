@@ -52,13 +52,17 @@ func CreateFileIfNotExists(file string) {
 func HttpRequest(method string, url string, body io.Reader, token string, params ...map[string]string) (*http.Response, error) {
 	client := http.Client{}
 	req, _ := http.NewRequest(method, url, body)
+
 	if token != "" {
 		req.Header.Set("Authorization", "Bearer "+token)
 	}
+
 	if params != nil && len(params) > 0 {
+		q := req.URL.Query()
 		for key, val := range params[0] {
-			req.URL.Query().Set(key, val)
+			q.Add(key, val)
 		}
+		req.URL.RawQuery = q.Encode()
 	}
 
 	resp, err := client.Do(req)
@@ -67,7 +71,8 @@ func HttpRequest(method string, url string, body io.Reader, token string, params
 	}
 
 	if resp.StatusCode >= 300 {
-		return resp, fmt.Errorf("http status %d for %s-call to %s", resp.StatusCode, method, url)
+		bodyBytes, _ := io.ReadAll(resp.Body)
+		return resp, fmt.Errorf("http status %d for %s-call to %s: %s", resp.StatusCode, method, url, string(bodyBytes))
 	}
 
 	return resp, nil
@@ -77,8 +82,12 @@ func GetRequest(url string, token string) (*http.Response, error) {
 	return HttpRequest("GET", url, nil, token)
 }
 
-func DeleteRequestWithParams(url string, token string, params map[string]string) (*http.Response, error) {
+func DeleteRequest(url string, token string, params map[string]string) (*http.Response, error) {
 	return HttpRequest("DELETE", url, nil, token, params)
+}
+
+func PutRequest(url string, token string, params map[string]string) (*http.Response, error) {
+	return HttpRequest("PUT", url, nil, token, params)
 }
 
 func GetRequestBody(url string, token string) ([]byte, error) {

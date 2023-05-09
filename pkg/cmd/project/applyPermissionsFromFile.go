@@ -2,9 +2,11 @@ package project
 
 import (
 	"fmt"
+	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"gobit/pkg"
+	"os"
 )
 
 var applyPermissionsFromFile = &cobra.Command{
@@ -12,48 +14,54 @@ var applyPermissionsFromFile = &cobra.Command{
 	RunE: applyPermissions,
 }
 
-func removeUserPermission(baseUrl string, projectKey string, token string, permission UserPermission) error {
-	url := fmt.Sprintf("%s/rest/api/1.0/projects/%s", baseUrl, projectKey)
-
-	params := map[string]string{
-		"user": permission.User.Name,
-	}
-
-	_, err := pkg.DeleteRequestWithParams(url, token, params)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func applyPermissions(cmd *cobra.Command, args []string) error {
 	var baseUrl = viper.GetString("baseUrl")
 	var limit = viper.GetInt("limit")
 	var token = viper.GetString("token")
 
-	var desiredState *GrantedProjectPermissions
-	err := pkg.ReadConfigFile("permissions.yaml", &desiredState)
-	if err != nil {
+	// Les inn fil (yaml eller json) med ønskede tilganger
+	var desiredPermissions *GrantedProjectPermissions
+	if err := pkg.ReadConfigFile("permissions.yaml", &desiredPermissions); err != nil {
 		return err
 	}
 
-	actualState := &GrantedProjectPermissions{
+	// Finn aktuelle tilganger for prosjekter definert i ønskede tilganger
+	actualPermissions := &GrantedProjectPermissions{
 		Project: map[string]*PermissionSet{},
 	}
-	for projectKey := range desiredState.Project {
+	progressBar, _ := pterm.DefaultProgressbar.WithTotal(len(desiredPermissions.Project)).WithRemoveWhenDone(true).WithWriter(os.Stderr).Start()
+	for projectKey := range desiredPermissions.Project {
+		progressBar.Title = projectKey
+
 		projectPermission, err := GetProjectPermissions(baseUrl, projectKey, limit, token)
 		if err != nil {
 			return err
 		}
-		actualState.Project[projectKey] = new(PermissionSet)
-		actualState.Project[projectKey].Permissions = projectPermission.Project[projectKey].Permissions
+		actualPermissions.Project[projectKey] = new(PermissionSet)
+		actualPermissions.Project[projectKey].Permissions = projectPermission.Project[projectKey].Permissions
+
+		progressBar.Increment()
 	}
 
-	permissionsToBeRemoved, permissionsToBeGranted := findProjectPermissionDifference(desiredState, actualState)
+	permissionsToBeRemoved, permissionsToBeGranted := findProjectPermissionDifference(desiredPermissions, actualPermissions)
 
-	pkg.PrintData(permissionsToBeRemoved, PrettyFormatProjectPermissions)
-	pkg.PrintData(permissionsToBeGranted, PrettyFormatProjectPermissions)
+	// Fjern alle tilganger som ikke er ønsket
+	progressBar, _ = pterm.DefaultProgressbar.WithTotal(len(permissionsToBeRemoved.Project)).WithRemoveWhenDone(true).WithWriter(os.Stderr).WithTitle("Fjerner tilganger").Start()
+	for projectKey := range permissionsToBeRemoved.Project {
+		if err := removeProjectPermissions(baseUrl, projectKey, token, permissionsToBeRemoved.Project[projectKey]); err != nil {
+			return err
+		}
+		progressBar.Increment()
+	}
+
+	// Gi ønskede tilganger
+	progressBar, _ = pterm.DefaultProgressbar.WithTotal(len(permissionsToBeGranted.Project)).WithRemoveWhenDone(true).WithWriter(os.Stderr).WithTitle("Gir tilganger").Start()
+	for projectKey := range permissionsToBeGranted.Project {
+		if err := grantProjectPermissions(baseUrl, projectKey, token, permissionsToBeGranted.Project[projectKey]); err != nil {
+			return err
+		}
+		progressBar.Increment()
+	}
 
 	return nil
 }
@@ -114,4 +122,86 @@ func (entities Entities) containsGroup(group string) bool {
 		}
 	}
 	return false
+}
+
+func removeProjectPermissions(baseUrl string, projectKey string, token string, permissionSet *PermissionSet) error {
+	for _, permission := range PermissionTypes {
+		for _, user := range permissionSet.Permissions[permission].Users {
+			if err := removeUserPermissions(baseUrl, projectKey, token, user); err != nil {
+				return err
+			}
+		}
+		for _, group := range permissionSet.Permissions[permission].Groups {
+			if err := removeGroupPermissions(baseUrl, projectKey, token, group); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func removeUserPermissions(baseUrl string, projectKey string, token string, user string) error {
+	url := fmt.Sprintf("%s/rest/api/latest/projects/%s/permissions/users", baseUrl, projectKey)
+	params := map[string]string{
+		"name": user,
+	}
+
+	if _, err := pkg.DeleteRequest(url, token, params); err != nil {
+		return err
+	}
+	return nil
+}
+
+func removeGroupPermissions(baseUrl string, projectKey string, token string, group string) error {
+	url := fmt.Sprintf("%s/rest/api/latest/projects/%s/permissions/groups", baseUrl, projectKey)
+	params := map[string]string{
+		"name": group,
+	}
+
+	if _, err := pkg.DeleteRequest(url, token, params); err != nil {
+		return err
+	}
+	return nil
+}
+
+func grantProjectPermissions(baseUrl string, projectKey string, token string, permissionSet *PermissionSet) error {
+	for _, permission := range PermissionTypes {
+		for _, user := range permissionSet.Permissions[permission].Users {
+			if err := grantUserPermission(baseUrl, projectKey, token, user, permission); err != nil {
+				return err
+			}
+		}
+		for _, group := range permissionSet.Permissions[permission].Groups {
+			if err := grantGroupPermission(baseUrl, projectKey, token, group, permission); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func grantUserPermission(baseUrl string, projectKey string, token string, user string, permission string) error {
+	url := fmt.Sprintf("%s/rest/api/latest/projects/%s/permissions/users", baseUrl, projectKey)
+	params := map[string]string{
+		"name":       user,
+		"permission": permission,
+	}
+
+	if _, err := pkg.PutRequest(url, token, params); err != nil {
+		return err
+	}
+	return nil
+}
+
+func grantGroupPermission(baseUrl string, projectKey string, token string, group string, permission string) error {
+	url := fmt.Sprintf("%s/rest/api/latest/projects/%s/permissions/groups", baseUrl, projectKey)
+	params := map[string]string{
+		"name":       group,
+		"permission": permission,
+	}
+
+	if _, err := pkg.PutRequest(url, token, params); err != nil {
+		return err
+	}
+	return nil
 }
