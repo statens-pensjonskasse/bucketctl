@@ -13,14 +13,14 @@ var listAllPermissionsCmd = &cobra.Command{
 	RunE: listAllPermissions,
 }
 
-func getAllPermissions(baseUrl string, limit int, token string) (*ProjectPermissions, error) {
+func getAllPermissions(baseUrl string, limit int, token string) (*GrantedProjectPermissions, error) {
 	projects, err := GetProjects(baseUrl, limit)
 	if err != nil {
 		return nil, err
 	}
 
-	allPermissions := &ProjectPermissions{
-		Project: map[string]*PermissionObjects{},
+	allPermissions := &GrantedProjectPermissions{
+		Project: map[string]*PermissionSet{},
 	}
 	progressBar, _ := pterm.DefaultProgressbar.WithTotal(len(projects)).WithRemoveWhenDone(true).WithWriter(os.Stderr).Start()
 	for _, proj := range projects {

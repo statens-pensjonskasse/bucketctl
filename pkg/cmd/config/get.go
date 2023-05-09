@@ -11,7 +11,7 @@ func prettyFormatConfig(settings map[string]interface{}) [][]string {
 	var data [][]string
 	data = append(data, []string{"Key", "Value"})
 
-	for key, _ := range settings {
+	for key := range settings {
 		row := []string{key, viper.GetString(key)}
 		data = append(data, row)
 	}

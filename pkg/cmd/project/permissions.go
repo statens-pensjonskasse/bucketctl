@@ -19,17 +19,17 @@ var (
 	}
 )
 
-type GivenPermissions struct {
+type Entities struct {
 	Groups []string `json:"groups,omitempty" yaml:"groups,omitempty"`
 	Users  []string `json:"users,omitempty" yaml:"users,omitempty"`
 }
 
-type PermissionObjects struct {
-	Permissions map[string]*GivenPermissions `json:"permissions" yaml:"permissions"`
+type PermissionSet struct {
+	Permissions map[string]*Entities `json:"permissions" yaml:"permissions"`
 }
 
-type ProjectPermissions struct {
-	Project map[string]*PermissionObjects `json:"" yaml:",inline"`
+type GrantedProjectPermissions struct {
+	Project map[string]*PermissionSet `json:"" yaml:",inline"`
 }
 
 type groupPermissionsResponse struct {
@@ -78,7 +78,7 @@ func getProjectGroupPermissions(baseUrl string, projectKey string, limit int, to
 	}
 
 	if !groups.IsLastPage {
-		pterm.Warning.Println("Not all Group Permissions fetched, try with a higher limit")
+		pterm.Warning.Println("Not all Group PermissionSet fetched, try with a higher limit")
 	}
 
 	return groups.Values, nil
@@ -98,26 +98,26 @@ func getProjectUserPermissions(baseUrl string, projectKey string, limit int, tok
 	}
 
 	if !users.IsLastPage {
-		pterm.Warning.Println("Not all User Permissions fetched, try with a higher limit")
+		pterm.Warning.Println("Not all User PermissionSet fetched, try with a higher limit")
 	}
 
 	return users.Values, nil
 }
 
-func GetProjectPermissions(baseUrl string, projectKey string, limit int, token string) (*ProjectPermissions, error) {
-	projectPermissions := &ProjectPermissions{
-		Project: map[string]*PermissionObjects{},
+func GetProjectPermissions(baseUrl string, projectKey string, limit int, token string) (*GrantedProjectPermissions, error) {
+	projectPermissions := &GrantedProjectPermissions{
+		Project: map[string]*PermissionSet{},
 	}
-	projectPermissions.Project[projectKey] = new(PermissionObjects)
-	projectPermissions.Project[projectKey].Permissions = make(map[string]*GivenPermissions)
+	projectPermissions.Project[projectKey] = new(PermissionSet)
+	projectPermissions.Project[projectKey].Permissions = make(map[string]*Entities)
 
 	for _, permission := range PermissionTypes {
-		projectPermissions.Project[projectKey].Permissions[permission] = new(GivenPermissions)
+		projectPermissions.Project[projectKey].Permissions[permission] = new(Entities)
 	}
 
 	projectGroupPermissions, err := getProjectGroupPermissions(baseUrl, projectKey, limit, token)
 	if err != nil {
-		return &ProjectPermissions{}, err
+		return &GrantedProjectPermissions{}, err
 	}
 
 	for _, gp := range projectGroupPermissions {
@@ -126,7 +126,7 @@ func GetProjectPermissions(baseUrl string, projectKey string, limit int, token s
 
 	projectUserPermissions, err := getProjectUserPermissions(baseUrl, projectKey, limit, token)
 	if err != nil {
-		return &ProjectPermissions{}, err
+		return &GrantedProjectPermissions{}, err
 	}
 
 	for _, up := range projectUserPermissions {
@@ -136,7 +136,7 @@ func GetProjectPermissions(baseUrl string, projectKey string, limit int, token s
 	return projectPermissions, nil
 }
 
-func PrettyFormatProjectPermissions(projectPermissions *ProjectPermissions) [][]string {
+func PrettyFormatProjectPermissions(projectPermissions *GrantedProjectPermissions) [][]string {
 	// Sorter prosjektene alfabetisk
 	projects := make([]string, 0, len(projectPermissions.Project))
 	for k := range projectPermissions.Project {
