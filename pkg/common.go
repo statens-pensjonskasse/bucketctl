@@ -10,7 +10,9 @@ import (
 	"io/fs"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
+	"time"
 )
 
 type BitbucketResponse struct {
@@ -34,6 +36,14 @@ type User struct {
 	Id           int    `json:"id" yaml:"id"`
 	Slug         string `json:"slug" yaml:"slug"`
 	Type         string `json:"type" yaml:"type"`
+}
+
+type BitbucketError struct {
+	Errors []struct {
+		Context       string `json:"context,omitempty"`
+		Message       string `json:"message,omitempty"`
+		ExceptionName string `json:"exceptionName,omitempty"`
+	} `json:"errors"`
 }
 
 func CreateFileIfNotExists(file string) {
@@ -70,9 +80,23 @@ func HttpRequest(method string, url string, body io.Reader, token string, params
 		return resp, err
 	}
 
-	if resp.StatusCode >= 300 {
-		bodyBytes, _ := io.ReadAll(resp.Body)
-		return resp, fmt.Errorf("http status %d for %s-call to %s: %s", resp.StatusCode, method, url, string(bodyBytes))
+	// Http-status 429 tyder på at vi sender for mange kall. Venter og prøver igjen.
+	if resp.StatusCode == 429 {
+		wait, _ := strconv.Atoi(resp.Header.Get("Retry-After"))
+		time.Sleep(time.Duration(wait) * time.Second)
+		return HttpRequest(method, url, body, token, params...)
+	}
+
+	if resp.StatusCode >= 400 {
+		bodyBytes, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return resp, err
+		}
+		var errorResp BitbucketError
+		if err := json.Unmarshal(bodyBytes, &errorResp); err != nil {
+			return resp, err
+		}
+		return resp, fmt.Errorf("http status %d for %s-call to %s: %s", resp.StatusCode, method, url, errorResp.Errors)
 	}
 
 	return resp, nil

@@ -10,15 +10,6 @@ import (
 	"strings"
 )
 
-var (
-	PermissionTypes = []string{
-		"PROJECT_READ",
-		"REPO_CREATE",
-		"PROJECT_WRITE",
-		"PROJECT_ADMIN",
-	}
-)
-
 type Entities struct {
 	Groups []string `json:"groups,omitempty" yaml:"groups,omitempty"`
 	Users  []string `json:"users,omitempty" yaml:"users,omitempty"`
@@ -111,17 +102,16 @@ func GetProjectPermissions(baseUrl string, projectKey string, limit int, token s
 	projectPermissions.Project[projectKey] = new(PermissionSet)
 	projectPermissions.Project[projectKey].Permissions = make(map[string]*Entities)
 
-	for _, permission := range PermissionTypes {
-		projectPermissions.Project[projectKey].Permissions[permission] = new(Entities)
-	}
-
 	projectGroupPermissions, err := getProjectGroupPermissions(baseUrl, projectKey, limit, token)
 	if err != nil {
 		return &GrantedProjectPermissions{}, err
 	}
 
-	for _, gp := range projectGroupPermissions {
-		projectPermissions.Project[projectKey].Permissions[gp.Permission].Groups = append(projectPermissions.Project[projectKey].Permissions[gp.Permission].Groups, gp.Group.Name)
+	for _, groupWithPermission := range projectGroupPermissions {
+		if _, exists := projectPermissions.Project[projectKey].Permissions[groupWithPermission.Permission]; !exists {
+			projectPermissions.Project[projectKey].Permissions[groupWithPermission.Permission] = new(Entities)
+		}
+		projectPermissions.Project[projectKey].Permissions[groupWithPermission.Permission].Groups = append(projectPermissions.Project[projectKey].Permissions[groupWithPermission.Permission].Groups, groupWithPermission.Group.Name)
 	}
 
 	projectUserPermissions, err := getProjectUserPermissions(baseUrl, projectKey, limit, token)
@@ -129,8 +119,11 @@ func GetProjectPermissions(baseUrl string, projectKey string, limit int, token s
 		return &GrantedProjectPermissions{}, err
 	}
 
-	for _, up := range projectUserPermissions {
-		projectPermissions.Project[projectKey].Permissions[up.Permission].Users = append(projectPermissions.Project[projectKey].Permissions[up.Permission].Users, up.User.Name)
+	for _, userWithPermission := range projectUserPermissions {
+		if _, exists := projectPermissions.Project[projectKey].Permissions[userWithPermission.Permission]; !exists {
+			projectPermissions.Project[projectKey].Permissions[userWithPermission.Permission] = new(Entities)
+		}
+		projectPermissions.Project[projectKey].Permissions[userWithPermission.Permission].Users = append(projectPermissions.Project[projectKey].Permissions[userWithPermission.Permission].Users, userWithPermission.User.Name)
 	}
 
 	return projectPermissions, nil
@@ -161,11 +154,8 @@ func PrettyFormatProjectPermissions(projectPermissions *GrantedProjectPermission
 			}
 			groups = strings.Trim(groups, "\n")
 
-			// Dersom verken en gruppe eller en bruker har rettigheten så hopper vi over den
-			if len(groups)+len(users) > 0 {
-				data = append(data, []string{proj, permission, groups, users})
-				proj = ""
-			}
+			data = append(data, []string{proj, permission, groups, users})
+			proj = ""
 		}
 	}
 	return data
