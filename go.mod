@@ -3,8 +3,10 @@ module gobit
 go 1.20
 
 require (
+	github.com/pterm/pterm v0.12.57
 	github.com/spf13/cobra v1.6.1
 	github.com/spf13/viper v1.15.0
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
@@ -20,7 +22,6 @@ require (
 	github.com/mattn/go-runewidth v0.0.14 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.6 // indirect
-	github.com/pterm/pterm v0.12.57 // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
 	github.com/spf13/afero v1.9.3 // indirect
 	github.com/spf13/cast v1.5.0 // indirect
@@ -32,5 +33,4 @@ require (
 	golang.org/x/term v0.5.0 // indirect
 	golang.org/x/text v0.8.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
