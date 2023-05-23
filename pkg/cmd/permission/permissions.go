@@ -1,4 +1,4 @@
-package project
+package permission
 
 import (
 	"encoding/json"
@@ -43,16 +43,16 @@ type UserPermission struct {
 	Permission string   `json:"permission"`
 }
 
-var PermissionsCmd = &cobra.Command{
+var Cmd = &cobra.Command{
 	Use:     "permissions",
 	Short:   "Bitbucket project permission commands",
 	Aliases: []string{"perm"},
 }
 
 func init() {
-	PermissionsCmd.AddCommand(ListProjectPermissionsCmd)
-	PermissionsCmd.AddCommand(listAllPermissionsCmd)
-	PermissionsCmd.AddCommand(applyPermissionsFromFile)
+	Cmd.AddCommand(ListProjectPermissionsCmd)
+	Cmd.AddCommand(listAllPermissionsCmd)
+	Cmd.AddCommand(applyPermissionsFromFile)
 }
 
 func getProjectGroupPermissions(baseUrl string, projectKey string, limit int, token string) ([]GroupPermission, error) {

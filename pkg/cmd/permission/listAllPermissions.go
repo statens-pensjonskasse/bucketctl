@@ -1,10 +1,11 @@
-package project
+package permission
 
 import (
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"gobit/pkg"
+	"gobit/pkg/cmd/project"
 	"os"
 )
 
@@ -14,7 +15,7 @@ var listAllPermissionsCmd = &cobra.Command{
 }
 
 func getAllPermissions(baseUrl string, limit int, token string) (*GrantedProjectPermissions, error) {
-	projects, err := GetProjects(baseUrl, limit)
+	projects, err := project.GetProjects(baseUrl, limit)
 	if err != nil {
 		return nil, err
 	}

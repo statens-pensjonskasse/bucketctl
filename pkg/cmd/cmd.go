@@ -6,6 +6,7 @@ import (
 	"github.com/spf13/viper"
 	"gobit/pkg"
 	"gobit/pkg/cmd/config"
+	"gobit/pkg/cmd/permission"
 	"gobit/pkg/cmd/project"
 	"gobit/pkg/cmd/version"
 	"os"
@@ -48,9 +49,10 @@ func init() {
 	viper.BindPFlag("token", rootCmd.PersistentFlags().Lookup("token"))
 	viper.BindPFlag("output", rootCmd.PersistentFlags().Lookup("output"))
 
-	rootCmd.AddCommand(version.Cmd)
-	rootCmd.AddCommand(project.Cmd)
 	rootCmd.AddCommand(config.Cmd)
+	rootCmd.AddCommand(permission.Cmd)
+	rootCmd.AddCommand(project.Cmd)
+	rootCmd.AddCommand(version.Cmd)
 }
 
 func initConfig() {

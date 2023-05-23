@@ -28,7 +28,6 @@ var Cmd = &cobra.Command{
 }
 
 func init() {
-	Cmd.AddCommand(PermissionsCmd)
 	Cmd.AddCommand(listProjectsCmd)
 }
 
