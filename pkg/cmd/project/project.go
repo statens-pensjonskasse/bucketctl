@@ -35,20 +35,20 @@ var listProjectsCmd = &cobra.Command{
 	Use:     "list",
 	Aliases: []string{"l"},
 	Short:   "List Bitbucket projects",
-	Run:     listProjects,
+	RunE:    listProjects,
 }
 
 func GetProjects(baseUrl string, limit int) ([]Project, error) {
-	url := fmt.Sprintf("%s/rest/api/1.0/projects/?limit=%d", baseUrl, limit)
+	url := fmt.Sprintf("%s/rest/api/latest/projects?limit=%d", baseUrl, limit)
 
 	body, err := pkg.GetRequestBody(url, "")
 	if err != nil {
-		return []Project{}, err
+		return nil, err
 	}
 
 	var projectsResponse ProjectsResponse
 	if err := json.Unmarshal(body, &projectsResponse); err != nil {
-		return []Project{}, err
+		return nil, err
 	}
 
 	if !projectsResponse.IsLastPage {

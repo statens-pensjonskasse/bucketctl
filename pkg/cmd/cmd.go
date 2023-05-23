@@ -8,6 +8,7 @@ import (
 	"gobit/pkg/cmd/config"
 	"gobit/pkg/cmd/permission"
 	"gobit/pkg/cmd/project"
+	"gobit/pkg/cmd/repository"
 	"gobit/pkg/cmd/version"
 	"os"
 	"path/filepath"
@@ -52,6 +53,7 @@ func init() {
 	rootCmd.AddCommand(config.Cmd)
 	rootCmd.AddCommand(permission.Cmd)
 	rootCmd.AddCommand(project.Cmd)
+	rootCmd.AddCommand(repository.Cmd)
 	rootCmd.AddCommand(version.Cmd)
 }
 

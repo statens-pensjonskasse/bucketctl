@@ -94,7 +94,7 @@ func HttpRequest(method string, url string, body io.Reader, token string, params
 		}
 		var errorResp BitbucketError
 		if err := json.Unmarshal(bodyBytes, &errorResp); err != nil {
-			return resp, err
+			return resp, fmt.Errorf("http status %d for %s-call to %s: %s", resp.StatusCode, method, url, string(bodyBytes))
 		}
 		return resp, fmt.Errorf("http status %d for %s-call to %s: %s", resp.StatusCode, method, url, errorResp.Errors)
 	}

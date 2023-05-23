@@ -1,11 +1,9 @@
 package project
 
 import (
-	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"gobit/pkg"
-	"os"
 	"strconv"
 )
 
@@ -22,15 +20,15 @@ func prettyFormatProjects(projects []Project) [][]string {
 	return data
 }
 
-func listProjects(cmd *cobra.Command, args []string) {
+func listProjects(cmd *cobra.Command, args []string) error {
 	var baseUrl = viper.GetString("baseUrl")
 	var limit = viper.GetInt("limit")
 
 	projects, err := GetProjects(baseUrl, limit)
 	if err != nil {
-		pterm.Error.Println(err)
-		os.Exit(1)
+		return err
 	}
 
 	pkg.PrintData(projects, prettyFormatProjects)
+	return nil
 }
