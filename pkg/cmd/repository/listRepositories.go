@@ -7,6 +7,10 @@ import (
 	"strconv"
 )
 
+var (
+	key string
+)
+
 func prettyFormatRepositories(repos []Repository) [][]string {
 	var data [][]string
 
@@ -18,6 +22,21 @@ func prettyFormatRepositories(repos []Repository) [][]string {
 	}
 
 	return data
+}
+
+func init() {
+	listRepositoriesCmd.Flags().StringVarP(&key, "key", "k", "", "Project key")
+	listRepositoriesCmd.MarkFlagRequired("key")
+}
+
+var listRepositoriesCmd = &cobra.Command{
+	PreRun: func(cmd *cobra.Command, args []string) {
+		viper.BindPFlag("key", cmd.Flags().Lookup("key"))
+	},
+	Use:     "list",
+	Aliases: []string{"l"},
+	Short:   "List Bitbucket repositories in a given project",
+	RunE:    listRepositories,
 }
 
 func listRepositories(cmd *cobra.Command, args []string) error {

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"gobit/pkg"
 	"gobit/pkg/cmd/project"
 )
@@ -29,33 +28,14 @@ type RepositoriesResponse struct {
 	Values []Repository `json:"values"`
 }
 
-var (
-	key string
-)
-
 var Cmd = &cobra.Command{
-	PreRun: func(cmd *cobra.Command, args []string) {
-		viper.BindPFlag("key", cmd.PersistentFlags().Lookup("key"))
-	},
 	Use:     "repository",
 	Short:   "Bitbucket repository commands",
 	Aliases: []string{"repo"},
 }
 
 func init() {
-	Cmd.PersistentFlags().StringVarP(&key, "key", "k", "", "Project key")
-	Cmd.MarkPersistentFlagRequired("key")
 	Cmd.AddCommand(listRepositoriesCmd)
-}
-
-var listRepositoriesCmd = &cobra.Command{
-	PreRun: func(cmd *cobra.Command, args []string) {
-		viper.BindPFlag("key", cmd.PersistentFlags().Lookup("key"))
-	},
-	Use:     "list",
-	Aliases: []string{"l"},
-	Short:   "List Bitbucket repositories in a given project",
-	RunE:    listRepositories,
 }
 
 func getRepositories(baseUrl string, projectKey string, limit int) ([]Repository, error) {

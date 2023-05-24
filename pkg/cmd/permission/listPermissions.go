@@ -11,7 +11,7 @@ var (
 	repo string
 )
 
-var ListPermissionsCmd = &cobra.Command{
+var listPermissionsCmd = &cobra.Command{
 	PreRun: func(cmd *cobra.Command, args []string) {
 		viper.BindPFlag("key", cmd.Flags().Lookup("key"))
 		viper.BindPFlag("repo", cmd.Flags().Lookup("repo"))
@@ -22,10 +22,10 @@ var ListPermissionsCmd = &cobra.Command{
 }
 
 func init() {
-	ListPermissionsCmd.Flags().StringVarP(&key, "key", "k", "", "Project key")
-	ListPermissionsCmd.Flags().StringVarP(&repo, "repo", "r", "", "Repository slug")
+	listPermissionsCmd.Flags().StringVarP(&key, "key", "k", "", "Project key")
+	listPermissionsCmd.Flags().StringVarP(&repo, "repo", "r", "", "Repository slug")
 
-	ListPermissionsCmd.MarkFlagRequired("key")
+	listPermissionsCmd.MarkFlagRequired("key")
 }
 
 func listProjectPermissions(cmd *cobra.Command, args []string) error {
