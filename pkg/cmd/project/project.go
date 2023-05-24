@@ -6,20 +6,8 @@ import (
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 	"gobit/pkg"
+	"gobit/pkg/types"
 )
-
-type Project struct {
-	Id          int    `json:"id"`
-	Key         string `json:"key"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Public      bool   `json:"public"`
-}
-
-type ProjectsResponse struct {
-	pkg.BitbucketResponse
-	Values []Project `json:"values"`
-}
 
 var Cmd = &cobra.Command{
 	Use:     "project",
@@ -38,7 +26,7 @@ var listProjectsCmd = &cobra.Command{
 	RunE:    listProjects,
 }
 
-func GetProjects(baseUrl string, limit int) ([]Project, error) {
+func GetProjects(baseUrl string, limit int) ([]types.Project, error) {
 	url := fmt.Sprintf("%s/rest/api/latest/projects?limit=%d", baseUrl, limit)
 
 	body, err := pkg.GetRequestBody(url, "")
@@ -46,7 +34,7 @@ func GetProjects(baseUrl string, limit int) ([]Project, error) {
 		return nil, err
 	}
 
-	var projectsResponse ProjectsResponse
+	var projectsResponse types.ProjectsResponse
 	if err := json.Unmarshal(body, &projectsResponse); err != nil {
 		return nil, err
 	}

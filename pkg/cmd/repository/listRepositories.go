@@ -4,6 +4,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"gobit/pkg"
+	"gobit/pkg/types"
 	"strconv"
 )
 
@@ -11,7 +12,7 @@ var (
 	key string
 )
 
-func prettyFormatRepositories(repos []Repository) [][]string {
+func prettyFormatRepositories(repos []types.Repository) [][]string {
 	var data [][]string
 
 	data = append(data, []string{"ID", "Name", "State", "Public", "Archived"})

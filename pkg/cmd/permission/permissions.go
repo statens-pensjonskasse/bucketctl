@@ -6,6 +6,7 @@ import (
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 	"gobit/pkg"
+	"gobit/pkg/types"
 	"sort"
 	"strings"
 )
@@ -27,26 +28,6 @@ type GrantedRepositoryPermissions struct {
 	Repository map[string]*PermissionSet `json:"" yaml:",inline"`
 }
 
-type groupPermissionsResponse struct {
-	pkg.BitbucketResponse
-	Values []GroupPermission `json:"values"`
-}
-
-type userPermissionsResponse struct {
-	pkg.BitbucketResponse
-	Values []UserPermission `json:"values"`
-}
-
-type GroupPermission struct {
-	Group      pkg.Group `json:"group"`
-	Permission string    `json:"permission"`
-}
-
-type UserPermission struct {
-	User       pkg.User `json:"user"`
-	Permission string   `json:"permission"`
-}
-
 var Cmd = &cobra.Command{
 	Use:     "permissions",
 	Short:   "Bitbucket project permission commands",
@@ -59,15 +40,15 @@ func init() {
 	Cmd.AddCommand(applyPermissionsFromFile)
 }
 
-func getGroupPermissions(url string, token string) ([]GroupPermission, error) {
+func getGroupPermissions(url string, token string) ([]types.GroupPermission, error) {
 	body, err := pkg.GetRequestBody(url, token)
 	if err != nil {
-		return []GroupPermission{}, err
+		return []types.GroupPermission{}, err
 	}
 
-	var groups groupPermissionsResponse
+	var groups types.GroupPermissionsResponse
 	if err := json.Unmarshal(body, &groups); err != nil {
-		return []GroupPermission{}, err
+		return []types.GroupPermission{}, err
 	}
 
 	if !groups.IsLastPage {
@@ -77,25 +58,25 @@ func getGroupPermissions(url string, token string) ([]GroupPermission, error) {
 	return groups.Values, nil
 }
 
-func getProjectGroupPermissions(baseUrl string, projectKey string, limit int, token string) ([]GroupPermission, error) {
+func getProjectGroupPermissions(baseUrl string, projectKey string, limit int, token string) ([]types.GroupPermission, error) {
 	url := fmt.Sprintf("%s/rest/api/latest/projects/%s/permissions/groups?limit=%d", baseUrl, projectKey, limit)
 	return getGroupPermissions(url, token)
 }
 
-func getRepositoryGroupPermissions(baseUrl string, projectKey string, repoSlug string, limit int, token string) ([]GroupPermission, error) {
+func getRepositoryGroupPermissions(baseUrl string, projectKey string, repoSlug string, limit int, token string) ([]types.GroupPermission, error) {
 	url := fmt.Sprintf("%s/rest/api/latest/projects/%s/repos/%s/permissions/groups?limit=%d", baseUrl, projectKey, repoSlug, limit)
 	return getGroupPermissions(url, token)
 }
 
-func getUserPermissions(url string, token string) ([]UserPermission, error) {
+func getUserPermissions(url string, token string) ([]types.UserPermission, error) {
 	body, err := pkg.GetRequestBody(url, token)
 	if err != nil {
-		return []UserPermission{}, err
+		return []types.UserPermission{}, err
 	}
 
-	var users userPermissionsResponse
+	var users types.UserPermissionsResponse
 	if err := json.Unmarshal(body, &users); err != nil {
-		return []UserPermission{}, err
+		return []types.UserPermission{}, err
 	}
 
 	if !users.IsLastPage {
@@ -105,12 +86,12 @@ func getUserPermissions(url string, token string) ([]UserPermission, error) {
 	return users.Values, nil
 }
 
-func getProjectUserPermissions(baseUrl string, projectKey string, limit int, token string) ([]UserPermission, error) {
+func getProjectUserPermissions(baseUrl string, projectKey string, limit int, token string) ([]types.UserPermission, error) {
 	url := fmt.Sprintf("%s/rest/api/latest/projects/%s/permissions/users?limit=%d", baseUrl, projectKey, limit)
 	return getUserPermissions(url, token)
 }
 
-func getRepositoryUserPermissions(baseUrl string, projectKey string, repoSlug string, limit int, token string) ([]UserPermission, error) {
+func getRepositoryUserPermissions(baseUrl string, projectKey string, repoSlug string, limit int, token string) ([]types.UserPermission, error) {
 	url := fmt.Sprintf("%s/rest/api/latest/projects/%s/repos/%s/permissions/users?limit=%d", baseUrl, projectKey, repoSlug, limit)
 	return getUserPermissions(url, token)
 }

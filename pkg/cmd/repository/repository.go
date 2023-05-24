@@ -6,27 +6,8 @@ import (
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 	"gobit/pkg"
-	"gobit/pkg/cmd/project"
+	"gobit/pkg/types"
 )
-
-type Repository struct {
-	Id            int             `json:"id"`
-	Name          string          `json:"name"`
-	Slug          string          `json:"slug"`
-	HierarchyId   string          `json:"hierarchyId"`
-	ScmId         string          `json:"scmId"`
-	State         string          `json:"state"`
-	StatusMessage string          `json:"statusMessage"`
-	Forkable      bool            `json:"forkable"`
-	Public        bool            `json:"public"`
-	Archived      bool            `json:"archived"`
-	Project       project.Project `json:"project"`
-}
-
-type RepositoriesResponse struct {
-	pkg.BitbucketResponse
-	Values []Repository `json:"values"`
-}
 
 var Cmd = &cobra.Command{
 	Use:     "repository",
@@ -38,7 +19,7 @@ func init() {
 	Cmd.AddCommand(listRepositoriesCmd)
 }
 
-func getRepositories(baseUrl string, projectKey string, limit int) ([]Repository, error) {
+func getRepositories(baseUrl string, projectKey string, limit int) ([]types.Repository, error) {
 	url := fmt.Sprintf("%s/rest/api/latest/projects/%s/repos?limit=%d", baseUrl, projectKey, limit)
 
 	body, err := pkg.GetRequestBody(url, "")
@@ -46,7 +27,7 @@ func getRepositories(baseUrl string, projectKey string, limit int) ([]Repository
 		return nil, err
 	}
 
-	var repoResponse RepositoriesResponse
+	var repoResponse types.RepositoriesResponse
 	if err := json.Unmarshal(body, &repoResponse); err != nil {
 		return nil, err
 	}

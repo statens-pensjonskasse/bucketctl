@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/pterm/pterm"
+	"gobit/pkg/types"
 	"gopkg.in/yaml.v3"
 	"io"
 	"io/fs"
@@ -14,37 +15,6 @@ import (
 	"strings"
 	"time"
 )
-
-type BitbucketResponse struct {
-	Size          int    `json:"size"`
-	Limit         int    `json:"limit"`
-	IsLastPage    bool   `json:"isLastPage"`
-	Start         int    `json:"start"`
-	NextPageStart int    `json:"nextPageStart"`
-	Values        []byte `json:"values"`
-}
-
-type Group struct {
-	Name string `json:"name" yaml:"name"`
-}
-
-type User struct {
-	Name         string `json:"name" yaml:"name"`
-	EmailAddress string `json:"emailAddress" yaml:"emailAddress"`
-	Active       bool   `json:"active" yaml:"active"`
-	DisplayName  string `json:"displayName" yaml:"displayName"`
-	Id           int    `json:"id" yaml:"id"`
-	Slug         string `json:"slug" yaml:"slug"`
-	Type         string `json:"type" yaml:"type"`
-}
-
-type BitbucketError struct {
-	Errors []struct {
-		Context       string `json:"context,omitempty"`
-		Message       string `json:"message,omitempty"`
-		ExceptionName string `json:"exceptionName,omitempty"`
-	} `json:"errors"`
-}
 
 func CreateFileIfNotExists(file string) {
 	if _, err := os.Stat(file); err != nil {
@@ -92,7 +62,7 @@ func HttpRequest(method string, url string, body io.Reader, token string, params
 		if err != nil {
 			return resp, err
 		}
-		var errorResp BitbucketError
+		var errorResp types.Error
 		if err := json.Unmarshal(bodyBytes, &errorResp); err != nil {
 			return resp, fmt.Errorf("http status %d for %s-call to %s: %s", resp.StatusCode, method, url, string(bodyBytes))
 		}

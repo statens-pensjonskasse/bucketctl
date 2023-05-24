@@ -4,10 +4,11 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"gobit/pkg"
+	"gobit/pkg/types"
 	"strconv"
 )
 
-func prettyFormatProjects(projects []Project) [][]string {
+func prettyFormatProjects(projects []types.Project) [][]string {
 	var data [][]string
 
 	data = append(data, []string{"ID", "Key", "Name", "Description"})
