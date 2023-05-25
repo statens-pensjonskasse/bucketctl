@@ -42,11 +42,20 @@ func listProjectPermissions(cmd *cobra.Command, args []string) error {
 		}
 		pkg.PrintData(permissionSet, PrettyFormatProjectPermissions)
 	} else {
-		permissionSet, err := getRepositoryPermissions(baseUrl, projectKey, repoSlug, limit, token)
+		repositoryPermissions := &GrantedRepositoryPermissions{
+			Repository: map[string]*PermissionSet{
+				repoSlug: new(PermissionSet),
+			},
+		}
+
+		grantedPermissions, err := getRepositoryPermissions(baseUrl, projectKey, repoSlug, limit, token)
 		if err != nil {
 			return err
 		}
-		pkg.PrintData(permissionSet, PrettyFormatRepositoryPermissions)
+
+		repositoryPermissions.Repository[repoSlug] = grantedPermissions
+
+		pkg.PrintData(repositoryPermissions, PrettyFormatRepositoryPermissions)
 	}
 
 	return nil

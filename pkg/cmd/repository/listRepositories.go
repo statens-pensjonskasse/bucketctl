@@ -45,7 +45,7 @@ func listRepositories(cmd *cobra.Command, args []string) error {
 	var projectKey = viper.GetString("key")
 	var limit = viper.GetInt("limit")
 
-	repos, err := getRepositories(baseUrl, projectKey, limit)
+	repos, err := GetProjectRepositories(baseUrl, projectKey, limit)
 	if err != nil {
 		return err
 	}

@@ -19,7 +19,7 @@ func init() {
 	Cmd.AddCommand(listRepositoriesCmd)
 }
 
-func getRepositories(baseUrl string, projectKey string, limit int) ([]types.Repository, error) {
+func GetProjectRepositories(baseUrl string, projectKey string, limit int) ([]types.Repository, error) {
 	url := fmt.Sprintf("%s/rest/api/latest/projects/%s/repos?limit=%d", baseUrl, projectKey, limit)
 
 	body, err := pkg.GetRequestBody(url, "")
@@ -33,7 +33,7 @@ func getRepositories(baseUrl string, projectKey string, limit int) ([]types.Repo
 	}
 
 	if !repoResponse.IsLastPage {
-		pterm.Warning.Println("Not all projects fetched, try with a higher limit")
+		pterm.Warning.Println("Not all repositories fetched, try with a higher limit")
 	}
 
 	return repoResponse.Values, nil

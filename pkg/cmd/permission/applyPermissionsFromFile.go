@@ -38,7 +38,7 @@ func applyPermissions(cmd *cobra.Command, args []string) error {
 
 	// Finn aktuelle tilganger for prosjekter definert i ønskede tilganger
 	actualPermissions := &GrantedProjectPermissions{
-		Project: map[string]*PermissionSet{},
+		Project: map[string]*ProjectPermissionSet{},
 	}
 	progressBar, _ := pterm.DefaultProgressbar.WithTotal(len(desiredPermissions.Project)).WithRemoveWhenDone(true).WithWriter(os.Stderr).Start()
 	for projectKey := range desiredPermissions.Project {
@@ -49,7 +49,7 @@ func applyPermissions(cmd *cobra.Command, args []string) error {
 			return err
 		}
 
-		actualPermissions.Project[projectKey] = new(PermissionSet)
+		actualPermissions.Project[projectKey] = new(ProjectPermissionSet)
 		actualPermissions.Project[projectKey].Permissions = projectPermission.Project[projectKey].Permissions
 
 		progressBar.Increment()
@@ -80,10 +80,10 @@ func applyPermissions(cmd *cobra.Command, args []string) error {
 
 func findProjectPermissionDifference(desiredState *GrantedProjectPermissions, actualState *GrantedProjectPermissions) (permissionsToBeRemoved *GrantedProjectPermissions, permissionsToBeGranted *GrantedProjectPermissions) {
 	permissionsToBeRemoved = &GrantedProjectPermissions{
-		Project: map[string]*PermissionSet{},
+		Project: map[string]*ProjectPermissionSet{},
 	}
 	permissionsToBeGranted = &GrantedProjectPermissions{
-		Project: map[string]*PermissionSet{},
+		Project: map[string]*ProjectPermissionSet{},
 	}
 	for projectKey := range desiredState.Project {
 		// Finner tilganger i 'actualState' som ikke finnes i 'desiredState'. Disse tilgangene skal fjernes.
@@ -96,8 +96,8 @@ func findProjectPermissionDifference(desiredState *GrantedProjectPermissions, ac
 }
 
 // Finner det relative komplementet til setA i setB
-func (setA *PermissionSet) getPermissionSetDifference(setB *PermissionSet) *PermissionSet {
-	difference := new(PermissionSet)
+func (setA *ProjectPermissionSet) getPermissionSetDifference(setB *ProjectPermissionSet) *ProjectPermissionSet {
+	difference := new(ProjectPermissionSet)
 	difference.Permissions = make(map[string]*Entities)
 
 	for permission := range setA.Permissions {
@@ -144,7 +144,7 @@ func (entities Entities) containsGroup(group string) bool {
 	return false
 }
 
-func removeProjectPermissions(baseUrl string, projectKey string, token string, permissionSet *PermissionSet) error {
+func removeProjectPermissions(baseUrl string, projectKey string, token string, permissionSet *ProjectPermissionSet) error {
 	for _, entity := range permissionSet.Permissions {
 		for _, user := range entity.Users {
 			if err := removeUserPermissions(baseUrl, projectKey, token, user); err != nil {
@@ -184,7 +184,7 @@ func removeGroupPermissions(baseUrl string, projectKey string, token string, gro
 	return nil
 }
 
-func grantProjectPermissions(baseUrl string, projectKey string, token string, permissionSet *PermissionSet) error {
+func grantProjectPermissions(baseUrl string, projectKey string, token string, permissionSet *ProjectPermissionSet) error {
 	for permission, entity := range permissionSet.Permissions {
 		for _, user := range entity.Users {
 			if err := grantUserPermission(baseUrl, projectKey, token, user, permission); err != nil {

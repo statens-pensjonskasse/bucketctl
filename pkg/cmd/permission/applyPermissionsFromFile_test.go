@@ -28,17 +28,27 @@ func TestEntitiesContains(t *testing.T) {
 func TestGetPermissionSetDifference(t *testing.T) {
 	var permission = "DUMMY_PERMISSION"
 
-	desiredPermissions := &PermissionSet{Permissions: map[string]*Entities{
-		permission: {
-			Users:  []string{"User1", "User2"},
-			Groups: []string{"Group1", "Group2", "Group3"}},
-	}}
+	desiredPermissions := &ProjectPermissionSet{
+		PermissionSet: PermissionSet{
+			map[string]*Entities{
+				permission: {
+					Users:  []string{"User1", "User2"},
+					Groups: []string{"Group1", "Group2", "Group3"},
+				},
+			},
+		},
+	}
 
-	actualPermissions := &PermissionSet{Permissions: map[string]*Entities{
-		permission: {
-			Users:  []string{"User3", "User4"},
-			Groups: []string{"Group3", "Group4"}},
-	}}
+	actualPermissions := &ProjectPermissionSet{
+		PermissionSet: PermissionSet{
+			map[string]*Entities{
+				permission: {
+					Users:  []string{"User3", "User4"},
+					Groups: []string{"Group3", "Group4"},
+				},
+			},
+		},
+	}
 
 	expectedToBeGranted := &Entities{
 		Users:  []string{"User1", "User2"},

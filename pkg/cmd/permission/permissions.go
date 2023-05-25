@@ -6,6 +6,7 @@ import (
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 	"gobit/pkg"
+	"gobit/pkg/cmd/repository"
 	"gobit/pkg/types"
 	"sort"
 	"strings"
@@ -20,8 +21,13 @@ type PermissionSet struct {
 	Permissions map[string]*Entities `json:"permissions" yaml:"permissions"`
 }
 
+type ProjectPermissionSet struct {
+	PermissionSet
+	Repositories map[string]*PermissionSet `json:"repositories,omitempty" yaml:"repositories,omitempty"`
+}
+
 type GrantedProjectPermissions struct {
-	Project map[string]*PermissionSet `json:"" yaml:",inline"`
+	Project map[string]*ProjectPermissionSet `json:"" yaml:",inline"`
 }
 
 type GrantedRepositoryPermissions struct {
@@ -98,21 +104,21 @@ func getRepositoryUserPermissions(baseUrl string, projectKey string, repoSlug st
 
 func GetProjectPermissions(baseUrl string, projectKey string, limit int, token string) (*GrantedProjectPermissions, error) {
 	projectPermissions := &GrantedProjectPermissions{
-		Project: map[string]*PermissionSet{},
+		Project: map[string]*ProjectPermissionSet{},
 	}
-	projectPermissions.Project[projectKey] = new(PermissionSet)
-	projectPermissions.Project[projectKey].Permissions = make(map[string]*Entities)
+	projectPermissions.Project[projectKey] = new(ProjectPermissionSet)
 
 	projectGroupPermissions, err := getProjectGroupPermissions(baseUrl, projectKey, limit, token)
 	if err != nil {
 		return nil, err
 	}
 
+	grantedPermissions := make(map[string]*Entities)
 	for _, groupWithPermission := range projectGroupPermissions {
-		if _, exists := projectPermissions.Project[projectKey].Permissions[groupWithPermission.Permission]; !exists {
-			projectPermissions.Project[projectKey].Permissions[groupWithPermission.Permission] = new(Entities)
+		if _, exists := grantedPermissions[groupWithPermission.Permission]; !exists {
+			grantedPermissions[groupWithPermission.Permission] = new(Entities)
 		}
-		projectPermissions.Project[projectKey].Permissions[groupWithPermission.Permission].Groups = append(projectPermissions.Project[projectKey].Permissions[groupWithPermission.Permission].Groups, groupWithPermission.Group.Name)
+		grantedPermissions[groupWithPermission.Permission].Groups = append(grantedPermissions[groupWithPermission.Permission].Groups, groupWithPermission.Group.Name)
 	}
 
 	projectUserPermissions, err := getProjectUserPermissions(baseUrl, projectKey, limit, token)
@@ -121,32 +127,42 @@ func GetProjectPermissions(baseUrl string, projectKey string, limit int, token s
 	}
 
 	for _, userWithPermission := range projectUserPermissions {
-		if _, exists := projectPermissions.Project[projectKey].Permissions[userWithPermission.Permission]; !exists {
-			projectPermissions.Project[projectKey].Permissions[userWithPermission.Permission] = new(Entities)
+		if _, exists := grantedPermissions[userWithPermission.Permission]; !exists {
+			grantedPermissions[userWithPermission.Permission] = new(Entities)
 		}
-		projectPermissions.Project[projectKey].Permissions[userWithPermission.Permission].Users = append(projectPermissions.Project[projectKey].Permissions[userWithPermission.Permission].Users, userWithPermission.User.Name)
+		grantedPermissions[userWithPermission.Permission].Users = append(grantedPermissions[userWithPermission.Permission].Users, userWithPermission.User.Name)
+	}
+
+	projectPermissions.Project[projectKey].Permissions = grantedPermissions
+
+	// Hent repo-rettigheter
+	projectRepositories, err := repository.GetProjectRepositories(baseUrl, projectKey, limit)
+	if err != nil {
+		return nil, err
+	}
+	projectPermissions.Project[projectKey].Repositories = make(map[string]*PermissionSet)
+	for _, r := range projectRepositories {
+		repoPerms, _ := getRepositoryPermissions(baseUrl, projectKey, r.Slug, limit, token)
+		if len(repoPerms.Permissions) > 0 {
+			projectPermissions.Project[projectKey].Repositories[r.Slug] = repoPerms
+		}
 	}
 
 	return projectPermissions, nil
 }
 
-func getRepositoryPermissions(baseUrl string, projectKey string, repoSlug string, limit int, token string) (*GrantedRepositoryPermissions, error) {
-	repositoryPermissions := &GrantedRepositoryPermissions{
-		Repository: map[string]*PermissionSet{},
-	}
-	repositoryPermissions.Repository[repoSlug] = new(PermissionSet)
-	repositoryPermissions.Repository[repoSlug].Permissions = make(map[string]*Entities)
-
+func getRepositoryPermissions(baseUrl string, projectKey string, repoSlug string, limit int, token string) (*PermissionSet, error) {
 	repoGroupPermissions, err := getRepositoryGroupPermissions(baseUrl, projectKey, repoSlug, limit, token)
 	if err != nil {
 		return nil, err
 	}
 
+	grantedPermissions := make(map[string]*Entities)
 	for _, groupWithPermission := range repoGroupPermissions {
-		if _, exists := repositoryPermissions.Repository[repoSlug].Permissions[groupWithPermission.Permission]; !exists {
-			repositoryPermissions.Repository[repoSlug].Permissions[groupWithPermission.Permission] = new(Entities)
+		if _, exists := grantedPermissions[groupWithPermission.Permission]; !exists {
+			grantedPermissions[groupWithPermission.Permission] = new(Entities)
 		}
-		repositoryPermissions.Repository[repoSlug].Permissions[groupWithPermission.Permission].Groups = append(repositoryPermissions.Repository[repoSlug].Permissions[groupWithPermission.Permission].Groups, groupWithPermission.Group.Name)
+		grantedPermissions[groupWithPermission.Permission].Groups = append(grantedPermissions[groupWithPermission.Permission].Groups, groupWithPermission.Group.Name)
 	}
 
 	repoUserPermissions, err := getRepositoryUserPermissions(baseUrl, projectKey, repoSlug, limit, token)
@@ -155,13 +171,13 @@ func getRepositoryPermissions(baseUrl string, projectKey string, repoSlug string
 	}
 
 	for _, userWithPermission := range repoUserPermissions {
-		if _, exists := repositoryPermissions.Repository[repoSlug].Permissions[userWithPermission.Permission]; !exists {
-			repositoryPermissions.Repository[repoSlug].Permissions[userWithPermission.Permission] = new(Entities)
+		if _, exists := grantedPermissions[userWithPermission.Permission]; !exists {
+			grantedPermissions[userWithPermission.Permission] = new(Entities)
 		}
-		repositoryPermissions.Repository[repoSlug].Permissions[userWithPermission.Permission].Users = append(repositoryPermissions.Repository[repoSlug].Permissions[userWithPermission.Permission].Users, userWithPermission.User.Name)
+		grantedPermissions[userWithPermission.Permission].Users = append(grantedPermissions[userWithPermission.Permission].Users, userWithPermission.User.Name)
 	}
 
-	return repositoryPermissions, nil
+	return &PermissionSet{Permissions: grantedPermissions}, nil
 }
 
 func PrettyFormatProjectPermissions(projectPermissions *GrantedProjectPermissions) [][]string {

@@ -21,7 +21,7 @@ func getAllPermissions(baseUrl string, limit int, token string) (*GrantedProject
 	}
 
 	allPermissions := &GrantedProjectPermissions{
-		Project: map[string]*PermissionSet{},
+		Project: map[string]*ProjectPermissionSet{},
 	}
 	progressBar, _ := pterm.DefaultProgressbar.WithTotal(len(projects)).WithRemoveWhenDone(true).WithWriter(os.Stderr).Start()
 	for _, proj := range projects {
