@@ -4,9 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/pterm/pterm"
 	"gobit/pkg/types"
-	"gopkg.in/yaml.v3"
 	"io"
 	"io/fs"
 	"net/http"
@@ -14,15 +12,18 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/pterm/pterm"
+	"gopkg.in/yaml.v3"
 )
 
 func CreateFileIfNotExists(file string) {
 	if _, err := os.Stat(file); err != nil {
 		if errors.Is(err, fs.ErrNotExist) {
-			var file, err = os.Create(file)
-			defer file.Close()
+			var filehandle, err = os.Create(file)
+			defer filehandle.Close()
 			if err != nil {
-				pterm.Error.Println("Error creating config file:", file)
+				pterm.Error.Println("Error creating config file:", file, ".")
 				os.Exit(1)
 			}
 		}
