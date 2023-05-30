@@ -28,7 +28,7 @@ func TestEntitiesContains(t *testing.T) {
 func TestGetPermissionSetDifference(t *testing.T) {
 	var permission = "DUMMY_PERMISSION"
 
-	desiredPermissions := &ProjectPermissionSet{
+	desiredPermissions := &ProjectPermissions{
 		PermissionSet: PermissionSet{
 			map[string]*Entities{
 				permission: {
@@ -39,7 +39,7 @@ func TestGetPermissionSetDifference(t *testing.T) {
 		},
 	}
 
-	actualPermissions := &ProjectPermissionSet{
+	actualPermissions := &ProjectPermissions{
 		PermissionSet: PermissionSet{
 			map[string]*Entities{
 				permission: {

@@ -32,94 +32,73 @@ func applyPermissions(cmd *cobra.Command, args []string) error {
 	includeRepos := viper.GetBool("include-repos")
 
 	// Les inn fil (yaml eller json) med ønskede tilganger
-	var desiredPermissions *GrantedProjectPermissions
+	var desiredPermissions map[string]ProjectPermissions
 	if err := pkg.ReadConfigFile(file, &desiredPermissions); err != nil {
 		return err
 	}
 
-	// Finn aktuelle tilganger for prosjekter definert i ønskede tilganger
-	actualPermissions := &GrantedProjectPermissions{
-		Project: map[string]*ProjectPermissionSet{},
-	}
-	progressBar, _ := pterm.DefaultProgressbar.WithTotal(len(desiredPermissions.Project)).WithRemoveWhenDone(true).WithWriter(os.Stderr).Start()
-	for projectKey := range desiredPermissions.Project {
+	progressBar, _ := pterm.DefaultProgressbar.WithTotal(len(desiredPermissions)).WithRemoveWhenDone(true).WithWriter(os.Stderr).Start()
+	for projectKey, desiredState := range desiredPermissions {
 		progressBar.Title = projectKey
-
-		projectPermission, err := GetProjectPermissions(baseUrl, projectKey, limit, token, includeRepos)
+		// Finn gjeldende tilganger
+		actualProjectPermissions, err := GetProjectPermissions(baseUrl, projectKey, limit, token, includeRepos)
 		if err != nil {
 			return err
 		}
 
-		actualPermissions.Project[projectKey] = new(ProjectPermissionSet)
-		actualPermissions.Project[projectKey].Permissions = projectPermission.Permissions
+		// Finn forskjeller i gjeldende og ønskede tilganger
+		permissionsToBeRemoved, permissionsToBeGranted := findProjectPermissionDifference(desiredState, actualProjectPermissions)
 
-		progressBar.Increment()
-	}
-
-	permissionsToBeRemoved, permissionsToBeGranted := findProjectPermissionDifference(desiredPermissions, actualPermissions)
-
-	// Fjern alle tilganger som ikke er ønsket
-	progressBar, _ = pterm.DefaultProgressbar.WithTotal(len(permissionsToBeRemoved.Project)).WithRemoveWhenDone(true).WithWriter(os.Stderr).WithTitle("Fjerner tilganger").Start()
-	for projectKey := range permissionsToBeRemoved.Project {
-		if err := removeProjectPermissions(baseUrl, projectKey, token, permissionsToBeRemoved.Project[projectKey]); err != nil {
+		// Fjern alle prosjekt-tilganger som ikke er ønsket
+		if err := removeProjectPermissions(baseUrl, projectKey, token, permissionsToBeRemoved); err != nil {
 			return err
 		}
-		progressBar.Increment()
-	}
 
-	// Gi ønskede tilganger
-	progressBar, _ = pterm.DefaultProgressbar.WithTotal(len(permissionsToBeGranted.Project)).WithRemoveWhenDone(true).WithWriter(os.Stderr).WithTitle("Gir tilganger").Start()
-	for projectKey := range permissionsToBeGranted.Project {
-		if err := grantProjectPermissions(baseUrl, projectKey, token, permissionsToBeGranted.Project[projectKey]); err != nil {
+		// Gi ønskede prosjekt-tilganger
+		if err := grantProjectPermissions(baseUrl, projectKey, token, permissionsToBeGranted); err != nil {
 			return err
 		}
+
 		progressBar.Increment()
 	}
 
 	return nil
 }
 
-func findProjectPermissionDifference(desiredState *GrantedProjectPermissions, actualState *GrantedProjectPermissions) (permissionsToBeRemoved *GrantedProjectPermissions, permissionsToBeGranted *GrantedProjectPermissions) {
-	permissionsToBeRemoved = &GrantedProjectPermissions{
-		Project: map[string]*ProjectPermissionSet{},
-	}
-	permissionsToBeGranted = &GrantedProjectPermissions{
-		Project: map[string]*ProjectPermissionSet{},
-	}
-	for projectKey := range desiredState.Project {
-		// Finner tilganger i 'actualState' som ikke finnes i 'desiredState'. Disse tilgangene skal fjernes.
-		permissionsToBeRemoved.Project[projectKey] = actualState.Project[projectKey].getPermissionSetDifference(desiredState.Project[projectKey])
-		// Finner tilganger i 'desiredState' som ikke finnes i 'actualState'. Disse tilgangene skal gis.
-		permissionsToBeGranted.Project[projectKey] = desiredState.Project[projectKey].getPermissionSetDifference(actualState.Project[projectKey])
-	}
+func findProjectPermissionDifference(desiredState ProjectPermissions, actualState ProjectPermissions) (permissionsToBeRemoved ProjectPermissions, permissionsToBeGranted ProjectPermissions) {
+	permissionsToBeRemoved = ProjectPermissions{}
+	permissionsToBeGranted = ProjectPermissions{}
+	// Finner tilganger i 'actualState' som ikke finnes i 'desiredState'. Disse tilgangene skal fjernes.
+	permissionsToBeRemoved.Permissions = actualState.Permissions.getPermissionSetDifference(desiredState.Permissions)
+	// Finner tilganger i 'desiredState' som ikke finnes i 'actualState'. Disse tilgangene skal gis.
+	permissionsToBeGranted.Permissions = desiredState.Permissions.getPermissionSetDifference(actualState.Permissions)
 
 	return permissionsToBeRemoved, permissionsToBeGranted
 }
 
 // Finner det relative komplementet til setA i setB
-func (setA *ProjectPermissionSet) getPermissionSetDifference(setB *ProjectPermissionSet) *ProjectPermissionSet {
-	difference := new(ProjectPermissionSet)
-	difference.Permissions = make(map[string]*Entities)
+func (setA PermissionSet) getPermissionSetDifference(setB PermissionSet) PermissionSet {
+	difference := make(PermissionSet)
 
-	for permission := range setA.Permissions {
-		difference.Permissions[permission] = new(Entities)
-		entriesInA := setA.Permissions[permission]
-		entriesInB, existsInB := setB.Permissions[permission]
+	for permission := range setA {
+		difference[permission] = new(Entities)
+		entriesInA := setA[permission]
+		entriesInB, existsInB := setB[permission]
 
 		if !existsInB {
 			// Dersom tilgangen ikke finnes i B så legger vi til alle entries i A i det relative komplementet
-			difference.Permissions[permission].Users = setA.Permissions[permission].Users
-			difference.Permissions[permission].Groups = setA.Permissions[permission].Groups
+			difference[permission].Users = setA[permission].Users
+			difference[permission].Groups = setA[permission].Groups
 		} else {
 			// Hvis tilgangen finnes i B så må sjekke alle elementene hver for seg
 			for _, user := range entriesInA.Users {
 				if !entriesInB.containsUser(user) {
-					difference.Permissions[permission].Users = append(difference.Permissions[permission].Users, user)
+					difference[permission].Users = append(difference[permission].Users, user)
 				}
 			}
 			for _, group := range entriesInA.Groups {
 				if !entriesInB.containsGroup(group) {
-					difference.Permissions[permission].Groups = append(difference.Permissions[permission].Groups, group)
+					difference[permission].Groups = append(difference[permission].Groups, group)
 				}
 			}
 		}
@@ -145,7 +124,7 @@ func (entities Entities) containsGroup(group string) bool {
 	return false
 }
 
-func removeProjectPermissions(baseUrl string, projectKey string, token string, permissionSet *ProjectPermissionSet) error {
+func removeProjectPermissions(baseUrl string, projectKey string, token string, permissionSet ProjectPermissions) error {
 	for _, entity := range permissionSet.Permissions {
 		for _, user := range entity.Users {
 			if err := removeUserProjectPermissions(baseUrl, projectKey, token, user); err != nil {
@@ -185,7 +164,7 @@ func removeGroupProjectPermissions(baseUrl string, projectKey string, token stri
 	return nil
 }
 
-func grantProjectPermissions(baseUrl string, projectKey string, token string, permissionSet *ProjectPermissionSet) error {
+func grantProjectPermissions(baseUrl string, projectKey string, token string, permissionSet ProjectPermissions) error {
 	for permission, entity := range permissionSet.Permissions {
 		for _, user := range entity.Users {
 			if err := grantUserProjectPermission(baseUrl, projectKey, token, user, permission); err != nil {
