@@ -15,45 +15,53 @@ var listPermissionsCmd = &cobra.Command{
 	PreRun: func(cmd *cobra.Command, args []string) {
 		viper.BindPFlag("key", cmd.Flags().Lookup("key"))
 		viper.BindPFlag("repo", cmd.Flags().Lookup("repo"))
+		viper.BindPFlag("include-repos", cmd.Flags().Lookup("include-repos"))
 	},
 	Use:     "list",
 	Aliases: []string{"l"},
-	RunE:    listProjectPermissions,
+	RunE:    listPermissions,
 }
 
 func init() {
 	listPermissionsCmd.Flags().StringVarP(&key, "key", "k", "", "Project key")
-	listPermissionsCmd.Flags().StringVarP(&repo, "repo", "r", "", "Repository slug")
+	listPermissionsCmd.Flags().StringVarP(&repo, "repo", "r", "", "Repository slug. Leave empty to query project permissions.")
+	listPermissionsCmd.Flags().Bool("include-repos", false, "Include repository permissions when querying project permissions")
 
 	listPermissionsCmd.MarkFlagRequired("key")
 }
 
-func listProjectPermissions(cmd *cobra.Command, args []string) error {
-	var baseUrl = viper.GetString("baseUrl")
-	var projectKey = viper.GetString("key")
-	var repoSlug = viper.GetString("repo")
-	var limit = viper.GetInt("limit")
-	var token = viper.GetString("token")
+func listPermissions(cmd *cobra.Command, args []string) error {
+	baseUrl := viper.GetString("baseUrl")
+	projectKey := viper.GetString("key")
+	repoSlug := viper.GetString("repo")
+	limit := viper.GetInt("limit")
+	token := viper.GetString("token")
+	includeRepos := viper.GetBool("include-repos")
 
 	if repoSlug == "" {
-		permissionSet, err := GetProjectPermissions(baseUrl, projectKey, limit, token)
+		grantedProjectPermissions, err := GetProjectPermissions(baseUrl, projectKey, limit, token, includeRepos)
 		if err != nil {
 			return err
 		}
-		pkg.PrintData(permissionSet, PrettyFormatProjectPermissions)
-	} else {
-		repositoryPermissions := &GrantedRepositoryPermissions{
-			Repository: map[string]*PermissionSet{
-				repoSlug: new(PermissionSet),
+
+		projectPermissions := &GrantedProjectPermissions{
+			Project: map[string]*ProjectPermissionSet{
+				projectKey: grantedProjectPermissions,
 			},
 		}
 
-		grantedPermissions, err := getRepositoryPermissions(baseUrl, projectKey, repoSlug, limit, token)
+		pkg.PrintData(projectPermissions, PrettyFormatProjectPermissions)
+	} else {
+		grantedRepoPermissions, err := getRepositoryPermissions(baseUrl, projectKey, repoSlug, limit, token)
 		if err != nil {
 			return err
 		}
 
-		repositoryPermissions.Repository[repoSlug] = grantedPermissions
+		repositoryPermissions := &GrantedRepositoryPermissions{
+			Repository: map[string]*PermissionSet{
+				repoSlug: grantedRepoPermissions,
+			},
+		}
 
 		pkg.PrintData(repositoryPermissions, PrettyFormatRepositoryPermissions)
 	}

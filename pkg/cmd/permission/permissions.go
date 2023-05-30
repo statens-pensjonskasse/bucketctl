@@ -22,8 +22,8 @@ type PermissionSet struct {
 }
 
 type ProjectPermissionSet struct {
-	PermissionSet
-	Repositories map[string]*PermissionSet `json:"repositories,omitempty" yaml:"repositories,omitempty"`
+	PermissionSet `json:"" yaml:",inline"`
+	Repositories  map[string]*PermissionSet `json:"repositories,omitempty" yaml:"repositories,omitempty"`
 }
 
 type GrantedProjectPermissions struct {
@@ -102,11 +102,8 @@ func getRepositoryUserPermissions(baseUrl string, projectKey string, repoSlug st
 	return getUserPermissions(url, token)
 }
 
-func GetProjectPermissions(baseUrl string, projectKey string, limit int, token string) (*GrantedProjectPermissions, error) {
-	projectPermissions := &GrantedProjectPermissions{
-		Project: map[string]*ProjectPermissionSet{},
-	}
-	projectPermissions.Project[projectKey] = new(ProjectPermissionSet)
+func GetProjectPermissions(baseUrl string, projectKey string, limit int, token string, includeRepos bool) (*ProjectPermissionSet, error) {
+	projectPermissions := new(ProjectPermissionSet)
 
 	projectGroupPermissions, err := getProjectGroupPermissions(baseUrl, projectKey, limit, token)
 	if err != nil {
@@ -133,18 +130,20 @@ func GetProjectPermissions(baseUrl string, projectKey string, limit int, token s
 		grantedPermissions[userWithPermission.Permission].Users = append(grantedPermissions[userWithPermission.Permission].Users, userWithPermission.User.Name)
 	}
 
-	projectPermissions.Project[projectKey].Permissions = grantedPermissions
+	projectPermissions.Permissions = grantedPermissions
 
-	// Hent repo-rettigheter
-	projectRepositories, err := repository.GetProjectRepositories(baseUrl, projectKey, limit)
-	if err != nil {
-		return nil, err
-	}
-	projectPermissions.Project[projectKey].Repositories = make(map[string]*PermissionSet)
-	for _, r := range projectRepositories {
-		repoPerms, _ := getRepositoryPermissions(baseUrl, projectKey, r.Slug, limit, token)
-		if len(repoPerms.Permissions) > 0 {
-			projectPermissions.Project[projectKey].Repositories[r.Slug] = repoPerms
+	if includeRepos {
+		// Hent rettigheter for alle repositories i prosjektet
+		projectRepositories, err := repository.GetProjectRepositories(baseUrl, projectKey, limit)
+		if err != nil {
+			return nil, err
+		}
+		projectPermissions.Repositories = make(map[string]*PermissionSet)
+		for _, r := range projectRepositories {
+			repoPerms, _ := getRepositoryPermissions(baseUrl, projectKey, r.Slug, limit, token)
+			if len(repoPerms.Permissions) > 0 {
+				projectPermissions.Repositories[r.Slug] = repoPerms
+			}
 		}
 	}
 

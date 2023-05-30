@@ -25,10 +25,11 @@ func init() {
 }
 
 func applyPermissions(cmd *cobra.Command, args []string) error {
-	var file = viper.GetString("file")
-	var baseUrl = viper.GetString("baseUrl")
-	var limit = viper.GetInt("limit")
-	var token = viper.GetString("token")
+	file := viper.GetString("file")
+	baseUrl := viper.GetString("baseUrl")
+	limit := viper.GetInt("limit")
+	token := viper.GetString("token")
+	includeRepos := viper.GetBool("include-repos")
 
 	// Les inn fil (yaml eller json) med ønskede tilganger
 	var desiredPermissions *GrantedProjectPermissions
@@ -44,13 +45,13 @@ func applyPermissions(cmd *cobra.Command, args []string) error {
 	for projectKey := range desiredPermissions.Project {
 		progressBar.Title = projectKey
 
-		projectPermission, err := GetProjectPermissions(baseUrl, projectKey, limit, token)
+		projectPermission, err := GetProjectPermissions(baseUrl, projectKey, limit, token, includeRepos)
 		if err != nil {
 			return err
 		}
 
 		actualPermissions.Project[projectKey] = new(ProjectPermissionSet)
-		actualPermissions.Project[projectKey].Permissions = projectPermission.Project[projectKey].Permissions
+		actualPermissions.Project[projectKey].Permissions = projectPermission.Permissions
 
 		progressBar.Increment()
 	}
@@ -147,12 +148,12 @@ func (entities Entities) containsGroup(group string) bool {
 func removeProjectPermissions(baseUrl string, projectKey string, token string, permissionSet *ProjectPermissionSet) error {
 	for _, entity := range permissionSet.Permissions {
 		for _, user := range entity.Users {
-			if err := removeUserPermissions(baseUrl, projectKey, token, user); err != nil {
+			if err := removeUserProjectPermissions(baseUrl, projectKey, token, user); err != nil {
 				return err
 			}
 		}
 		for _, group := range entity.Groups {
-			if err := removeGroupPermissions(baseUrl, projectKey, token, group); err != nil {
+			if err := removeGroupProjectPermissions(baseUrl, projectKey, token, group); err != nil {
 				return err
 			}
 		}
@@ -160,7 +161,7 @@ func removeProjectPermissions(baseUrl string, projectKey string, token string, p
 	return nil
 }
 
-func removeUserPermissions(baseUrl string, projectKey string, token string, user string) error {
+func removeUserProjectPermissions(baseUrl string, projectKey string, token string, user string) error {
 	url := fmt.Sprintf("%s/rest/api/latest/projects/%s/permissions/users", baseUrl, projectKey)
 	params := map[string]string{
 		"name": user,
@@ -172,7 +173,7 @@ func removeUserPermissions(baseUrl string, projectKey string, token string, user
 	return nil
 }
 
-func removeGroupPermissions(baseUrl string, projectKey string, token string, group string) error {
+func removeGroupProjectPermissions(baseUrl string, projectKey string, token string, group string) error {
 	url := fmt.Sprintf("%s/rest/api/latest/projects/%s/permissions/groups", baseUrl, projectKey)
 	params := map[string]string{
 		"name": group,
@@ -187,12 +188,12 @@ func removeGroupPermissions(baseUrl string, projectKey string, token string, gro
 func grantProjectPermissions(baseUrl string, projectKey string, token string, permissionSet *ProjectPermissionSet) error {
 	for permission, entity := range permissionSet.Permissions {
 		for _, user := range entity.Users {
-			if err := grantUserPermission(baseUrl, projectKey, token, user, permission); err != nil {
+			if err := grantUserProjectPermission(baseUrl, projectKey, token, user, permission); err != nil {
 				return err
 			}
 		}
 		for _, group := range entity.Groups {
-			if err := grantGroupPermission(baseUrl, projectKey, token, group, permission); err != nil {
+			if err := grantGroupProjectPermission(baseUrl, projectKey, token, group, permission); err != nil {
 				return err
 			}
 		}
@@ -200,7 +201,7 @@ func grantProjectPermissions(baseUrl string, projectKey string, token string, pe
 	return nil
 }
 
-func grantUserPermission(baseUrl string, projectKey string, token string, user string, permission string) error {
+func grantUserProjectPermission(baseUrl string, projectKey string, token string, user string, permission string) error {
 	url := fmt.Sprintf("%s/rest/api/latest/projects/%s/permissions/users", baseUrl, projectKey)
 	params := map[string]string{
 		"name":       user,
@@ -213,7 +214,7 @@ func grantUserPermission(baseUrl string, projectKey string, token string, user s
 	return nil
 }
 
-func grantGroupPermission(baseUrl string, projectKey string, token string, group string, permission string) error {
+func grantGroupProjectPermission(baseUrl string, projectKey string, token string, group string, permission string) error {
 	url := fmt.Sprintf("%s/rest/api/latest/projects/%s/permissions/groups", baseUrl, projectKey)
 	params := map[string]string{
 		"name":       group,
