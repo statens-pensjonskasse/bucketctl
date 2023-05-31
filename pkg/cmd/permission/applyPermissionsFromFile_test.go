@@ -29,7 +29,7 @@ func TestGetPermissionSetDifference(t *testing.T) {
 	var permission = "DUMMY_PERMISSION"
 
 	desiredPermissions := &ProjectPermissions{
-		PermissionSet: PermissionSet{
+		PermissionSet: Permissions{
 			map[string]*Entities{
 				permission: {
 					Users:  []string{"User1", "User2"},
@@ -40,7 +40,7 @@ func TestGetPermissionSetDifference(t *testing.T) {
 	}
 
 	actualPermissions := &ProjectPermissions{
-		PermissionSet: PermissionSet{
+		PermissionSet: Permissions{
 			map[string]*Entities{
 				permission: {
 					Users:  []string{"User3", "User4"},

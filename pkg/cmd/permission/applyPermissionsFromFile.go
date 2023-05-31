@@ -32,8 +32,8 @@ func applyPermissions(cmd *cobra.Command, args []string) error {
 	includeRepos := viper.GetBool("include-repos")
 
 	// Les inn fil (yaml eller json) med ønskede tilganger
-	var desiredPermissions map[string]ProjectPermissions
-	if err := pkg.ReadConfigFile(file, &desiredPermissions); err != nil {
+	var desiredPermissions map[string]*ProjectPermissions
+	if err := pkg.ReadConfigFile(file, desiredPermissions); err != nil {
 		return err
 	}
 
@@ -41,7 +41,7 @@ func applyPermissions(cmd *cobra.Command, args []string) error {
 	for projectKey, desiredState := range desiredPermissions {
 		progressBar.Title = projectKey
 		// Finn gjeldende tilganger
-		actualProjectPermissions, err := GetProjectPermissions(baseUrl, projectKey, limit, token, includeRepos)
+		actualProjectPermissions, err := getProjectPermissions(baseUrl, projectKey, limit, token, includeRepos)
 		if err != nil {
 			return err
 		}
@@ -65,9 +65,9 @@ func applyPermissions(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func findProjectPermissionDifference(desiredState ProjectPermissions, actualState ProjectPermissions) (permissionsToBeRemoved ProjectPermissions, permissionsToBeGranted ProjectPermissions) {
-	permissionsToBeRemoved = ProjectPermissions{}
-	permissionsToBeGranted = ProjectPermissions{}
+func findProjectPermissionDifference(desiredState *ProjectPermissions, actualState *ProjectPermissions) (permissionsToBeRemoved *ProjectPermissions, permissionsToBeGranted *ProjectPermissions) {
+	permissionsToBeRemoved = &ProjectPermissions{}
+	permissionsToBeGranted = &ProjectPermissions{}
 	// Finner tilganger i 'actualState' som ikke finnes i 'desiredState'. Disse tilgangene skal fjernes.
 	permissionsToBeRemoved.Permissions = actualState.Permissions.getPermissionSetDifference(desiredState.Permissions)
 	// Finner tilganger i 'desiredState' som ikke finnes i 'actualState'. Disse tilgangene skal gis.
@@ -77,18 +77,18 @@ func findProjectPermissionDifference(desiredState ProjectPermissions, actualStat
 }
 
 // Finner det relative komplementet til setA i setB
-func (setA PermissionSet) getPermissionSetDifference(setB PermissionSet) PermissionSet {
-	difference := make(PermissionSet)
+func (setA *Permissions) getPermissionSetDifference(setB *Permissions) *Permissions {
+	difference := make(Permissions)
 
-	for permission := range setA {
+	for permission := range *setA {
 		difference[permission] = new(Entities)
-		entriesInA := setA[permission]
-		entriesInB, existsInB := setB[permission]
+		entriesInA := (*setA)[permission]
+		entriesInB, existsInB := (*setB)[permission]
 
 		if !existsInB {
 			// Dersom tilgangen ikke finnes i B så legger vi til alle entries i A i det relative komplementet
-			difference[permission].Users = setA[permission].Users
-			difference[permission].Groups = setA[permission].Groups
+			difference[permission].Users = (*setA)[permission].Users
+			difference[permission].Groups = (*setA)[permission].Groups
 		} else {
 			// Hvis tilgangen finnes i B så må sjekke alle elementene hver for seg
 			for _, user := range entriesInA.Users {
@@ -103,7 +103,7 @@ func (setA PermissionSet) getPermissionSetDifference(setB PermissionSet) Permiss
 			}
 		}
 	}
-	return difference
+	return &difference
 }
 
 func (entities Entities) containsUser(user string) bool {
@@ -124,8 +124,8 @@ func (entities Entities) containsGroup(group string) bool {
 	return false
 }
 
-func removeProjectPermissions(baseUrl string, projectKey string, token string, permissionSet ProjectPermissions) error {
-	for _, entity := range permissionSet.Permissions {
+func removeProjectPermissions(baseUrl string, projectKey string, token string, projectPermissions *ProjectPermissions) error {
+	for _, entity := range *projectPermissions.Permissions {
 		for _, user := range entity.Users {
 			if err := removeUserProjectPermissions(baseUrl, projectKey, token, user); err != nil {
 				return err
@@ -164,8 +164,8 @@ func removeGroupProjectPermissions(baseUrl string, projectKey string, token stri
 	return nil
 }
 
-func grantProjectPermissions(baseUrl string, projectKey string, token string, permissionSet ProjectPermissions) error {
-	for permission, entity := range permissionSet.Permissions {
+func grantProjectPermissions(baseUrl string, projectKey string, token string, projectPermissions *ProjectPermissions) error {
+	for permission, entity := range *projectPermissions.Permissions {
 		for _, user := range entity.Users {
 			if err := grantUserProjectPermission(baseUrl, projectKey, token, user, permission); err != nil {
 				return err

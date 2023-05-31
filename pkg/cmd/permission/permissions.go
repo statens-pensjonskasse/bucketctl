@@ -17,15 +17,15 @@ type Entities struct {
 	Users  []string `json:"users,omitempty" yaml:"users,omitempty"`
 }
 
-type PermissionSet map[string]*Entities
+type Permissions map[string]*Entities
 
 type ProjectPermissions struct {
-	Permissions  PermissionSet                    `json:"permissions" yaml:"permissions"`
-	Repositories map[string]RepositoryPermissions `json:"repositories,omitempty" yaml:"repositories,omitempty"`
+	Permissions  *Permissions                      `json:"permissions,omitempty" yaml:"permissions,omitempty"`
+	Repositories map[string]*RepositoryPermissions `json:"repositories,omitempty" yaml:"repositories,omitempty"`
 }
 
 type RepositoryPermissions struct {
-	Permissions PermissionSet `json:"permissions" yaml:"permissions"`
+	Permissions *Permissions `json:"permissions" yaml:"permissions"`
 }
 
 var Cmd = &cobra.Command{
@@ -96,13 +96,13 @@ func getRepositoryUserPermissions(baseUrl string, projectKey string, repoSlug st
 	return getUserPermissions(url, token)
 }
 
-func GetProjectPermissions(baseUrl string, projectKey string, limit int, token string, includeRepos bool) (ProjectPermissions, error) {
+func getProjectPermissions(baseUrl string, projectKey string, limit int, token string, includeRepos bool) (*ProjectPermissions, error) {
 	projectGroupPermissions, err := getProjectGroupPermissions(baseUrl, projectKey, limit, token)
 	if err != nil {
-		return ProjectPermissions{}, err
+		return nil, err
 	}
 
-	grantedPermissions := make(PermissionSet)
+	grantedPermissions := make(Permissions)
 	for _, groupWithPermission := range projectGroupPermissions {
 		if _, exists := grantedPermissions[groupWithPermission.Permission]; !exists {
 			grantedPermissions[groupWithPermission.Permission] = new(Entities)
@@ -112,7 +112,7 @@ func GetProjectPermissions(baseUrl string, projectKey string, limit int, token s
 
 	projectUserPermissions, err := getProjectUserPermissions(baseUrl, projectKey, limit, token)
 	if err != nil {
-		return ProjectPermissions{}, err
+		return nil, err
 	}
 
 	for _, userWithPermission := range projectUserPermissions {
@@ -122,33 +122,33 @@ func GetProjectPermissions(baseUrl string, projectKey string, limit int, token s
 		grantedPermissions[userWithPermission.Permission].Users = append(grantedPermissions[userWithPermission.Permission].Users, userWithPermission.User.Name)
 	}
 
-	projectPermissions := ProjectPermissions{Permissions: grantedPermissions}
+	projectPermissions := ProjectPermissions{Permissions: &grantedPermissions}
 
 	if includeRepos {
 		// Hent rettigheter for alle repositories i prosjektet
 		projectRepositories, err := repository.GetProjectRepositories(baseUrl, projectKey, limit)
 		if err != nil {
-			return projectPermissions, err
+			return nil, err
 		}
-		projectPermissions.Repositories = make(map[string]RepositoryPermissions)
+		projectPermissions.Repositories = make(map[string]*RepositoryPermissions)
 		for _, r := range projectRepositories {
 			repoPerms, _ := getRepositoryPermissions(baseUrl, projectKey, r.Slug, limit, token)
-			if len(repoPerms.Permissions) > 0 {
+			if len(*repoPerms.Permissions) > 0 {
 				projectPermissions.Repositories[r.Slug] = repoPerms
 			}
 		}
 	}
 
-	return projectPermissions, nil
+	return &projectPermissions, nil
 }
 
-func getRepositoryPermissions(baseUrl string, projectKey string, repoSlug string, limit int, token string) (RepositoryPermissions, error) {
+func getRepositoryPermissions(baseUrl string, projectKey string, repoSlug string, limit int, token string) (*RepositoryPermissions, error) {
 	repoGroupPermissions, err := getRepositoryGroupPermissions(baseUrl, projectKey, repoSlug, limit, token)
 	if err != nil {
-		return RepositoryPermissions{}, err
+		return nil, err
 	}
 
-	grantedPermissions := make(PermissionSet)
+	grantedPermissions := make(Permissions)
 	for _, groupWithPermission := range repoGroupPermissions {
 		if _, exists := grantedPermissions[groupWithPermission.Permission]; !exists {
 			grantedPermissions[groupWithPermission.Permission] = new(Entities)
@@ -158,7 +158,7 @@ func getRepositoryPermissions(baseUrl string, projectKey string, repoSlug string
 
 	repoUserPermissions, err := getRepositoryUserPermissions(baseUrl, projectKey, repoSlug, limit, token)
 	if err != nil {
-		return RepositoryPermissions{}, err
+		return nil, err
 	}
 
 	for _, userWithPermission := range repoUserPermissions {
@@ -168,69 +168,66 @@ func getRepositoryPermissions(baseUrl string, projectKey string, repoSlug string
 		grantedPermissions[userWithPermission.Permission].Users = append(grantedPermissions[userWithPermission.Permission].Users, userWithPermission.User.Name)
 	}
 
-	return RepositoryPermissions{Permissions: grantedPermissions}, nil
+	return &RepositoryPermissions{Permissions: &grantedPermissions}, nil
 }
 
-func PrettyFormatProjectPermissions(projectPermissions map[string]ProjectPermissions) [][]string {
+func PrettyFormatProjectPermissions(projectPermissionsMap map[string]*ProjectPermissions) [][]string {
 	// Sorter prosjektene alfabetisk
-	projects := make([]string, 0, len(projectPermissions))
-	for k := range projectPermissions {
+	projects := make([]string, 0, len(projectPermissionsMap))
+	for k := range projectPermissionsMap {
 		projects = append(projects, k)
 	}
 	sort.Strings(projects)
 
 	var data [][]string
-	data = append(data, []string{"Project", "Permission", "Groups", "Users"})
+	data = append(data, []string{"Project", "Repository", "Permission", "Groups", "Users"})
 
-	for _, k := range projects {
-		proj := k
-		for permission, v := range projectPermissions[k].Permissions {
-			var users string
-			for _, user := range v.Users {
-				users += user + "\n"
-			}
-			users = strings.Trim(users, "\n")
-			var groups string
-			for _, group := range v.Groups {
-				groups += group + "\n"
-			}
-			groups = strings.Trim(groups, "\n")
+	for _, projectKey := range projects {
+		formattedProjectPermissions := prettyFormatPermissions(projectKey, "ALL", projectPermissionsMap[projectKey].Permissions)
+		data = append(data, formattedProjectPermissions...)
 
-			data = append(data, []string{proj, permission, groups, users})
-			proj = ""
-		}
+		formattedRepositoryPermissions := prettyFormatRepositoryPermissions(projectKey, projectPermissionsMap[projectKey].Repositories)
+		data = append(data, formattedRepositoryPermissions...)
 	}
 	return data
 }
 
-func PrettyFormatRepositoryPermissions(repositoryPermissions map[string]RepositoryPermissions) [][]string {
+func prettyFormatRepositoryPermissions(projectKey string, repositoryPermissionsMap map[string]*RepositoryPermissions) [][]string {
 	// Sorter repoene alfabetisk
-	repositories := make([]string, 0, len(repositoryPermissions))
-	for k := range repositoryPermissions {
+	repositories := make([]string, 0, len(repositoryPermissionsMap))
+	for k := range repositoryPermissionsMap {
 		repositories = append(repositories, k)
 	}
 	sort.Strings(repositories)
 
 	var data [][]string
-	data = append(data, []string{"Repository", "Permission", "Groups", "Users"})
+	for _, repoSlug := range repositories {
+		repoPermissions := prettyFormatPermissions(projectKey, repoSlug, repositoryPermissionsMap[repoSlug].Permissions)
+		data = append(data, repoPermissions...)
+	}
+	return data
+}
 
-	for _, r := range repositories {
-		repoName := r
-		for permission, v := range repositoryPermissions[r].Permissions {
-			var users string
-			for _, user := range v.Users {
-				users += user + "\n"
-			}
-			users = strings.Trim(users, "\n")
-			var groups string
-			for _, group := range v.Groups {
-				groups += group + "\n"
-			}
-			groups = strings.Trim(groups, "\n")
+func prettyFormatPermissions(projectKey string, repoSlug string, permissions *Permissions) [][]string {
+	var data [][]string
 
-			data = append(data, []string{repoName, permission, groups, users})
-			repoName = ""
+	if permissions == nil {
+		return data
+	}
+
+	for permission, v := range *permissions {
+		var users string
+		for _, user := range v.Users {
+			users += user + "\n"
 		}
+		users = strings.Trim(users, "\n")
+		var groups string
+		for _, group := range v.Groups {
+			groups += group + "\n"
+		}
+		groups = strings.Trim(groups, "\n")
+
+		data = append(data, []string{projectKey, repoSlug, permission, groups, users})
 	}
 	return data
 }
