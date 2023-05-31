@@ -23,8 +23,8 @@ var (
 
 	rootCmd = &cobra.Command{
 		Use:   "gobit",
-		Short: "gobit - enkel CLI for Bitbucket",
-		Long:  `GoBit lalala`,
+		Short: "GoBit - Simple CLI-tool for Bitbucket",
+		Long:  `GoBit – A Simple CLI-Tool for Bitbucket written in Go using Cobra`,
 	}
 )
 
