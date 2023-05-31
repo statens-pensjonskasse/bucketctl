@@ -6,6 +6,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"gobit/pkg"
+	"gobit/pkg/cmd/repository"
 	"os"
 )
 
@@ -14,6 +15,10 @@ var (
 )
 
 var applyPermissionsFromFile = &cobra.Command{
+	PreRun: func(cmd *cobra.Command, args []string) {
+		viper.BindPFlag("file", cmd.Flags().Lookup("file"))
+		viper.BindPFlag("include-repos", cmd.Flags().Lookup("include-repos"))
+	},
 	Use:  "apply",
 	RunE: applyPermissions,
 }
@@ -21,7 +26,7 @@ var applyPermissionsFromFile = &cobra.Command{
 func init() {
 	applyPermissionsFromFile.Flags().StringVarP(&fileName, "file", "f", "", "Permission file")
 	applyPermissionsFromFile.MarkFlagRequired("file")
-	viper.BindPFlag("file", applyPermissionsFromFile.Flags().Lookup("file"))
+	applyPermissionsFromFile.Flags().Bool("include-repos", false, "Include repositories")
 }
 
 func applyPermissions(cmd *cobra.Command, args []string) error {
@@ -33,23 +38,48 @@ func applyPermissions(cmd *cobra.Command, args []string) error {
 
 	// Les inn fil (yaml eller json) med ønskede tilganger
 	var desiredPermissions map[string]*ProjectPermissions
-	if err := pkg.ReadConfigFile(file, desiredPermissions); err != nil {
+	if err := pkg.ReadConfigFile(file, &desiredPermissions); err != nil {
 		return err
 	}
 
 	progressBar, _ := pterm.DefaultProgressbar.WithTotal(len(desiredPermissions)).WithRemoveWhenDone(true).WithWriter(os.Stderr).Start()
-	for projectKey, desiredState := range desiredPermissions {
+	for projectKey, desiredProjectPermissions := range desiredPermissions {
 		progressBar.Title = projectKey
 		// Finn gjeldende tilganger
 		actualProjectPermissions, err := getProjectPermissions(baseUrl, projectKey, limit, token, includeRepos)
 		if err != nil {
 			return err
 		}
+		if includeRepos {
+			// Fyller inn data om manglende repositories med tom Permissions struct.
+			// Tom Permissions struct betyr ingen ekstra rettigheter på repo-nivå.
+			allProjectRepositories, err := repository.GetProjectRepositories(baseUrl, projectKey, limit)
+			if err != nil {
+				return err
+			}
+			for _, r := range allProjectRepositories {
+				if desiredProjectPermissions.Repositories == nil {
+					desiredProjectPermissions.Repositories = make(map[string]*RepositoryPermissions)
+				}
+				if _, exists := desiredProjectPermissions.Repositories[r.Slug]; !exists {
+					desiredProjectPermissions.Repositories[r.Slug] = &RepositoryPermissions{Permissions: &Permissions{}}
+				}
+				if actualProjectPermissions.Repositories == nil {
+					actualProjectPermissions.Repositories = make(map[string]*RepositoryPermissions)
+				}
+				if _, exists := actualProjectPermissions.Repositories[r.Slug]; !exists {
+					actualProjectPermissions.Repositories[r.Slug] = &RepositoryPermissions{Permissions: &Permissions{}}
+				}
+			}
+		}
 
-		// Finn forskjeller i gjeldende og ønskede tilganger
-		permissionsToBeRemoved, permissionsToBeGranted := findProjectPermissionDifference(desiredState, actualProjectPermissions)
+		// Finner tilganger i 'actualProjectPermissions' som ikke finnes i 'desiredProjectPermissions'. Disse tilgangene skal fjernes.
+		permissionsToBeRemoved := findProjectPermissionsDifference(actualProjectPermissions, desiredProjectPermissions)
 
-		// Fjern alle prosjekt-tilganger som ikke er ønsket
+		//Finner tilganger i 'desiredProjectPermissions' som ikke finnes i 'actualProjectPermissions'. Disse tilgangene skal gis.
+		permissionsToBeGranted := findProjectPermissionsDifference(desiredProjectPermissions, actualProjectPermissions)
+
+		// Fjern alle ikke-ønskede prosjekt-tilganger
 		if err := removeProjectPermissions(baseUrl, projectKey, token, permissionsToBeRemoved); err != nil {
 			return err
 		}
@@ -59,25 +89,44 @@ func applyPermissions(cmd *cobra.Command, args []string) error {
 			return err
 		}
 
+		if includeRepos {
+			// Fjern alle ikke-ønskede repo-tilganger for prosjektet
+			for repoSlug, permissions := range permissionsToBeRemoved.Repositories {
+				if err := removeRepositoryPermissions(baseUrl, projectKey, repoSlug, token, permissions); err != nil {
+					return err
+				}
+			}
+			// GI ønskede repo-tilganger for prosjektet
+			for repoSlug, permissions := range permissionsToBeGranted.Repositories {
+				if err := grantRepositoryPermissions(baseUrl, projectKey, repoSlug, token, permissions); err != nil {
+					return err
+				}
+			}
+		}
+
 		progressBar.Increment()
 	}
 
 	return nil
 }
 
-func findProjectPermissionDifference(desiredState *ProjectPermissions, actualState *ProjectPermissions) (permissionsToBeRemoved *ProjectPermissions, permissionsToBeGranted *ProjectPermissions) {
-	permissionsToBeRemoved = &ProjectPermissions{}
-	permissionsToBeGranted = &ProjectPermissions{}
-	// Finner tilganger i 'actualState' som ikke finnes i 'desiredState'. Disse tilgangene skal fjernes.
-	permissionsToBeRemoved.Permissions = actualState.Permissions.getPermissionSetDifference(desiredState.Permissions)
-	// Finner tilganger i 'desiredState' som ikke finnes i 'actualState'. Disse tilgangene skal gis.
-	permissionsToBeGranted.Permissions = desiredState.Permissions.getPermissionSetDifference(actualState.Permissions)
+func findProjectPermissionsDifference(permissionsA *ProjectPermissions, permissionsB *ProjectPermissions) (permissionsDifference *ProjectPermissions) {
+	// Finner tilganger i 'permissionsA' som ikke finnes i 'permissionsB'.
+	permissionsDifference = &ProjectPermissions{}
+	permissionsDifference.Permissions = permissionsA.Permissions.getPermissionsDifference(permissionsB.Permissions)
+	if permissionsA.Repositories != nil {
+		permissionsDifference.Repositories = make(map[string]*RepositoryPermissions)
+		for r, value := range permissionsA.Repositories {
+			permissionsDifference.Repositories[r] = new(RepositoryPermissions)
+			permissionsDifference.Repositories[r].Permissions = value.Permissions.getPermissionsDifference(permissionsB.Repositories[r].Permissions)
+		}
+	}
 
-	return permissionsToBeRemoved, permissionsToBeGranted
+	return permissionsDifference
 }
 
 // Finner det relative komplementet til setA i setB
-func (setA *Permissions) getPermissionSetDifference(setB *Permissions) *Permissions {
+func (setA *Permissions) getPermissionsDifference(setB *Permissions) *Permissions {
 	difference := make(Permissions)
 
 	for permission := range *setA {
@@ -164,6 +213,46 @@ func removeGroupProjectPermissions(baseUrl string, projectKey string, token stri
 	return nil
 }
 
+func removeRepositoryPermissions(baseUrl string, projectKey string, repoSlug string, token string, repositoryPermissions *RepositoryPermissions) error {
+	for _, entity := range *repositoryPermissions.Permissions {
+		for _, user := range entity.Users {
+			if err := removeUserRepositoryPermissions(baseUrl, projectKey, repoSlug, token, user); err != nil {
+				return err
+			}
+		}
+		for _, group := range entity.Groups {
+			if err := removeGroupRepositoryPermissions(baseUrl, projectKey, repoSlug, token, group); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func removeUserRepositoryPermissions(baseUrl string, projectKey string, repoSlug string, token string, user string) error {
+	url := fmt.Sprintf("%s/rest/api/latest/projects/%s/repos/%s/permissions/users", baseUrl, projectKey, repoSlug)
+	params := map[string]string{
+		"name": user,
+	}
+
+	if _, err := pkg.DeleteRequest(url, token, params); err != nil {
+		return err
+	}
+	return nil
+}
+
+func removeGroupRepositoryPermissions(baseUrl string, projectKey string, repoSlug string, token string, group string) error {
+	url := fmt.Sprintf("%s/rest/api/latest/projects/%s/repos/%s/permissions/groups", baseUrl, projectKey, repoSlug)
+	params := map[string]string{
+		"name": group,
+	}
+
+	if _, err := pkg.DeleteRequest(url, token, params); err != nil {
+		return err
+	}
+	return nil
+}
+
 func grantProjectPermissions(baseUrl string, projectKey string, token string, projectPermissions *ProjectPermissions) error {
 	for permission, entity := range *projectPermissions.Permissions {
 		for _, user := range entity.Users {
@@ -195,6 +284,48 @@ func grantUserProjectPermission(baseUrl string, projectKey string, token string,
 
 func grantGroupProjectPermission(baseUrl string, projectKey string, token string, group string, permission string) error {
 	url := fmt.Sprintf("%s/rest/api/latest/projects/%s/permissions/groups", baseUrl, projectKey)
+	params := map[string]string{
+		"name":       group,
+		"permission": permission,
+	}
+
+	if _, err := pkg.PutRequest(url, token, params); err != nil {
+		return err
+	}
+	return nil
+}
+
+func grantRepositoryPermissions(baseUrl string, projectKey string, repoSlug string, token string, repositoryPermissions *RepositoryPermissions) error {
+	for permission, entity := range *repositoryPermissions.Permissions {
+		for _, user := range entity.Users {
+			if err := grantUserRepositoryPermission(baseUrl, projectKey, repoSlug, token, user, permission); err != nil {
+				return err
+			}
+		}
+		for _, group := range entity.Groups {
+			if err := grantGroupRepositoryPermission(baseUrl, projectKey, repoSlug, token, group, permission); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func grantUserRepositoryPermission(baseUrl string, projectKey string, repoSlug string, token string, user string, permission string) error {
+	url := fmt.Sprintf("%s/rest/api/latest/projects/%s/repos/%s/permissions/users", baseUrl, projectKey, repoSlug)
+	params := map[string]string{
+		"name":       user,
+		"permission": permission,
+	}
+
+	if _, err := pkg.PutRequest(url, token, params); err != nil {
+		return err
+	}
+	return nil
+}
+
+func grantGroupRepositoryPermission(baseUrl string, projectKey string, reposSlug string, token string, group string, permission string) error {
+	url := fmt.Sprintf("%s/rest/api/latest/projects/%s/repos/%s/permissions/groups", baseUrl, projectKey, reposSlug)
 	params := map[string]string{
 		"name":       group,
 		"permission": permission,

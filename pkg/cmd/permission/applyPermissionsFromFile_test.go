@@ -28,42 +28,39 @@ func TestEntitiesContains(t *testing.T) {
 func TestGetPermissionSetDifference(t *testing.T) {
 	var permission = "DUMMY_PERMISSION"
 
-	desiredPermissions := &ProjectPermissions{
-		PermissionSet: Permissions{
-			map[string]*Entities{
-				permission: {
-					Users:  []string{"User1", "User2"},
-					Groups: []string{"Group1", "Group2", "Group3"},
-				},
-			},
+	desiredPermissions := &Permissions{
+		permission: &Entities{
+			Users:  []string{"User1", "User2"},
+			Groups: []string{"Group1", "Group2", "Group3"},
 		},
 	}
 
-	actualPermissions := &ProjectPermissions{
-		PermissionSet: Permissions{
-			map[string]*Entities{
-				permission: {
-					Users:  []string{"User3", "User4"},
-					Groups: []string{"Group3", "Group4"},
-				},
-			},
+	actualPermissions := &Permissions{
+		permission: &Entities{
+			Users:  []string{"User3", "User4"},
+			Groups: []string{"Group3", "Group4"},
 		},
 	}
 
-	expectedToBeGranted := &Entities{
-		Users:  []string{"User1", "User2"},
-		Groups: []string{"Group1", "Group2"},
+	expectedToBeGranted := &Permissions{
+		permission: &Entities{
+			Users:  []string{"User1", "User2"},
+			Groups: []string{"Group1", "Group2"},
+		},
 	}
-	actualToBeGranted := desiredPermissions.getPermissionSetDifference(actualPermissions).Permissions[permission]
+
+	actualToBeGranted := desiredPermissions.getPermissionsDifference(actualPermissions)
 	if !reflect.DeepEqual(expectedToBeGranted, actualToBeGranted) {
 		t.Fatal("Forventer å gi tilgang til 'User1', 'User2', 'Group1' og 'Group2'")
 	}
 
-	expectedToBeRemoved := &Entities{
-		Users:  []string{"User3", "User4"},
-		Groups: []string{"Group4"},
+	expectedToBeRemoved := &Permissions{
+		permission: &Entities{
+			Users:  []string{"User3", "User4"},
+			Groups: []string{"Group4"},
+		},
 	}
-	actualToBeRemoved := actualPermissions.getPermissionSetDifference(desiredPermissions).Permissions[permission]
+	actualToBeRemoved := actualPermissions.getPermissionsDifference(desiredPermissions)
 	if !reflect.DeepEqual(expectedToBeRemoved, actualToBeRemoved) {
 		t.Fatal("Forventer å fjerne tilgang for 'User3', 'User4' og 'Group4'")
 	}
