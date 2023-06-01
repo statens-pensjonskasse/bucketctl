@@ -29,8 +29,8 @@ type RepositoryPermissions struct {
 }
 
 var Cmd = &cobra.Command{
-	Use:     "permissions",
-	Short:   "Bitbucket project permission commands",
+	Use:     "permission",
+	Short:   "Bitbucket permission commands",
 	Aliases: []string{"perm"},
 }
 

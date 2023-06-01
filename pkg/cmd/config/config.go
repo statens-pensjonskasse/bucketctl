@@ -11,18 +11,18 @@ var Cmd = &cobra.Command{
 }
 
 func init() {
-	Cmd.AddCommand(getCmd)
-	Cmd.AddCommand(setCmd)
+	Cmd.AddCommand(getConfigCmd)
+	Cmd.AddCommand(setConfigCmd)
 }
 
-var getCmd = &cobra.Command{
+var getConfigCmd = &cobra.Command{
 	Use:     "get",
 	Aliases: []string{"g", "list", "l"},
 	Short:   "Get config",
 	Run:     getConfig,
 }
 
-var setCmd = &cobra.Command{
+var setConfigCmd = &cobra.Command{
 	Use:     "set",
 	Aliases: []string{"s"},
 	Short:   "Set config",

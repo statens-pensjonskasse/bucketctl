@@ -10,6 +10,7 @@ import (
 	"gobit/pkg/cmd/project"
 	"gobit/pkg/cmd/repository"
 	"gobit/pkg/cmd/version"
+	"gobit/pkg/cmd/webhook"
 	"os"
 	"path/filepath"
 )
@@ -55,6 +56,7 @@ func init() {
 	rootCmd.AddCommand(project.Cmd)
 	rootCmd.AddCommand(repository.Cmd)
 	rootCmd.AddCommand(version.Cmd)
+	rootCmd.AddCommand(webhook.Cmd)
 }
 
 func initConfig() {

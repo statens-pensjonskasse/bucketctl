@@ -1,13 +1,17 @@
 # GoBit
+
 Et CLI-verktøy for BitBucket-APIet skrevet i Go
 
 ## Installasjon
+
 ```shell
 make build && make install
 ```
 
 ## Hjelp
+
 For å komme i gang skriv
+
 ```shell 
 gobit help
 ```
@@ -21,6 +25,7 @@ gobit config set --token <token>
 ```
 
 ### Eksempler
+
 Hent alle prosjekter
 
 ```shell
@@ -36,19 +41,19 @@ gobit repo list -k INFRA
 Hent alle tilganger for `INFRA`-prosjektet med alle repos og skriv det til en `.yaml` fil
 
 ```shell
-gobit permissions list -k --include-repos -o yaml > INFRA.yaml
+gobit permission list -k --include-repos -o yaml > INFRA.yaml
 ```
 
 Hent abosolutt alle tilganger i Bitbucket og i `.json`-format
 
 ```shell
-gobit permissions all -o json --limit 9001
+gobit permission all -o json --limit 9001
 ```
 
 Sett tilganger ut fra en fil (`.json` eller `.yaml`)
 
 ```shell
-gobit permissions apply -f <fil> --include-repos
+gobit permission apply -f <fil> --include-repos
 ```
 
 **Obs:** Tilganger til repositories fra fil vil kun bli brukt når `--include-repos` anngis.

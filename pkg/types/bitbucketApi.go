@@ -49,14 +49,8 @@ type ProjectsResponse struct {
 	Values []Project `json:"values"`
 }
 
-type GroupPermissionsResponse struct {
-	response
-	Values []GroupPermission `json:"values"`
-}
-
-type UserPermissionsResponse struct {
-	response
-	Values []UserPermission `json:"values"`
+type Group struct {
+	Name string `json:"name" yaml:"name"`
 }
 
 type GroupPermission struct {
@@ -64,13 +58,9 @@ type GroupPermission struct {
 	Permission string `json:"permission"`
 }
 
-type UserPermission struct {
-	User       User   `json:"user"`
-	Permission string `json:"permission"`
-}
-
-type Group struct {
-	Name string `json:"name" yaml:"name"`
+type GroupPermissionsResponse struct {
+	response
+	Values []GroupPermission `json:"values"`
 }
 
 type User struct {
@@ -81,4 +71,32 @@ type User struct {
 	Id           int    `json:"id" yaml:"id"`
 	Slug         string `json:"slug" yaml:"slug"`
 	Type         string `json:"type" yaml:"type"`
+}
+
+type UserPermission struct {
+	User       User   `json:"user"`
+	Permission string `json:"permission"`
+}
+
+type UserPermissionsResponse struct {
+	response
+	Values []UserPermission `json:"values"`
+}
+
+type Webhook struct {
+	Id                      int         `json:"id" yaml:"id"`
+	Name                    string      `json:"name" yaml:"name"`
+	CreatedDate             int         `json:"createdDate" yaml:"createdDate"`
+	UpdatedDate             int         `json:"updatedDate" yaml:"updatedDate"`
+	Events                  []string    `json:"events" yaml:"events"`
+	Configuration           interface{} `json:"configuration" yaml:"configuration"`
+	Url                     string      `json:"url" yaml:"url"`
+	Active                  bool        `json:"active" yaml:"active"`
+	ScopeType               string      `json:"scopeType" yaml:"scopeType"`
+	SslVerificationRequired bool        `yaml:"sslVerificationRequired" yaml:"sslVerificationRequired" yaml:"sslVerificationRequired"`
+}
+
+type WebhooksResponse struct {
+	response
+	Values []Webhook `json:"values"`
 }
