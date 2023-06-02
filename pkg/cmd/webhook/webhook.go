@@ -5,19 +5,19 @@ import (
 	"fmt"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"gobit/pkg"
+	"gobit/pkg/cmd/repository"
 	"gobit/pkg/types"
 	"sort"
 	"strconv"
 )
 
 type ProjectWebhooks struct {
-	Webhooks     []types.Webhook               `yaml:"webhooks,omitempty"`
-	Repositories map[string]*RepositoryWebhook `yaml:"respositories,omitempty"`
+	Webhooks     []types.Webhook                `json:"webhooks,omitempty" yaml:"webhooks,omitempty"`
+	Repositories map[string]*RepositoryWebhooks `json:"repositories,omitempty" yaml:"repositories,omitempty"`
 }
 
-type RepositoryWebhook struct {
+type RepositoryWebhooks struct {
 	Webhooks []types.Webhook `yaml:"webhooks"`
 }
 
@@ -28,33 +28,16 @@ var (
 
 var Cmd = &cobra.Command{
 	Use:     "webhook",
-	Short:   "Bitbucket webhook commands",
+	Short:   "Webhook commands",
 	Aliases: []string{"wh"},
 }
 
 func init() {
-	Cmd.PersistentFlags().StringVarP(&key, "key", "k", "", "Project key")
-	Cmd.PersistentFlags().StringVarP(&repo, "repo", "r", "", "Repository slug. Leave empty to query project permissions.")
-
-	Cmd.MarkPersistentFlagRequired("key")
-
+	Cmd.AddCommand(listAllWebhooksCmd)
 	Cmd.AddCommand(listWebhooksCmd)
 }
 
-var listWebhooksCmd = &cobra.Command{
-	PreRun: func(cmd *cobra.Command, args []string) {
-		Cmd.MarkPersistentFlagRequired("repo")
-		viper.BindPFlag("key", Cmd.PersistentFlags().Lookup("key"))
-		viper.BindPFlag("repo", Cmd.PersistentFlags().Lookup("repo"))
-	},
-	Use:   "list",
-	Short: "List Webhooks for given repo",
-	RunE:  listWebhooks,
-}
-
-func getRepositoryWebhooks(baseUrl string, projectKey string, repoSlug string, limit int, token string) ([]types.Webhook, error) {
-	url := fmt.Sprintf("%s/rest/api/latest/projects/%s/repos/%s/webhooks?limit=%d", baseUrl, projectKey, repoSlug, limit)
-
+func getWebhooks(url string, token string) ([]types.Webhook, error) {
 	body, err := pkg.GetRequestBody(url, token)
 	if err != nil {
 		return nil, err
@@ -72,19 +55,89 @@ func getRepositoryWebhooks(baseUrl string, projectKey string, repoSlug string, l
 	return webhooks.Values, nil
 }
 
-func PrettyFormatProjectWebhooks(projectWebhooks map[string]*ProjectWebhooks) [][]string {
+func getProjectWebhooks(baseUrl string, projectKey string, limit int, token string, includeRepos bool) (*ProjectWebhooks, error) {
+	url := fmt.Sprintf("%s/rest/api/latest/projects/%s/webhooks?limit=%d", baseUrl, projectKey, limit)
+
+	webhooks, err := getWebhooks(url, token)
+	if err != nil {
+		return nil, err
+	}
+
+	projectWebhooks := &ProjectWebhooks{Webhooks: webhooks}
+
+	if includeRepos {
+		projectRepositories, err := repository.GetProjectRepositories(baseUrl, projectKey, limit)
+		if err != nil {
+			return nil, err
+		}
+		projectWebhooks.Repositories = make(map[string]*RepositoryWebhooks)
+		for _, r := range projectRepositories {
+			repoWebhooks, err := getRepositoryWebhooks(baseUrl, projectKey, r.Slug, limit, token)
+			if err != nil {
+				return nil, err
+			}
+			if len(repoWebhooks.Webhooks) > 0 {
+				projectWebhooks.Repositories[r.Slug] = repoWebhooks
+			}
+		}
+	}
+
+	return projectWebhooks, nil
+}
+
+func getRepositoryWebhooks(baseUrl string, projectKey string, repoSlug string, limit int, token string) (*RepositoryWebhooks, error) {
+	url := fmt.Sprintf("%s/rest/api/latest/projects/%s/repos/%s/webhooks?limit=%d", baseUrl, projectKey, repoSlug, limit)
+
+	webhooks, err := getWebhooks(url, token)
+	if err != nil {
+		return nil, err
+	}
+
+	return &RepositoryWebhooks{Webhooks: webhooks}, nil
+}
+
+func PrettyFormatProjectWebhooks(projectWebhooksMap map[string]*ProjectWebhooks) [][]string {
 	var data [][]string
 	data = append(data, []string{"Project", "Repository", "ID", "Name", "Events", "URL", "Active", "VerifySSL"})
 
-	for projectKey, webhooks := range projectWebhooks {
-		for repoSlug, repoWebhooks := range webhooks.Repositories {
-			for _, webhook := range repoWebhooks.Webhooks {
-				sort.Strings(webhook.Events)
-				data = append(data, []string{projectKey, repoSlug, strconv.Itoa(webhook.Id), webhook.Name, webhook.Events[0], webhook.Url, strconv.FormatBool(webhook.Active), strconv.FormatBool(webhook.SslVerificationRequired)})
-				for _, event := range webhook.Events[1:] {
-					data = append(data, []string{"", "", "", "", event, "", "", ""})
-				}
-			}
+	// Sorter prosjekt alfabetisk
+	projects := make([]string, 0, len(projectWebhooksMap))
+	for k := range projectWebhooksMap {
+		projects = append(projects, k)
+	}
+	sort.Strings(projects)
+
+	for _, projectKey := range projects {
+		formattedProjectWebhooks := prettyFormatWebhooks(projectKey, "PROJECT", projectWebhooksMap[projectKey].Webhooks)
+		data = append(data, formattedProjectWebhooks...)
+
+		// Sorter repoene alfabetisk
+		repos := make([]string, 0, len(projectWebhooksMap[projectKey].Repositories))
+		for r := range projectWebhooksMap[projectKey].Repositories {
+			repos = append(repos, r)
+		}
+		sort.Strings(repos)
+		for _, repoSlug := range repos {
+			formattedRepoWebhooks := prettyFormatWebhooks(projectKey, repoSlug, projectWebhooksMap[projectKey].Repositories[repoSlug].Webhooks)
+			data = append(data, formattedRepoWebhooks...)
+		}
+	}
+
+	return data
+}
+
+func prettyFormatWebhooks(projectKey string, repoSlug string, webhooks []types.Webhook) [][]string {
+	var data [][]string
+
+	if webhooks == nil {
+		return data
+	}
+
+	for _, webhook := range webhooks {
+		sort.Strings(webhook.Events)
+		data = append(data, []string{projectKey, repoSlug, strconv.Itoa(webhook.Id), webhook.Name, webhook.Events[0], webhook.Url, strconv.FormatBool(webhook.Active), strconv.FormatBool(webhook.SslVerificationRequired)})
+		for _, event := range webhook.Events[1:] {
+			data = append(data, []string{"", "", "", "", event, "", "", ""})
 		}
 	}
 

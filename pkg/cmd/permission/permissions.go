@@ -30,14 +30,14 @@ type RepositoryPermissions struct {
 
 var Cmd = &cobra.Command{
 	Use:     "permission",
-	Short:   "Bitbucket permission commands",
+	Short:   "Permission commands",
 	Aliases: []string{"perm"},
 }
 
 func init() {
-	Cmd.AddCommand(listPermissionsCmd)
-	Cmd.AddCommand(listAllPermissionsCmd)
 	Cmd.AddCommand(applyPermissionsFromFile)
+	Cmd.AddCommand(listAllPermissionsCmd)
+	Cmd.AddCommand(listPermissionsCmd)
 }
 
 func getGroupPermissions(url string, token string) ([]types.GroupPermission, error) {
@@ -132,7 +132,10 @@ func getProjectPermissions(baseUrl string, projectKey string, limit int, token s
 		}
 		projectPermissions.Repositories = make(map[string]*RepositoryPermissions)
 		for _, r := range projectRepositories {
-			repoPerms, _ := getRepositoryPermissions(baseUrl, projectKey, r.Slug, limit, token)
+			repoPerms, err := getRepositoryPermissions(baseUrl, projectKey, r.Slug, limit, token)
+			if err != nil {
+				return nil, err
+			}
 			if len(*repoPerms.Permissions) > 0 {
 				projectPermissions.Repositories[r.Slug] = repoPerms
 			}
@@ -172,7 +175,7 @@ func getRepositoryPermissions(baseUrl string, projectKey string, repoSlug string
 }
 
 func PrettyFormatProjectPermissions(projectPermissionsMap map[string]*ProjectPermissions) [][]string {
-	// Sorter prosjektene alfabetisk
+	// Sorter prosjekt alfabetisk
 	projects := make([]string, 0, len(projectPermissionsMap))
 	for k := range projectPermissionsMap {
 		projects = append(projects, k)

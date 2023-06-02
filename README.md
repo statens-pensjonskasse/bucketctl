@@ -53,8 +53,14 @@ gobit permission all -o json --limit 9001
 Sett tilganger ut fra en fil (`.json` eller `.yaml`)
 
 ```shell
-gobit permission apply -f <fil> --include-repos
+gobit permission apply -f permissions.yaml --include-repos
 ```
 
 **Obs:** Tilganger til repositories fra fil vil kun bli brukt når `--include-repos` anngis.
 Repositories som ev. ikke er inkludert i liste vil miste all tilgangsstyring da denne er antatt satt på prosjektnivå.
+
+Hent webhooks for jenkins-pipeline-library repoet i INFRA-prosjektet
+
+```shell
+gobit webhook list -k INFRA -r jenkins-pipeline-library
+```

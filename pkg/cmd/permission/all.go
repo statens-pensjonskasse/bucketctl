@@ -10,8 +10,23 @@ import (
 )
 
 var listAllPermissionsCmd = &cobra.Command{
-	Use:  "all",
-	RunE: listAllPermissions,
+	Use:   "all",
+	Short: "List all permissions",
+	RunE:  listAllPermissions,
+}
+
+func listAllPermissions(cmd *cobra.Command, args []string) error {
+	baseUrl := viper.GetString("baseUrl")
+	limit := viper.GetInt("limit")
+	token := viper.GetString("token")
+
+	permissions, err := getAllPermissions(baseUrl, limit, token)
+	if err != nil {
+		return err
+	}
+
+	pkg.PrintData(permissions, PrettyFormatProjectPermissions)
+	return nil
 }
 
 func getAllPermissions(baseUrl string, limit int, token string) (map[string]*ProjectPermissions, error) {
@@ -33,18 +48,4 @@ func getAllPermissions(baseUrl string, limit int, token string) (map[string]*Pro
 	}
 
 	return allPermissions, nil
-}
-
-func listAllPermissions(cmd *cobra.Command, args []string) error {
-	var baseUrl = viper.GetString("baseUrl")
-	var limit = viper.GetInt("limit")
-	var token = viper.GetString("token")
-
-	permissions, err := getAllPermissions(baseUrl, limit, token)
-	if err != nil {
-		return err
-	}
-
-	pkg.PrintData(permissions, PrettyFormatProjectPermissions)
-	return nil
 }

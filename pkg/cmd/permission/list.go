@@ -38,33 +38,25 @@ func listPermissions(cmd *cobra.Command, args []string) error {
 	token := viper.GetString("token")
 	includeRepos := viper.GetBool("include-repos")
 
+	projectPermissionsMap := make(map[string]*ProjectPermissions)
 	if repoSlug == "" {
 		projectPermissions, err := getProjectPermissions(baseUrl, projectKey, limit, token, includeRepos)
 		if err != nil {
 			return err
 		}
 
-		projectPermissionsMap := make(map[string]*ProjectPermissions)
 		projectPermissionsMap[projectKey] = projectPermissions
-
-		pkg.PrintData(projectPermissionsMap, PrettyFormatProjectPermissions)
 	} else {
 		permissions, err := getRepositoryPermissions(baseUrl, projectKey, repoSlug, limit, token)
 		if err != nil {
 			return err
 		}
 
-		repoPermissionsMap := make(map[string]*RepositoryPermissions)
-		repoPermissionsMap[repoSlug] = permissions
-
-		projectPermissions := &ProjectPermissions{
-			Repositories: repoPermissionsMap,
-		}
-		projectPermissionsMap := make(map[string]*ProjectPermissions)
-		projectPermissionsMap[projectKey] = projectPermissions
-
-		pkg.PrintData(projectPermissionsMap, PrettyFormatProjectPermissions)
+		projectPermissionsMap[projectKey] = new(ProjectPermissions)
+		projectPermissionsMap[projectKey].Repositories = make(map[string]*RepositoryPermissions)
+		projectPermissionsMap[projectKey].Repositories[repoSlug] = permissions
 	}
 
+	pkg.PrintData(projectPermissionsMap, PrettyFormatProjectPermissions)
 	return nil
 }

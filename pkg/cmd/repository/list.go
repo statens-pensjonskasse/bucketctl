@@ -36,7 +36,7 @@ var listRepositoriesCmd = &cobra.Command{
 	},
 	Use:     "list",
 	Aliases: []string{"l"},
-	Short:   "List Bitbucket repositories in a given project",
+	Short:   "List repositories in a given project",
 	RunE:    listRepositories,
 }
 

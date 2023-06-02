@@ -11,7 +11,7 @@ import (
 
 var Cmd = &cobra.Command{
 	Use:     "project",
-	Short:   "Bitbucket project commands",
+	Short:   "Project commands",
 	Aliases: []string{"proj"},
 }
 
@@ -22,7 +22,7 @@ func init() {
 var listProjectsCmd = &cobra.Command{
 	Use:     "list",
 	Aliases: []string{"l"},
-	Short:   "List Bitbucket projects",
+	Short:   "List projects",
 	RunE:    listProjects,
 }
 

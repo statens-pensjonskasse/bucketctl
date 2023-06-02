@@ -3,3 +3,6 @@ build:
 
 install:
 	go install -v ./...
+
+help:
+	go run main.go help

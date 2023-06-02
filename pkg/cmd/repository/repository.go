@@ -11,7 +11,7 @@ import (
 
 var Cmd = &cobra.Command{
 	Use:     "repository",
-	Short:   "Bitbucket repository commands",
+	Short:   "Repository commands",
 	Aliases: []string{"repo"},
 }
 
