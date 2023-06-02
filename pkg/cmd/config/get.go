@@ -19,7 +19,7 @@ func prettyFormatConfig(settings map[string]interface{}) [][]string {
 	return data
 }
 
-func getConfig(cmd *cobra.Command, args []string) {
+func getConfig(cmd *cobra.Command, args []string) error {
 	keys := viper.AllKeys()
 	sort.Strings(keys)
 
@@ -31,5 +31,5 @@ func getConfig(cmd *cobra.Command, args []string) {
 		data = append(data, row)
 	}
 
-	pkg.PrintData(viper.AllSettings(), prettyFormatConfig)
+	return pkg.PrintData(viper.AllSettings(), prettyFormatConfig)
 }

@@ -43,25 +43,30 @@ func (e *OutputFormatType) Type() string {
 	return "OutputFormatType"
 }
 
-func PrintData[T interface{}](data T, prettyPrintFunction func(a T) [][]string) {
+func PrintData[T interface{}](data T, prettyPrintFunction func(a T) [][]string) error {
 	outputFormat := OutputFormatType(viper.GetString("output"))
 
 	switch outputFormat {
 	case OutputYaml:
 		yamlData, err := yaml.Marshal(&data)
 		if err != nil {
-			pterm.Error.Println("Error while Marshaling to YAML. %v", err)
+			return err
 		}
 		pterm.Println(string(yamlData))
 	case OutputJson:
 		jsonData, err := json.MarshalIndent(&data, "", "  ")
 		if err != nil {
-			pterm.Error.Println("Error while Marshaling to JSON. %v", err)
+			return err
 		}
 		pterm.Println(string(jsonData))
 	case OutputPretty:
-		pterm.DefaultTable.WithHasHeader().WithData(prettyPrintFunction(data)).Render()
+		if err := pterm.DefaultTable.WithHasHeader().WithData(prettyPrintFunction(data)).Render(); err != nil {
+			return err
+		}
 	default:
-		pterm.DefaultTable.WithHasHeader().WithData(prettyPrintFunction(data)).Render()
+		if err := pterm.DefaultTable.WithHasHeader().WithData(prettyPrintFunction(data)).Render(); err != nil {
+			return err
+		}
 	}
+	return nil
 }

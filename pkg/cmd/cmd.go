@@ -75,10 +75,12 @@ func initConfig() {
 
 	viper.AutomaticEnv()
 
-	pkg.CreateFileIfNotExists(cfgFile)
+	if err := pkg.CreateFileIfNotExists(cfgFile); err != nil {
+		cobra.CheckErr(err)
+	}
 
 	if err := viper.ReadInConfig(); err != nil {
-		pterm.Error.Println("Error reading config file:", viper.ConfigFileUsed())
+		cobra.CheckErr(err)
 	}
 
 	viper.SetDefault("config", viper.ConfigFileUsed())

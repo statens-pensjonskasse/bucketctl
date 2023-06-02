@@ -19,7 +19,7 @@ var getConfigCmd = &cobra.Command{
 	Use:     "get",
 	Aliases: []string{"g", "list", "l"},
 	Short:   "Get config",
-	Run:     getConfig,
+	RunE:    getConfig,
 }
 
 var setConfigCmd = &cobra.Command{

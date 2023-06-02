@@ -50,6 +50,5 @@ func listRepositories(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	pkg.PrintData(repos, prettyFormatRepositories)
-	return nil
+	return pkg.PrintData(repos, prettyFormatRepositories)
 }

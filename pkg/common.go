@@ -13,21 +13,20 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pterm/pterm"
 	"gopkg.in/yaml.v3"
 )
 
-func CreateFileIfNotExists(file string) {
+func CreateFileIfNotExists(file string) error {
 	if _, err := os.Stat(file); err != nil {
 		if errors.Is(err, fs.ErrNotExist) {
-			var filehandle, err = os.Create(file)
-			defer filehandle.Close()
+			var fileHandle, err = os.Create(file)
+			defer fileHandle.Close()
 			if err != nil {
-				pterm.Error.Println("Error creating config file:", file, ".")
-				os.Exit(1)
+				return errors.New(err.Error())
 			}
 		}
 	}
+	return nil
 }
 
 func HttpRequest(method string, url string, body io.Reader, token string, params ...map[string]string) (*http.Response, error) {

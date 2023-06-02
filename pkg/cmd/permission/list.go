@@ -57,6 +57,5 @@ func listPermissions(cmd *cobra.Command, args []string) error {
 		projectPermissionsMap[projectKey].Repositories[repoSlug] = permissions
 	}
 
-	pkg.PrintData(projectPermissionsMap, PrettyFormatProjectPermissions)
-	return nil
+	return pkg.PrintData(projectPermissionsMap, PrettyFormatProjectPermissions)
 }

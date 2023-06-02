@@ -30,6 +30,5 @@ func listProjects(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	pkg.PrintData(projects, prettyFormatProjects)
-	return nil
+	return pkg.PrintData(projects, prettyFormatProjects)
 }

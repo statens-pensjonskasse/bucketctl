@@ -52,6 +52,5 @@ func listWebhooks(cmd *cobra.Command, args []string) error {
 		projectWebhooksMap[projectKey].Repositories[repoSlug] = webhooks
 	}
 
-	pkg.PrintData(projectWebhooksMap, PrettyFormatProjectWebhooks)
-	return nil
+	return pkg.PrintData(projectWebhooksMap, PrettyFormatProjectWebhooks)
 }

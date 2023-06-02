@@ -25,8 +25,7 @@ func listAllPermissions(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	pkg.PrintData(permissions, PrettyFormatProjectPermissions)
-	return nil
+	return pkg.PrintData(permissions, PrettyFormatProjectPermissions)
 }
 
 func getAllPermissions(baseUrl string, limit int, token string) (map[string]*ProjectPermissions, error) {
