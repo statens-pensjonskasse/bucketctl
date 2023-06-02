@@ -14,7 +14,7 @@ var (
 	fileName string
 )
 
-var applyPermissionsFromFile = &cobra.Command{
+var applyPermissionsCmd = &cobra.Command{
 	PreRun: func(cmd *cobra.Command, args []string) {
 		viper.BindPFlag("file", cmd.Flags().Lookup("file"))
 		viper.BindPFlag("include-repos", cmd.Flags().Lookup("include-repos"))
@@ -24,9 +24,10 @@ var applyPermissionsFromFile = &cobra.Command{
 }
 
 func init() {
-	applyPermissionsFromFile.Flags().StringVarP(&fileName, "file", "f", "", "Permission file")
-	applyPermissionsFromFile.MarkFlagRequired("file")
-	applyPermissionsFromFile.Flags().Bool("include-repos", false, "Include repositories")
+	applyPermissionsCmd.Flags().StringVarP(&fileName, "file", "f", "", "Permissions file")
+	applyPermissionsCmd.Flags().Bool("include-repos", false, "Include repositories")
+
+	applyPermissionsCmd.MarkFlagRequired("file")
 }
 
 func applyPermissions(cmd *cobra.Command, args []string) error {

@@ -33,6 +33,7 @@ var Cmd = &cobra.Command{
 }
 
 func init() {
+	Cmd.AddCommand(applyWebhooksCmd)
 	Cmd.AddCommand(listAllWebhooksCmd)
 	Cmd.AddCommand(listWebhooksCmd)
 }

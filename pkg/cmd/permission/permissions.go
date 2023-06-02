@@ -35,7 +35,7 @@ var Cmd = &cobra.Command{
 }
 
 func init() {
-	Cmd.AddCommand(applyPermissionsFromFile)
+	Cmd.AddCommand(applyPermissionsCmd)
 	Cmd.AddCommand(listAllPermissionsCmd)
 	Cmd.AddCommand(listPermissionsCmd)
 }
