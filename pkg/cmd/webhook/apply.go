@@ -46,6 +46,18 @@ func applyWebhooks(cmd *cobra.Command, args []string) error {
 			return err
 		}
 
+		for repoSlug, webhooks := range actualWebhooks.Repositories {
+			pterm.Info.Println(repoSlug)
+			for _, webhook := range webhooks.Webhooks {
+				pterm.Warning.Println(webhook)
+				wh, err := getRepositoryWebhook(baseUrl, projectKey, repoSlug, webhook.Id, limit, token)
+				if err != nil {
+					return err
+				}
+				pterm.Error.Println(wh)
+			}
+		}
+
 		pterm.Info.Println(desiredProjectWebhooks)
 		pterm.Info.Println(actualWebhooks)
 	}

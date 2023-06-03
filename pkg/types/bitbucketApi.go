@@ -33,7 +33,7 @@ type Repository struct {
 
 type RepositoriesResponse struct {
 	response
-	Values []Repository `json:"values"`
+	Values []*Repository `json:"values"`
 }
 
 type Project struct {
@@ -46,7 +46,7 @@ type Project struct {
 
 type ProjectsResponse struct {
 	response
-	Values []Project `json:"values"`
+	Values []*Project `json:"values"`
 }
 
 type Group struct {
@@ -60,7 +60,7 @@ type GroupPermission struct {
 
 type GroupPermissionsResponse struct {
 	response
-	Values []GroupPermission `json:"values"`
+	Values []*GroupPermission `json:"values"`
 }
 
 type User struct {
@@ -80,7 +80,7 @@ type UserPermission struct {
 
 type UserPermissionsResponse struct {
 	response
-	Values []UserPermission `json:"values"`
+	Values []*UserPermission `json:"values"`
 }
 
 type Webhook struct {
@@ -98,5 +98,5 @@ type Webhook struct {
 
 type WebhooksResponse struct {
 	response
-	Values []Webhook `json:"values"`
+	Values []*Webhook `json:"values"`
 }

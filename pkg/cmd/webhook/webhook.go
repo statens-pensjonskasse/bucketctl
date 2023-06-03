@@ -13,12 +13,12 @@ import (
 )
 
 type ProjectWebhooks struct {
-	Webhooks     []types.Webhook                `json:"webhooks,omitempty" yaml:"webhooks,omitempty"`
+	Webhooks     []*types.Webhook               `json:"webhooks,omitempty" yaml:"webhooks,omitempty"`
 	Repositories map[string]*RepositoryWebhooks `json:"repositories,omitempty" yaml:"repositories,omitempty"`
 }
 
 type RepositoryWebhooks struct {
-	Webhooks []types.Webhook `yaml:"webhooks"`
+	Webhooks []*types.Webhook `yaml:"webhooks"`
 }
 
 var (
@@ -38,7 +38,32 @@ func init() {
 	Cmd.AddCommand(listWebhooksCmd)
 }
 
-func getWebhooks(url string, token string) ([]types.Webhook, error) {
+func getWebhook(url string, token string) (*types.Webhook, error) {
+	body, err := pkg.GetRequestBody(url, token)
+	if err != nil {
+		pterm.Warning.Println(err)
+		return nil, err
+	}
+
+	var webhook types.Webhook
+	if err := json.Unmarshal(body, &webhook); err != nil {
+		return nil, err
+	}
+
+	return &webhook, nil
+}
+
+func getProjectWebhook(baseUrl string, projectKey string, webhookId int, limit int, token string) (*types.Webhook, error) {
+	url := fmt.Sprintf("%s/rest/api/latest/projects/%s/webhooks/%d?limit=%d", baseUrl, projectKey, webhookId, limit)
+	return getWebhook(url, token)
+}
+
+func getRepositoryWebhook(baseUrl string, projectKey string, repoSlug string, webhookId int, limit int, token string) (*types.Webhook, error) {
+	url := fmt.Sprintf("%s/rest/api/latest/projects/%s/repos/%s/webhooks/%d?limit=%d", baseUrl, projectKey, repoSlug, webhookId, limit)
+	return getWebhook(url, token)
+}
+
+func getWebhooks(url string, token string) ([]*types.Webhook, error) {
 	body, err := pkg.GetRequestBody(url, token)
 	if err != nil {
 		return nil, err
@@ -127,7 +152,7 @@ func PrettyFormatProjectWebhooks(projectWebhooksMap map[string]*ProjectWebhooks)
 	return data
 }
 
-func prettyFormatWebhooks(projectKey string, repoSlug string, webhooks []types.Webhook) [][]string {
+func prettyFormatWebhooks(projectKey string, repoSlug string, webhooks []*types.Webhook) [][]string {
 	var data [][]string
 
 	if webhooks == nil {

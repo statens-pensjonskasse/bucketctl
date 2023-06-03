@@ -12,7 +12,7 @@ var (
 	key string
 )
 
-func prettyFormatRepositories(repos []types.Repository) [][]string {
+func prettyFormatRepositories(repos []*types.Repository) [][]string {
 	var data [][]string
 
 	data = append(data, []string{"ID", "Name", "State", "Public", "Archived"})

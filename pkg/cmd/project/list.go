@@ -8,7 +8,7 @@ import (
 	"strconv"
 )
 
-func prettyFormatProjects(projects []types.Project) [][]string {
+func prettyFormatProjects(projects []*types.Project) [][]string {
 	var data [][]string
 
 	data = append(data, []string{"ID", "Key", "Name", "Description"})

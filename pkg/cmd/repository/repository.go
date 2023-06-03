@@ -19,7 +19,7 @@ func init() {
 	Cmd.AddCommand(listRepositoriesCmd)
 }
 
-func GetProjectRepositories(baseUrl string, projectKey string, limit int) ([]types.Repository, error) {
+func GetProjectRepositories(baseUrl string, projectKey string, limit int) ([]*types.Repository, error) {
 	url := fmt.Sprintf("%s/rest/api/latest/projects/%s/repos?limit=%d", baseUrl, projectKey, limit)
 
 	body, err := pkg.GetRequestBody(url, "")

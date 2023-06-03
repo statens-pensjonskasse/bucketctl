@@ -26,7 +26,7 @@ var listProjectsCmd = &cobra.Command{
 	RunE:    listProjects,
 }
 
-func GetProjects(baseUrl string, limit int) ([]types.Project, error) {
+func GetProjects(baseUrl string, limit int) ([]*types.Project, error) {
 	url := fmt.Sprintf("%s/rest/api/latest/projects?limit=%d", baseUrl, limit)
 
 	body, err := pkg.GetRequestBody(url, "")
