@@ -1,7 +1,7 @@
 package main
 
 import (
-	"gobit/pkg/cmd"
+	"bucketctl/pkg/cmd"
 )
 
 func main() {

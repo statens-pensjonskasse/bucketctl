@@ -1,12 +1,12 @@
 package repository
 
 import (
+	"bucketctl/pkg"
+	"bucketctl/pkg/types"
 	"encoding/json"
 	"fmt"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
-	"gobit/pkg"
-	"gobit/pkg/types"
 )
 
 var Cmd = &cobra.Command{

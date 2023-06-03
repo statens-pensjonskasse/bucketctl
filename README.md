@@ -1,4 +1,4 @@
-# GoBit
+# BucketCtl
 
 Et CLI-verktøy for BitBucket-APIet skrevet i Go
 
@@ -13,7 +13,7 @@ make build && make install
 For å komme i gang skriv
 
 ```shell 
-gobit help
+bucketctl help
 ```
 
 For å kunne bruke noen av funksjonene trenger du et access-token,
@@ -21,7 +21,7 @@ dette kan lages under [profilen din](https://git.spk.no/account) i Bitbucket.
 For enkelhestsskyld kan dette lagres i en config-fil med kommandoen
 
 ```shell
-gobit config set --token <token>
+bucketctl config set --token <token>
 ```
 
 ### Eksempler
@@ -29,31 +29,31 @@ gobit config set --token <token>
 Hent alle prosjekter
 
 ```shell
-gobit project list 
+bucketctl project list 
 ```
 
 Hent alle repositories under `INFRA`-prosjektet
 
 ```shell
-gobit repo list -k INFRA
+bucketctl repo list -k INFRA
 ```
 
 Hent alle tilganger for `INFRA`-prosjektet med alle repos og skriv det til en `.yaml` fil
 
 ```shell
-gobit permission list -k --include-repos -o yaml > INFRA.yaml
+bucketctl permission list -k --include-repos -o yaml > INFRA.yaml
 ```
 
 Hent abosolutt alle tilganger i Bitbucket og i `.json`-format
 
 ```shell
-gobit permission all -o json --limit 9001
+bucketctl permission all -o json --limit 9001
 ```
 
 Sett tilganger ut fra en fil (`.json` eller `.yaml`)
 
 ```shell
-gobit permission apply -f permissions.yaml --include-repos
+bucketctl permission apply -f permissions.yaml --include-repos
 ```
 
 **Obs:** Tilganger til repositories fra fil vil kun bli brukt når `--include-repos` anngis.
@@ -62,5 +62,5 @@ Repositories som ev. ikke er inkludert i liste vil miste all tilgangsstyring da 
 Hent webhooks for jenkins-pipeline-library repoet i INFRA-prosjektet
 
 ```shell
-gobit webhook list -k INFRA -r jenkins-pipeline-library
+bucketctl webhook list -k INFRA -r jenkins-pipeline-library
 ```

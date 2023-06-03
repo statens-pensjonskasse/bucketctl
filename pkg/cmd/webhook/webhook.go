@@ -1,13 +1,13 @@
 package webhook
 
 import (
+	"bucketctl/pkg"
+	"bucketctl/pkg/cmd/repository"
+	"bucketctl/pkg/types"
 	"encoding/json"
 	"fmt"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
-	"gobit/pkg"
-	"gobit/pkg/cmd/repository"
-	"gobit/pkg/types"
 	"sort"
 	"strconv"
 )

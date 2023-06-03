@@ -1,10 +1,10 @@
 package pkg
 
 import (
+	"bucketctl/pkg/types"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"gobit/pkg/types"
 	"io"
 	"io/fs"
 	"net/http"

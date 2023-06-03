@@ -1,10 +1,10 @@
 package repository
 
 import (
+	"bucketctl/pkg"
+	"bucketctl/pkg/types"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"gobit/pkg"
-	"gobit/pkg/types"
 	"strconv"
 )
 

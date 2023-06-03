@@ -1,4 +1,4 @@
-module gobit
+module bucketctl
 
 go 1.20
 

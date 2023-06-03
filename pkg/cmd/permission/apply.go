@@ -1,12 +1,12 @@
 package permission
 
 import (
+	"bucketctl/pkg"
+	"bucketctl/pkg/cmd/repository"
 	"fmt"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"gobit/pkg"
-	"gobit/pkg/cmd/repository"
 	"os"
 )
 

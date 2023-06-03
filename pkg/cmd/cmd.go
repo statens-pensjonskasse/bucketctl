@@ -1,16 +1,16 @@
 package cmd
 
 import (
+	"bucketctl/pkg"
+	"bucketctl/pkg/cmd/config"
+	"bucketctl/pkg/cmd/permission"
+	"bucketctl/pkg/cmd/project"
+	"bucketctl/pkg/cmd/repository"
+	"bucketctl/pkg/cmd/version"
+	"bucketctl/pkg/cmd/webhook"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"gobit/pkg"
-	"gobit/pkg/cmd/config"
-	"gobit/pkg/cmd/permission"
-	"gobit/pkg/cmd/project"
-	"gobit/pkg/cmd/repository"
-	"gobit/pkg/cmd/version"
-	"gobit/pkg/cmd/webhook"
 	"os"
 	"path/filepath"
 )
@@ -39,7 +39,7 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "Config file (default $HOME/.gobit/config.yaml")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "Config file (default $HOME/.bucketctl/config.yaml")
 	rootCmd.PersistentFlags().StringVar(&baseUrl, "baseUrl", "https://git.spk.no", "Base url for BitBucket instance")
 	rootCmd.PersistentFlags().IntVarP(&limit, "limit", "l", 100, "Max return values")
 	rootCmd.PersistentFlags().StringVarP(&userToken, "token", "t", "", "Token for user")
@@ -66,11 +66,11 @@ func initConfig() {
 		home, err := os.UserHomeDir()
 		cobra.CheckErr(err)
 
-		viper.AddConfigPath(filepath.Join(home, ".gobit"))
+		viper.AddConfigPath(filepath.Join(home, ".bucketctl"))
 		viper.SetConfigName("config")
 		viper.SetConfigType("yaml")
 
-		cfgFile = filepath.Join(home, ".gobit", "config.yaml")
+		cfgFile = filepath.Join(home, ".bucketctl", "config.yaml")
 	}
 
 	viper.AutomaticEnv()
