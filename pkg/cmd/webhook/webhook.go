@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
+	"io"
 	"sort"
 	"strconv"
 )
@@ -39,12 +40,19 @@ func init() {
 }
 
 func getWebhook(url string, token string) (*types.Webhook, error) {
-	body, err := pkg.GetRequestBody(url, token)
+	resp, err := pkg.GetRequest(url, token)
 	if err != nil {
-		pterm.Warning.Println(err)
+		if resp.StatusCode == 404 {
+			return nil, nil
+		}
 		return nil, err
 	}
 
+	defer resp.Body.Close()
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
 	var webhook types.Webhook
 	if err := json.Unmarshal(body, &webhook); err != nil {
 		return nil, err

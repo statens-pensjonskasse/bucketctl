@@ -1,5 +1,9 @@
 package types
 
+import (
+	"reflect"
+)
+
 type response struct {
 	Size          int    `json:"size"`
 	Limit         int    `json:"limit"`
@@ -99,4 +103,38 @@ type Webhook struct {
 type WebhooksResponse struct {
 	response
 	Values []*Webhook `json:"values"`
+}
+
+// Similarity Finner gir en score på hvor like to webhooks er mellom 0.0 og 1.0
+// Dersom ID er lik antas webhookene å være de samme
+func (webhookA *Webhook) Similarity(webhookB *Webhook) float64 {
+	if webhookB == nil {
+		return 0.0
+	}
+	if webhookA.Id == webhookB.Id {
+		return 1.0
+	}
+	similarityScore := 0.0
+	if webhookA.Name == webhookB.Name {
+		similarityScore += 0.3
+	}
+	if webhookA.Url == webhookB.Url {
+		similarityScore += 0.1
+	}
+	if webhookA.Active == webhookB.Active {
+		similarityScore += 0.1
+	}
+	if webhookA.ScopeType == webhookB.ScopeType {
+		similarityScore += 0.1
+	}
+	if webhookA.SslVerificationRequired == webhookB.SslVerificationRequired {
+		similarityScore += 0.1
+	}
+	if reflect.DeepEqual(webhookA.Configuration, webhookB.Configuration) {
+		similarityScore += 0.1
+	}
+	if len(webhookA.Events) == len(webhookB.Events) {
+		similarityScore += 0.1
+	}
+	return similarityScore
 }

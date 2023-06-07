@@ -5,7 +5,7 @@ Et CLI-verktøy for BitBucket-APIet skrevet i Go
 ## Installasjon
 
 ```shell
-make build && make install
+make install
 ```
 
 ## Hjelp

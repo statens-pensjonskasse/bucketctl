@@ -5,5 +5,5 @@ help:
 build: ## Bygger bin/bucketctl
 	go build -o bin/bucketctl main.go
 
-install: ## Installerer under ${GOPATH}/bin
+install: build ## Installerer under ${GOPATH}/bin
 	go install -v ./...

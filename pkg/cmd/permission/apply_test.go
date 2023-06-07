@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestEntitiesContains(t *testing.T) {
+func Test_EntitiesContains(t *testing.T) {
 	entities := &Entities{
 		Users:  []string{"😐"},
 		Groups: []string{"👯"},
@@ -25,7 +25,7 @@ func TestEntitiesContains(t *testing.T) {
 	}
 }
 
-func TestGetPermissionSetDifference(t *testing.T) {
+func Test_GetPermissionSetDifference(t *testing.T) {
 	var permission = "DUMMY_PERMISSION"
 
 	desiredPermissions := &Permissions{
@@ -51,7 +51,7 @@ func TestGetPermissionSetDifference(t *testing.T) {
 
 	actualToBeGranted := desiredPermissions.getPermissionsDifference(actualPermissions)
 	if !reflect.DeepEqual(expectedToBeGranted, actualToBeGranted) {
-		t.Fatal("Forventer å gi tilgang til 'User1', 'User2', 'Group1' og 'Group2'")
+		t.Errorf("Forventer å gi tilgang til 'User1', 'User2', 'Group1' og 'Group2'")
 	}
 
 	expectedToBeRemoved := &Permissions{
@@ -62,6 +62,6 @@ func TestGetPermissionSetDifference(t *testing.T) {
 	}
 	actualToBeRemoved := actualPermissions.getPermissionsDifference(desiredPermissions)
 	if !reflect.DeepEqual(expectedToBeRemoved, actualToBeRemoved) {
-		t.Fatal("Forventer å fjerne tilgang for 'User3', 'User4' og 'Group4'")
+		t.Errorf("Forventer å fjerne tilgang for 'User3', 'User4' og 'Group4'")
 	}
 }
