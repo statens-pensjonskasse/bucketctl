@@ -105,34 +105,34 @@ func findWebhooksToChange(desiredWebhooks []*types.Webhook, actualWebhooks []*ty
 	for i := range actualWebhooks {
 		availableWebhooks = append(availableWebhooks, &actualWebhooks[i])
 	}
-
 	// Finn webhookene som ligner mest på hverandre
-	pairedWebhooks := pairMostSimilarWebhooks(desiredWebhooks, availableWebhooks)
+	ratedWebhooks := rateCandidateWebhooksSimilarity(desiredWebhooks, availableWebhooks)
 	// Begynn med den ønskede webhooken som er mest lik en av de aktuelle
-	for _, pair := range pairedWebhooks {
-		desired := pair.webhook
-		pterm.Info.Println((*desired).Name)
-		for _, p := range pairedWebhooks {
-			pterm.Warning.Println((*p.webhook).Name)
-			for _, c := range p.candidates {
-				if c.webhook != nil && *c.webhook != nil {
-					pterm.Error.Println((*c.webhook).Name)
-				}
-			}
-		}
-		for i, candidate := range pair.candidates {
-			// Bruk den første (mest like) tilgjegelige aktuelle webhooken
-			if candidate.webhook != nil && *candidate.webhook != nil {
-				(*desired).Id = (*candidate.webhook).Id
-				webhooksToUpdate = append(webhooksToUpdate, *desired)
+	for r := range ratedWebhooks {
+		// Plukker ut de ønskede webhookene som ikke har blitt brukt enda
+		sorted := ratedWebhooks[r:]
+		// Sorter de resterende ønskede webhookene etter beste tilgjengelige kandidat
+		sortWebhooksByAvailableCandidatesSimilarity(sorted)
+		// Plukker ut den ønskede webhooken med den beste kandidaten
+		hasBestCandidate := sorted[0]
+		desired := hasBestCandidate.webhook
 
+		for i, candidate := range hasBestCandidate.candidates {
+			// Bruk den første (mest like) ledige kandidaten
+			if *candidate.webhook != nil {
+				if !(*desired).Equivalent(*candidate.webhook) {
+					// Dersom kandidaten ikke er ekvivalent med den ønskede må den oppdateres
+					updatedWebhook := (*desired).Copy()
+					updatedWebhook.Id = (*candidate.webhook).Id
+					webhooksToUpdate = append(webhooksToUpdate, updatedWebhook)
+				}
 				// Sett den brukte webhooken som utilgjengelig
 				*candidate.webhook = nil
+				// Vi har funnet en kandidat og kan slutte å lete
 				break
-			}
-			// Vi har brukt opp alle kandidater
-			if i == len(pair.candidates)-1 {
-				webhooksToCreate = append(webhooksToCreate, *desired)
+			} else if i >= len(hasBestCandidate.candidates)-1 {
+				// Vi har brukt opp alle kandidater
+				webhooksToCreate = append(webhooksToCreate, desired)
 			}
 		}
 	}
@@ -147,22 +147,23 @@ func findWebhooksToChange(desiredWebhooks []*types.Webhook, actualWebhooks []*ty
 }
 
 type similarWebhooks struct {
-	webhook    **types.Webhook
+	webhook    *types.Webhook
 	candidates []*similarCandidates
 }
 
 type similarCandidates struct {
 	similarity float64
-	webhook    **types.Webhook
+	// Bruker dobbeltpeker for å kunne endre på referansen av den første pekningen uten å måtte loope gjennom alle
+	// kandidater for å sette de som utilgjengelige
+	webhook **types.Webhook
 }
 
-// Pairs most similar webhooks. Different bases can have the same candidate
-func pairMostSimilarWebhooks(baseWebhooks []*types.Webhook, candidateWebhooks []**types.Webhook) []*similarWebhooks {
+// Kalkulerer likheten av base med alle kandidater
+func rateCandidateWebhooksSimilarity(baseWebhooks []*types.Webhook, candidateWebhooks []**types.Webhook) []*similarWebhooks {
 	var similar []*similarWebhooks
 
-	for i, webhook := range baseWebhooks {
-		candidates := []*similarCandidates{{similarity: -1.0, webhook: nil}}
-		// Finner grad av likhet med alle kandidater
+	for _, webhook := range baseWebhooks {
+		var candidates []*similarCandidates
 		for _, candidate := range candidateWebhooks {
 			if candidate != nil {
 				candidates = append(candidates,
@@ -177,11 +178,28 @@ func pairMostSimilarWebhooks(baseWebhooks []*types.Webhook, candidateWebhooks []
 		sort.Slice(candidates, func(i, j int) bool {
 			return candidates[i].similarity > candidates[j].similarity
 		})
-		similar = append(similar, &similarWebhooks{webhook: &baseWebhooks[i], candidates: candidates})
+		similar = append(similar, &similarWebhooks{webhook: webhook, candidates: candidates})
 	}
-	// Sorterer base webhooks basert på likhet av beste kandidat
-	sort.Slice(similar, func(i, j int) bool {
-		return similar[i].candidates[0].similarity > similar[j].candidates[0].similarity
-	})
 	return similar
+}
+
+// Sorterer rangerte webhooks etter den beste tilgjengelige kandidaten
+func sortWebhooksByAvailableCandidatesSimilarity(similar []*similarWebhooks) {
+	sort.Slice(similar, func(i, j int) bool {
+		var ci, cj int
+		// Finner indeksene til de beste tilgjengelige kandidaten til sammenligningsgrunnlag
+		for wi, w := range similar[i].candidates {
+			if *w.webhook != nil {
+				ci = wi
+				break
+			}
+		}
+		for wj, w := range similar[j].candidates {
+			if *w.webhook != nil {
+				cj = wj
+				break
+			}
+		}
+		return similar[i].candidates[ci].similarity > similar[j].candidates[cj].similarity
+	})
 }

@@ -1,4 +1,4 @@
-# BucketCtl
+# bucketctl
 
 Et CLI-verktøy for BitBucket-APIet skrevet i Go
 

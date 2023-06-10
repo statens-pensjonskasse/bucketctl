@@ -105,35 +105,77 @@ type WebhooksResponse struct {
 	Values []*Webhook `json:"values"`
 }
 
+func (base *Webhook) Copy() *Webhook {
+	copied := &Webhook{
+		Id:                      base.Id,
+		Name:                    base.Name,
+		CreatedDate:             base.CreatedDate,
+		UpdatedDate:             base.UpdatedDate,
+		Configuration:           base.Configuration,
+		Url:                     base.Url,
+		Active:                  base.Active,
+		ScopeType:               base.ScopeType,
+		SslVerificationRequired: base.SslVerificationRequired,
+	}
+	copied.Events = append(copied.Events, base.Events...)
+
+	return copied
+}
+
+func (base *Webhook) Equivalent(candidate *Webhook) bool {
+	if candidate == nil {
+		return false
+	}
+	if base.Name != candidate.Name {
+		return false
+	}
+	if base.Url != candidate.Url {
+		return false
+	}
+	if base.Active != candidate.Active {
+		return false
+	}
+	if base.SslVerificationRequired != candidate.SslVerificationRequired {
+		return false
+	}
+	if !reflect.DeepEqual(base.Configuration, candidate.Configuration) {
+		return false
+	}
+	if !reflect.DeepEqual(base.Events, candidate.Events) {
+		return false
+	}
+	return true
+}
+
 // Similarity Finner gir en score på hvor like to webhooks er mellom 0.0 og 1.0
 // Dersom ID er lik antas webhookene å være de samme
-func (webhookA *Webhook) Similarity(webhookB *Webhook) float64 {
-	if webhookB == nil {
+func (base *Webhook) Similarity(candidate *Webhook) float64 {
+	if candidate == nil {
 		return 0.0
 	}
-	if webhookA.Id == webhookB.Id {
+	if base.Id == candidate.Id {
 		return 1.0
 	}
 	similarityScore := 0.0
-	if webhookA.Name == webhookB.Name {
+	if base.Name == candidate.Name {
 		similarityScore += 0.3
 	}
-	if webhookA.Url == webhookB.Url {
+	if base.Url == candidate.Url {
 		similarityScore += 0.1
 	}
-	if webhookA.Active == webhookB.Active {
+	if base.Active == candidate.Active {
 		similarityScore += 0.1
 	}
-	if webhookA.ScopeType == webhookB.ScopeType {
+	if base.ScopeType == candidate.ScopeType {
 		similarityScore += 0.1
 	}
-	if webhookA.SslVerificationRequired == webhookB.SslVerificationRequired {
+	if base.SslVerificationRequired == candidate.SslVerificationRequired {
 		similarityScore += 0.1
 	}
-	if reflect.DeepEqual(webhookA.Configuration, webhookB.Configuration) {
+	if reflect.DeepEqual(base.Configuration, candidate.Configuration) {
 		similarityScore += 0.1
 	}
-	if len(webhookA.Events) == len(webhookB.Events) {
+	if len(base.Events) == len(candidate.Events) {
 		similarityScore += 0.1
 	}
 	return similarityScore
