@@ -134,9 +134,9 @@ func Test_rateSimilarWebhooks(t *testing.T) {
 	}
 }
 
-func Test_sortByAvailableSimilarCandidatesLikeness(t *testing.T) {
+func Test_sortByBestAvailableCandidate(t *testing.T) {
 	sortedRatedWebhooks := rateCandidateWebhooksSimilarity([]*types.Webhook{pizza, chicken}, []**types.Webhook{&pizza, &bacon, &burger})
-	sortWebhooksByAvailableCandidatesSimilarity(sortedRatedWebhooks)
+	sortWebhooksByBestAvailableCandidate(sortedRatedWebhooks)
 
 	if sortedRatedWebhooks[0].webhook.Name != "🍕" {
 		t.Errorf("Forventet å finne %s først i listen, fikk %s", pizza.Name, sortedRatedWebhooks[0].webhook.Name)
@@ -145,7 +145,7 @@ func Test_sortByAvailableSimilarCandidatesLikeness(t *testing.T) {
 	// Utilgjengeliggjør kandidater som passer best til `pizza`. Står da igjen med én kandidat som passer best til `chicken`
 	*(sortedRatedWebhooks[0].candidates[0]).webhook = nil
 	*(sortedRatedWebhooks[0].candidates[1]).webhook = nil
-	sortWebhooksByAvailableCandidatesSimilarity(sortedRatedWebhooks)
+	sortWebhooksByBestAvailableCandidate(sortedRatedWebhooks)
 
 	if sortedRatedWebhooks[0].webhook.Name != "🐓" {
 		t.Errorf("Forventet å finne %s først i listen, fikk %s", chicken.Name, sortedRatedWebhooks[0].webhook.Name)

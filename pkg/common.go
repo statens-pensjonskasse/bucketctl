@@ -29,12 +29,15 @@ func CreateFileIfNotExists(file string) error {
 	return nil
 }
 
-func HttpRequest(method string, url string, body io.Reader, token string, params ...map[string]string) (*http.Response, error) {
+func HttpRequest(method string, url string, payload io.Reader, token string, params ...map[string]string) (*http.Response, error) {
 	client := http.Client{}
-	req, _ := http.NewRequest(method, url, body)
+	req, _ := http.NewRequest(method, url, payload)
 
 	if token != "" {
 		req.Header.Set("Authorization", "Bearer "+token)
+	}
+	if payload != nil {
+		req.Header.Set("Content-Type", "application/json")
 	}
 
 	if params != nil && len(params) > 0 {
@@ -54,7 +57,7 @@ func HttpRequest(method string, url string, body io.Reader, token string, params
 	if resp.StatusCode == 429 {
 		wait, _ := strconv.Atoi(resp.Header.Get("Retry-After"))
 		time.Sleep(time.Duration(wait) * time.Second)
-		return HttpRequest(method, url, body, token, params...)
+		return HttpRequest(method, url, payload, token, params...)
 	}
 
 	if resp.StatusCode >= 400 {
@@ -80,8 +83,12 @@ func DeleteRequest(url string, token string, params map[string]string) (*http.Re
 	return HttpRequest("DELETE", url, nil, token, params)
 }
 
-func PutRequest(url string, token string, params map[string]string) (*http.Response, error) {
-	return HttpRequest("PUT", url, nil, token, params)
+func PostRequest(url string, token string, payload io.Reader, params map[string]string) (*http.Response, error) {
+	return HttpRequest("POST", url, payload, token, params)
+}
+
+func PutRequest(url string, token string, payload io.Reader, params map[string]string) (*http.Response, error) {
+	return HttpRequest("PUT", url, payload, token, params)
 }
 
 func GetRequestBody(url string, token string) ([]byte, error) {

@@ -277,7 +277,7 @@ func grantUserProjectPermission(baseUrl string, projectKey string, token string,
 		"permission": permission,
 	}
 
-	if _, err := pkg.PutRequest(url, token, params); err != nil {
+	if _, err := pkg.PutRequest(url, token, nil, params); err != nil {
 		return err
 	}
 	return nil
@@ -290,7 +290,7 @@ func grantGroupProjectPermission(baseUrl string, projectKey string, token string
 		"permission": permission,
 	}
 
-	if _, err := pkg.PutRequest(url, token, params); err != nil {
+	if _, err := pkg.PutRequest(url, token, nil, params); err != nil {
 		return err
 	}
 	return nil
@@ -319,7 +319,7 @@ func grantUserRepositoryPermission(baseUrl string, projectKey string, repoSlug s
 		"permission": permission,
 	}
 
-	if _, err := pkg.PutRequest(url, token, params); err != nil {
+	if _, err := pkg.PutRequest(url, token, nil, params); err != nil {
 		return err
 	}
 	return nil
@@ -332,7 +332,7 @@ func grantGroupRepositoryPermission(baseUrl string, projectKey string, reposSlug
 		"permission": permission,
 	}
 
-	if _, err := pkg.PutRequest(url, token, params); err != nil {
+	if _, err := pkg.PutRequest(url, token, nil, params); err != nil {
 		return err
 	}
 	return nil

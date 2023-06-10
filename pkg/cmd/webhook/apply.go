@@ -3,7 +3,9 @@ package webhook
 import (
 	"bucketctl/pkg"
 	"bucketctl/pkg/types"
-	"github.com/pterm/pterm"
+	"bytes"
+	"encoding/json"
+	"fmt"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"sort"
@@ -34,7 +36,6 @@ func applyWebhooks(cmd *cobra.Command, args []string) error {
 	baseUrl := viper.GetString("baseUrl")
 	limit := viper.GetInt("limit")
 	token := viper.GetString("token")
-	includeRepos := viper.GetBool("include-repos")
 
 	var desiredWebhooks map[string]*ProjectWebhooks
 	if err := pkg.ReadConfigFile(file, &desiredWebhooks); err != nil {
@@ -42,51 +43,47 @@ func applyWebhooks(cmd *cobra.Command, args []string) error {
 	}
 
 	for projectKey, desiredProjectWebhooks := range desiredWebhooks {
-
-		actualWebhooks, err := getProjectWebhooks(baseUrl, projectKey, limit, token, includeRepos)
+		actualWebhooks, err := getProjectWebhooks(baseUrl, projectKey, limit, token, true)
 		if err != nil {
 			return err
 		}
 
-		for repoSlug, desiredRepoWebhooks := range desiredProjectWebhooks.Repositories {
-			var webhooksToCreate []*types.Webhook
-			var webhooksToDelete []*types.Webhook
-			var webhooksToUpdate []*types.Webhook
-			actualRepoWebhooks, exists := actualWebhooks.Repositories[repoSlug]
-			if !exists {
-				// Dersom repoet ikke har noen webhooks må alle lages
-				webhooksToCreate = desiredRepoWebhooks.Webhooks
-			} else {
-				availableWebhooks := make([]*types.Webhook, 0, len(actualRepoWebhooks.Webhooks))
-				copy(availableWebhooks, actualRepoWebhooks.Webhooks)
-
-				for _, desiredRepoWebhook := range desiredRepoWebhooks.Webhooks {
-					if len(availableWebhooks) == 0 {
-						// Hvis vi har gått tom for tilgjengelige webhooks å oppdatere må vi lage den
-						webhooksToCreate = append(webhooksToCreate, desiredRepoWebhook)
-					} else {
-						// Finn webhooken mest lik den ønskede
-						sort.SliceStable(availableWebhooks, func(i, j int) bool {
-							return desiredRepoWebhook.Similarity(availableWebhooks[i]) > desiredRepoWebhook.Similarity(availableWebhooks[j])
-						})
-						desiredRepoWebhook.Id = availableWebhooks[0].Id
-						webhooksToUpdate = append(webhooksToUpdate, desiredRepoWebhook)
-						// Fjern webhooken fra tilgjengelige
-						availableWebhooks = availableWebhooks[1:]
-					}
-				}
-				// Resterende webhooks sletter vi
-				for _, w := range availableWebhooks {
-					webhooksToDelete = append(webhooksToDelete, w)
-				}
+		toCreate, toUpdate, toDelete := findWebhooksToChange(desiredProjectWebhooks.Webhooks, actualWebhooks.Webhooks)
+		for _, w := range toCreate {
+			if err := createProjectWebhook(baseUrl, projectKey, token, w); err != nil {
+				return err
 			}
-			pterm.Info.Println(webhooksToCreate)
-			pterm.Info.Println(webhooksToDelete)
-
+		}
+		for _, w := range toUpdate {
+			if err := updateProjectWebhook(baseUrl, projectKey, token, w); err != nil {
+				return err
+			}
+		}
+		for _, w := range toDelete {
+			if err := deleteProjectWebhook(baseUrl, projectKey, token, w); err != nil {
+				return err
+			}
 		}
 
-		pterm.Info.Println(desiredProjectWebhooks)
-		pterm.Info.Println(actualWebhooks)
+		for repoSlug, desiredRepoWebhooks := range desiredProjectWebhooks.Repositories {
+			toCreate, toUpdate, toDelete := findWebhooksToChange(desiredRepoWebhooks.Webhooks, actualWebhooks.Repositories[repoSlug].Webhooks)
+			for _, w := range toCreate {
+				if err := createRepositoryWebhook(baseUrl, projectKey, repoSlug, token, w); err != nil {
+					return err
+				}
+			}
+			for _, w := range toUpdate {
+				if err := updateRepositoryWebhook(baseUrl, projectKey, repoSlug, token, w); err != nil {
+					return err
+				}
+			}
+			for _, w := range toDelete {
+				if err := deleteRepositoryWebhook(baseUrl, projectKey, repoSlug, token, w); err != nil {
+					return err
+				}
+			}
+
+		}
 	}
 
 	return nil
@@ -112,7 +109,7 @@ func findWebhooksToChange(desiredWebhooks []*types.Webhook, actualWebhooks []*ty
 		// Plukker ut de ønskede webhookene som ikke har blitt brukt enda
 		sorted := ratedWebhooks[r:]
 		// Sorter de resterende ønskede webhookene etter beste tilgjengelige kandidat
-		sortWebhooksByAvailableCandidatesSimilarity(sorted)
+		sortWebhooksByBestAvailableCandidate(sorted)
 		// Plukker ut den ønskede webhooken med den beste kandidaten
 		hasBestCandidate := sorted[0]
 		desired := hasBestCandidate.webhook
@@ -184,7 +181,7 @@ func rateCandidateWebhooksSimilarity(baseWebhooks []*types.Webhook, candidateWeb
 }
 
 // Sorterer rangerte webhooks etter den beste tilgjengelige kandidaten
-func sortWebhooksByAvailableCandidatesSimilarity(similar []*similarWebhooks) {
+func sortWebhooksByBestAvailableCandidate(similar []*similarWebhooks) {
 	sort.Slice(similar, func(i, j int) bool {
 		var ci, cj int
 		// Finner indeksene til de beste tilgjengelige kandidaten til sammenligningsgrunnlag
@@ -202,4 +199,68 @@ func sortWebhooksByAvailableCandidatesSimilarity(similar []*similarWebhooks) {
 		}
 		return similar[i].candidates[ci].similarity > similar[j].candidates[cj].similarity
 	})
+}
+
+func createProjectWebhook(baseUrl string, projectKey string, token string, webhook *types.Webhook) error {
+	url := fmt.Sprintf("%s/rest/api/latest/projects/%s/webhooks", baseUrl, projectKey)
+	payload, err := json.Marshal(webhook)
+	if err != nil {
+		return err
+	}
+	if _, err := pkg.PostRequest(url, token, bytes.NewReader(payload), nil); err != nil {
+		return err
+	}
+	return nil
+}
+
+func updateProjectWebhook(baseUrl string, projectKey string, token string, webhook *types.Webhook) error {
+	url := fmt.Sprintf("%s/rest/api/latest/projects/%s/webhooks/%d", baseUrl, projectKey, webhook.Id)
+	payload, err := json.Marshal(webhook)
+	if err != nil {
+		return err
+	}
+	if _, err := pkg.PutRequest(url, token, bytes.NewReader(payload), nil); err != nil {
+		return err
+	}
+	return nil
+}
+
+func deleteProjectWebhook(baseUrl string, projectKey string, token string, webhook *types.Webhook) error {
+	url := fmt.Sprintf("%s/rest/api/latest/projects/%s/webhooks/%d", baseUrl, projectKey, webhook.Id)
+	if _, err := pkg.DeleteRequest(url, token, nil); err != nil {
+		return err
+	}
+	return nil
+}
+
+func createRepositoryWebhook(baseUrl string, projectKey string, repoSlug string, token string, webhook *types.Webhook) error {
+	url := fmt.Sprintf("%s/rest/api/latest/projects/%s/repos/%s/webhooks", baseUrl, projectKey, repoSlug)
+	payload, err := json.Marshal(webhook)
+	if err != nil {
+		return err
+	}
+	if _, err := pkg.PostRequest(url, token, bytes.NewReader(payload), nil); err != nil {
+		return err
+	}
+	return nil
+}
+
+func updateRepositoryWebhook(baseUrl string, projectKey string, repoSlug string, token string, webhook *types.Webhook) error {
+	url := fmt.Sprintf("%s/rest/api/latest/projects/%s/repos/%s/webhooks/%d", baseUrl, projectKey, repoSlug, webhook.Id)
+	payload, err := json.Marshal(webhook)
+	if err != nil {
+		return err
+	}
+	if _, err := pkg.PutRequest(url, token, bytes.NewReader(payload), nil); err != nil {
+		return err
+	}
+	return nil
+}
+
+func deleteRepositoryWebhook(baseUrl string, projectKey string, repoSlug string, token string, webhook *types.Webhook) error {
+	url := fmt.Sprintf("%s/rest/api/latest/projects/%s/repos/%s/webhooks/%d", baseUrl, projectKey, repoSlug, webhook.Id)
+	if _, err := pkg.DeleteRequest(url, token, nil); err != nil {
+		return err
+	}
+	return nil
 }
