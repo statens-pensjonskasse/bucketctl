@@ -36,13 +36,13 @@ func getAllPermissions(baseUrl string, limit int, token string) (map[string]*Pro
 
 	allPermissions := make(map[string]*ProjectPermissions)
 	progressBar, _ := pterm.DefaultProgressbar.WithTotal(len(projects)).WithRemoveWhenDone(true).WithWriter(os.Stderr).Start()
-	for _, proj := range projects {
-		progressBar.Title = proj.Key
-		projectPermissions, err := getProjectPermissions(baseUrl, proj.Key, limit, token, true)
+	for projectKey := range projects {
+		progressBar.Title = projectKey
+		projectPermissions, err := getProjectPermissions(baseUrl, projectKey, limit, token, true)
 		if err != nil {
 			return nil, err
 		}
-		allPermissions[proj.Key] = projectPermissions
+		allPermissions[projectKey] = projectPermissions
 		progressBar.Increment()
 	}
 

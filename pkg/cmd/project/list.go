@@ -2,19 +2,18 @@ package project
 
 import (
 	"bucketctl/pkg"
-	"bucketctl/pkg/types"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"strconv"
 )
 
-func prettyFormatProjects(projects []*types.Project) [][]string {
+func prettyFormatProjects(projects map[string]*Project) [][]string {
 	var data [][]string
 
 	data = append(data, []string{"ID", "Key", "Name", "Description"})
 
-	for _, proj := range projects {
-		row := []string{strconv.Itoa(proj.Id), proj.Key, proj.Name, proj.Description}
+	for key, proj := range projects {
+		row := []string{strconv.Itoa(proj.Id), key, proj.Name, proj.Description}
 		data = append(data, row)
 	}
 

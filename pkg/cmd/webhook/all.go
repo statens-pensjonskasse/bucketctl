@@ -36,13 +36,13 @@ func getAllWebhooks(baseUrl string, limit int, token string) (map[string]*Projec
 
 	allWebhooks := make(map[string]*ProjectWebhooks)
 	progressBar, _ := pterm.DefaultProgressbar.WithTotal(len(projects)).WithRemoveWhenDone(true).WithWriter(os.Stderr).Start()
-	for _, proj := range projects {
-		progressBar.Title = proj.Key
-		projectWebhooks, err := getProjectWebhooks(baseUrl, proj.Key, limit, token, true)
+	for projectKey := range projects {
+		progressBar.Title = projectKey
+		projectWebhooks, err := getProjectWebhooks(baseUrl, projectKey, limit, token, true)
 		if err != nil {
 			return nil, err
 		}
-		allWebhooks[proj.Key] = projectWebhooks
+		allWebhooks[projectKey] = projectWebhooks
 		progressBar.Increment()
 	}
 

@@ -9,6 +9,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
+type Project struct {
+	Id          int    `json:"id,omitempty" yaml:"id"`
+	Name        string `json:"name,omitempty" yaml:"name"`
+	Description string `json:"description,omitempty" yaml:"description"`
+	Public      bool   `json:"public,omitempty" yaml:"public"`
+}
+
 var Cmd = &cobra.Command{
 	Use:     "project",
 	Short:   "Project commands",
@@ -26,7 +33,7 @@ var listProjectsCmd = &cobra.Command{
 	RunE:    listProjects,
 }
 
-func GetProjects(baseUrl string, limit int) ([]*types.Project, error) {
+func GetProjects(baseUrl string, limit int) (map[string]*Project, error) {
 	url := fmt.Sprintf("%s/rest/api/latest/projects?limit=%d", baseUrl, limit)
 
 	body, err := pkg.GetRequestBody(url, "")
@@ -43,5 +50,15 @@ func GetProjects(baseUrl string, limit int) ([]*types.Project, error) {
 		pterm.Warning.Println("Not all projects fetched, try with a higher limit")
 	}
 
-	return projectsResponse.Values, nil
+	projects := make(map[string]*Project)
+	for _, p := range projectsResponse.Values {
+		projects[p.Key] = &Project{
+			Id:          p.Id,
+			Name:        p.Name,
+			Description: p.Description,
+			Public:      p.Public,
+		}
+	}
+
+	return projects, nil
 }
