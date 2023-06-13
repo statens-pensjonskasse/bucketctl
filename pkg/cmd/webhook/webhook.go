@@ -105,13 +105,13 @@ func getProjectWebhooks(baseUrl string, projectKey string, limit int, token stri
 			return nil, err
 		}
 		projectWebhooks.Repositories = make(map[string]*RepositoryWebhooks)
-		for _, r := range projectRepositories {
-			repoWebhooks, err := getRepositoryWebhooks(baseUrl, projectKey, r.Slug, limit, token)
+		for repoSlug := range projectRepositories {
+			repoWebhooks, err := getRepositoryWebhooks(baseUrl, projectKey, repoSlug, limit, token)
 			if err != nil {
 				return nil, err
 			}
 			if len(repoWebhooks.Webhooks) > 0 {
-				projectWebhooks.Repositories[r.Slug] = repoWebhooks
+				projectWebhooks.Repositories[repoSlug] = repoWebhooks
 			}
 		}
 	}

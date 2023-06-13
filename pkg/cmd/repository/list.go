@@ -2,9 +2,9 @@ package repository
 
 import (
 	"bucketctl/pkg"
-	"bucketctl/pkg/types"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"sort"
 	"strconv"
 )
 
@@ -12,13 +12,17 @@ var (
 	key string
 )
 
-func prettyFormatRepositories(repos []*types.Repository) [][]string {
+func prettyFormatRepositories(reposMap map[string]*Repository) [][]string {
+	repos := make([]string, 0, len(reposMap))
+	for s := range reposMap {
+		repos = append(repos, s)
+	}
+	sort.Strings(repos)
+
 	var data [][]string
-
-	data = append(data, []string{"ID", "Name", "State", "Public", "Archived"})
-
-	for _, repo := range repos {
-		row := []string{strconv.Itoa(repo.Id), repo.Name, repo.StatusMessage, strconv.FormatBool(repo.Public), strconv.FormatBool(repo.Archived)}
+	data = append(data, []string{"ID", "Slug", "State", "Public", "Archived"})
+	for _, slug := range repos {
+		row := []string{strconv.Itoa(reposMap[slug].Id), slug, reposMap[slug].StatusMessage, strconv.FormatBool(reposMap[slug].Public), strconv.FormatBool(reposMap[slug].Archived)}
 		data = append(data, row)
 	}
 

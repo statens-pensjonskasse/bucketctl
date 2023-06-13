@@ -131,13 +131,13 @@ func getProjectPermissions(baseUrl string, projectKey string, limit int, token s
 			return nil, err
 		}
 		projectPermissions.Repositories = make(map[string]*RepositoryPermissions)
-		for _, r := range projectRepositories {
-			repoPerms, err := getRepositoryPermissions(baseUrl, projectKey, r.Slug, limit, token)
+		for repoSlug := range projectRepositories {
+			repoPerms, err := getRepositoryPermissions(baseUrl, projectKey, repoSlug, limit, token)
 			if err != nil {
 				return nil, err
 			}
 			if len(*repoPerms.Permissions) > 0 {
-				projectPermissions.Repositories[r.Slug] = repoPerms
+				projectPermissions.Repositories[repoSlug] = repoPerms
 			}
 		}
 	}

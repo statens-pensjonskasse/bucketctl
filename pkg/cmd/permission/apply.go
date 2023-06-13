@@ -58,18 +58,18 @@ func applyPermissions(cmd *cobra.Command, args []string) error {
 			if err != nil {
 				return err
 			}
-			for _, r := range allProjectRepositories {
+			for repoSlug := range allProjectRepositories {
 				if desiredProjectPermissions.Repositories == nil {
 					desiredProjectPermissions.Repositories = make(map[string]*RepositoryPermissions)
 				}
-				if _, exists := desiredProjectPermissions.Repositories[r.Slug]; !exists {
-					desiredProjectPermissions.Repositories[r.Slug] = &RepositoryPermissions{Permissions: &Permissions{}}
+				if _, exists := desiredProjectPermissions.Repositories[repoSlug]; !exists {
+					desiredProjectPermissions.Repositories[repoSlug] = &RepositoryPermissions{Permissions: &Permissions{}}
 				}
 				if actualProjectPermissions.Repositories == nil {
 					actualProjectPermissions.Repositories = make(map[string]*RepositoryPermissions)
 				}
-				if _, exists := actualProjectPermissions.Repositories[r.Slug]; !exists {
-					actualProjectPermissions.Repositories[r.Slug] = &RepositoryPermissions{Permissions: &Permissions{}}
+				if _, exists := actualProjectPermissions.Repositories[repoSlug]; !exists {
+					actualProjectPermissions.Repositories[repoSlug] = &RepositoryPermissions{Permissions: &Permissions{}}
 				}
 			}
 		}

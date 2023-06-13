@@ -4,16 +4,21 @@ import (
 	"bucketctl/pkg"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"sort"
 	"strconv"
 )
 
-func prettyFormatProjects(projects map[string]*Project) [][]string {
+func prettyFormatProjects(projectsMap map[string]*Project) [][]string {
+	projects := make([]string, 0, len(projectsMap))
+	for p := range projectsMap {
+		projects = append(projects, p)
+	}
+	sort.Strings(projects)
+
 	var data [][]string
-
 	data = append(data, []string{"ID", "Key", "Name", "Description"})
-
-	for key, proj := range projects {
-		row := []string{strconv.Itoa(proj.Id), key, proj.Name, proj.Description}
+	for _, key := range projects {
+		row := []string{strconv.Itoa(projectsMap[key].Id), key, projectsMap[key].Name, projectsMap[key].Description}
 		data = append(data, row)
 	}
 
