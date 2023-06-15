@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"os"
+	"sort"
 )
 
 var (
@@ -43,8 +44,13 @@ func applyPermissions(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	projectKeys := make([]string, 0, len(desiredPermissions))
+	for p := range desiredPermissions {
+		projectKeys = append(projectKeys, p)
+	}
+	sort.Strings(projectKeys)
 	progressBar, _ := pterm.DefaultProgressbar.WithTotal(len(desiredPermissions)).WithRemoveWhenDone(true).WithWriter(os.Stderr).Start()
-	for projectKey, desiredProjectPermissions := range desiredPermissions {
+	for _, projectKey := range projectKeys {
 		progressBar.Title = projectKey
 		// Finn gjeldende tilganger
 		actualProjectPermissions, err := getProjectPermissions(baseUrl, projectKey, limit, token, includeRepos)
@@ -59,11 +65,11 @@ func applyPermissions(cmd *cobra.Command, args []string) error {
 				return err
 			}
 			for repoSlug := range allProjectRepositories {
-				if desiredProjectPermissions.Repositories == nil {
-					desiredProjectPermissions.Repositories = make(map[string]*RepositoryPermissions)
+				if desiredPermissions[projectKey].Repositories == nil {
+					desiredPermissions[projectKey].Repositories = make(map[string]*RepositoryPermissions)
 				}
-				if _, exists := desiredProjectPermissions.Repositories[repoSlug]; !exists {
-					desiredProjectPermissions.Repositories[repoSlug] = &RepositoryPermissions{Permissions: &Permissions{}}
+				if _, exists := desiredPermissions[projectKey].Repositories[repoSlug]; !exists {
+					desiredPermissions[projectKey].Repositories[repoSlug] = &RepositoryPermissions{Permissions: &Permissions{}}
 				}
 				if actualProjectPermissions.Repositories == nil {
 					actualProjectPermissions.Repositories = make(map[string]*RepositoryPermissions)
@@ -75,10 +81,10 @@ func applyPermissions(cmd *cobra.Command, args []string) error {
 		}
 
 		// Finner tilganger i 'actualProjectPermissions' som ikke finnes i 'desiredProjectPermissions'. Disse tilgangene skal fjernes.
-		permissionsToBeRemoved := findProjectPermissionsDifference(actualProjectPermissions, desiredProjectPermissions)
+		permissionsToBeRemoved := findProjectPermissionsDifference(actualProjectPermissions, desiredPermissions[projectKey])
 
 		//Finner tilganger i 'desiredProjectPermissions' som ikke finnes i 'actualProjectPermissions'. Disse tilgangene skal gis.
-		permissionsToBeGranted := findProjectPermissionsDifference(desiredProjectPermissions, actualProjectPermissions)
+		permissionsToBeGranted := findProjectPermissionsDifference(desiredPermissions[projectKey], actualProjectPermissions)
 
 		// Fjern alle ikke-ønskede prosjekt-tilganger
 		if err := removeProjectPermissions(baseUrl, projectKey, token, permissionsToBeRemoved); err != nil {
