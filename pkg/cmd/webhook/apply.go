@@ -2,6 +2,7 @@ package webhook
 
 import (
 	"bucketctl/pkg"
+	"bucketctl/pkg/cmd/repository"
 	"bucketctl/pkg/types"
 	"bytes"
 	"encoding/json"
@@ -73,13 +74,21 @@ func applyWebhooks(cmd *cobra.Command, args []string) error {
 				return err
 			}
 		}
-
-		for repoSlug, desiredRepoWebhooks := range desiredWebhooks[projectKey].Repositories {
-			pterm.Info.Println(projectKey, repoSlug)
+		allProjectRepositories, err := repository.GetProjectRepositories(baseUrl, projectKey, limit)
+		if err != nil {
+			return err
+		}
+		if desiredWebhooks[projectKey].Repositories == nil {
+			desiredWebhooks[projectKey].Repositories = make(map[string]*RepositoryWebhooks)
+		}
+		for repoSlug := range allProjectRepositories {
 			if actualWebhooks.Repositories[repoSlug] == nil {
 				actualWebhooks.Repositories[repoSlug] = new(RepositoryWebhooks)
 			}
-			toCreate, toUpdate, toDelete := findWebhooksToChange(desiredRepoWebhooks.Webhooks, actualWebhooks.Repositories[repoSlug].Webhooks)
+			if desiredWebhooks[projectKey].Repositories[repoSlug] == nil {
+				desiredWebhooks[projectKey].Repositories[repoSlug] = new(RepositoryWebhooks)
+			}
+			toCreate, toUpdate, toDelete := findWebhooksToChange(desiredWebhooks[projectKey].Repositories[repoSlug].Webhooks, actualWebhooks.Repositories[repoSlug].Webhooks)
 			for _, w := range toCreate {
 				if err := createRepositoryWebhook(baseUrl, projectKey, repoSlug, token, w); err != nil {
 					return err
