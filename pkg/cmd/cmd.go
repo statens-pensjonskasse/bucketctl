@@ -23,9 +23,9 @@ var (
 	outputFormat pkg.OutputFormatType
 
 	rootCmd = &cobra.Command{
-		Use:   "gobit",
-		Short: "GoBit - Simple CLI-tool for Bitbucket",
-		Long:  `GoBit – A Simple CLI-Tool for Bitbucket written in Go using Cobra`,
+		Use:   "bucketctl",
+		Short: "bucketctl - Simple CLI-tool for Bitbucket",
+		Long:  `bucketctl – A Simple CLI-Tool for Bitbucket written in Go using Cobra`,
 	}
 )
 

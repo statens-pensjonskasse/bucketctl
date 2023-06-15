@@ -117,9 +117,13 @@ func findProjectPermissionsDifference(permissionsA *ProjectPermissions, permissi
 	permissionsDifference.Permissions = permissionsA.Permissions.getPermissionsDifference(permissionsB.Permissions)
 	if permissionsA.Repositories != nil {
 		permissionsDifference.Repositories = make(map[string]*RepositoryPermissions)
-		for r, value := range permissionsA.Repositories {
-			permissionsDifference.Repositories[r] = new(RepositoryPermissions)
-			permissionsDifference.Repositories[r].Permissions = value.Permissions.getPermissionsDifference(permissionsB.Repositories[r].Permissions)
+		for repoSlug, repo := range permissionsA.Repositories {
+			permissionsDifference.Repositories[repoSlug] = new(RepositoryPermissions)
+			if permissionsB.Repositories[repoSlug] == nil {
+				permissionsDifference.Repositories[repoSlug].Permissions = repo.Permissions
+			} else {
+				permissionsDifference.Repositories[repoSlug].Permissions = repo.Permissions.getPermissionsDifference(permissionsB.Repositories[repoSlug].Permissions)
+			}
 		}
 	}
 
