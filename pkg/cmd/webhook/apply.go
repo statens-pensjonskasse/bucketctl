@@ -44,15 +44,20 @@ func applyWebhooks(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	projectKeys := make([]string, 0, len(desiredWebhooks))
+	for p := range desiredWebhooks {
+		projectKeys = append(projectKeys, p)
+	}
+	sort.Strings(projectKeys)
 	progressBar, _ := pterm.DefaultProgressbar.WithTotal(len(desiredWebhooks)).WithRemoveWhenDone(true).WithWriter(os.Stderr).Start()
-	for projectKey, desiredProjectWebhooks := range desiredWebhooks {
+	for _, projectKey := range projectKeys {
 		progressBar.Title = projectKey
 		actualWebhooks, err := getProjectWebhooks(baseUrl, projectKey, limit, token, true)
 		if err != nil {
 			return err
 		}
 
-		toCreate, toUpdate, toDelete := findWebhooksToChange(desiredProjectWebhooks.Webhooks, actualWebhooks.Webhooks)
+		toCreate, toUpdate, toDelete := findWebhooksToChange(desiredWebhooks[projectKey].Webhooks, actualWebhooks.Webhooks)
 		for _, w := range toCreate {
 			if err := createProjectWebhook(baseUrl, projectKey, token, w); err != nil {
 				return err
@@ -69,7 +74,7 @@ func applyWebhooks(cmd *cobra.Command, args []string) error {
 			}
 		}
 
-		for repoSlug, desiredRepoWebhooks := range desiredProjectWebhooks.Repositories {
+		for repoSlug, desiredRepoWebhooks := range desiredWebhooks[projectKey].Repositories {
 			pterm.Info.Println(projectKey, repoSlug)
 			if actualWebhooks.Repositories[repoSlug] == nil {
 				actualWebhooks.Repositories[repoSlug] = new(RepositoryWebhooks)
