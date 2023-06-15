@@ -110,7 +110,6 @@ func applyPermissions(cmd *cobra.Command, args []string) error {
 				}
 			}
 		}
-
 		progressBar.Increment()
 	}
 

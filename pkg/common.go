@@ -2,6 +2,7 @@ package pkg
 
 import (
 	"bucketctl/pkg/types"
+	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -30,7 +31,12 @@ func CreateFileIfNotExists(file string) error {
 }
 
 func HttpRequest(method string, url string, payload io.Reader, token string, params ...map[string]string) (*http.Response, error) {
-	client := http.Client{}
+	// TODO: DON'T SKIP TLS VERIFICATION!!!
+	// Temporary workaround for Cert-issues on Mac
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	client := &http.Client{Transport: tr}
 	req, _ := http.NewRequest(method, url, payload)
 
 	if token != "" {

@@ -6,8 +6,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"os"
 	"sort"
 )
 
@@ -42,7 +44,9 @@ func applyWebhooks(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	progressBar, _ := pterm.DefaultProgressbar.WithTotal(len(desiredWebhooks)).WithRemoveWhenDone(true).WithWriter(os.Stderr).Start()
 	for projectKey, desiredProjectWebhooks := range desiredWebhooks {
+		progressBar.Title = projectKey
 		actualWebhooks, err := getProjectWebhooks(baseUrl, projectKey, limit, token, true)
 		if err != nil {
 			return err
@@ -66,6 +70,10 @@ func applyWebhooks(cmd *cobra.Command, args []string) error {
 		}
 
 		for repoSlug, desiredRepoWebhooks := range desiredProjectWebhooks.Repositories {
+			pterm.Info.Println(projectKey, repoSlug)
+			if actualWebhooks.Repositories[repoSlug] == nil {
+				actualWebhooks.Repositories[repoSlug] = new(RepositoryWebhooks)
+			}
 			toCreate, toUpdate, toDelete := findWebhooksToChange(desiredRepoWebhooks.Webhooks, actualWebhooks.Repositories[repoSlug].Webhooks)
 			for _, w := range toCreate {
 				if err := createRepositoryWebhook(baseUrl, projectKey, repoSlug, token, w); err != nil {
@@ -84,6 +92,7 @@ func applyWebhooks(cmd *cobra.Command, args []string) error {
 			}
 
 		}
+		progressBar.Increment()
 	}
 
 	return nil
