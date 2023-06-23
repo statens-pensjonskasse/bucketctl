@@ -7,7 +7,6 @@ import (
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"os"
 	"sort"
 )
 
@@ -49,9 +48,9 @@ func applyPermissions(cmd *cobra.Command, args []string) error {
 		projectKeys = append(projectKeys, p)
 	}
 	sort.Strings(projectKeys)
-	progressBar, _ := pterm.DefaultProgressbar.WithTotal(len(desiredPermissions)).WithRemoveWhenDone(true).WithWriter(os.Stderr).Start()
+	progressBar, _ := pterm.DefaultProgressbar.WithTotal(len(desiredPermissions)).WithRemoveWhenDone(true).Start()
 	for _, projectKey := range projectKeys {
-		progressBar.Title = projectKey
+		progressBar.UpdateTitle(projectKey)
 		// Finn gjeldende tilganger
 		actualProjectPermissions, err := getProjectPermissions(baseUrl, projectKey, limit, token, includeRepos)
 		if err != nil {
@@ -189,11 +188,13 @@ func removeProjectPermissions(baseUrl string, projectKey string, token string, p
 			if err := removeUserProjectPermissions(baseUrl, projectKey, token, user); err != nil {
 				return err
 			}
+			pterm.Info.Println(pterm.Red("🙅 Revoked") + " permissions for user '" + user + "' for project '" + projectKey + "'")
 		}
 		for _, group := range entity.Groups {
 			if err := removeGroupProjectPermissions(baseUrl, projectKey, token, group); err != nil {
 				return err
 			}
+			pterm.Info.Println(pterm.Red("🚫 Revoked") + " permissions for group '" + group + "' for project '" + projectKey + "'")
 		}
 	}
 	return nil
@@ -229,11 +230,13 @@ func removeRepositoryPermissions(baseUrl string, projectKey string, repoSlug str
 			if err := removeUserRepositoryPermissions(baseUrl, projectKey, repoSlug, token, user); err != nil {
 				return err
 			}
+			pterm.Info.Println(pterm.Red("🙅 Revoked") + " permissions for user '" + user + "' for repository '" + projectKey + "/" + repoSlug + "'")
 		}
 		for _, group := range entity.Groups {
 			if err := removeGroupRepositoryPermissions(baseUrl, projectKey, repoSlug, token, group); err != nil {
 				return err
 			}
+			pterm.Info.Println(pterm.Red("🚫 Revoked") + " permissions for group '" + group + "' for repository '" + projectKey + "/" + repoSlug + "'")
 		}
 	}
 	return nil
@@ -269,11 +272,13 @@ func grantProjectPermissions(baseUrl string, projectKey string, token string, pr
 			if err := grantUserProjectPermission(baseUrl, projectKey, token, user, permission); err != nil {
 				return err
 			}
+			pterm.Info.Println(pterm.Green("🧑 Granted") + " user '" + user + "' permission '" + permission + "' for project '" + projectKey + "'")
 		}
 		for _, group := range entity.Groups {
 			if err := grantGroupProjectPermission(baseUrl, projectKey, token, group, permission); err != nil {
 				return err
 			}
+			pterm.Info.Println(pterm.Green("👥 Granted") + " group '" + group + "' permission '" + permission + "' for project '" + projectKey + "'")
 		}
 	}
 	return nil
@@ -311,11 +316,13 @@ func grantRepositoryPermissions(baseUrl string, projectKey string, repoSlug stri
 			if err := grantUserRepositoryPermission(baseUrl, projectKey, repoSlug, token, user, permission); err != nil {
 				return err
 			}
+			pterm.Info.Println(pterm.Green("🧑 Granted") + " user '" + user + "' permission '" + permission + "' for repository '" + projectKey + "/" + repoSlug + "'")
 		}
 		for _, group := range entity.Groups {
 			if err := grantGroupRepositoryPermission(baseUrl, projectKey, repoSlug, token, group, permission); err != nil {
 				return err
 			}
+			pterm.Info.Println(pterm.Green("👥 Granted") + " group '" + group + "' permission '" + permission + "' for repository '" + projectKey + "/" + repoSlug + "'")
 		}
 	}
 	return nil

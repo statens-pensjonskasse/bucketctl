@@ -10,7 +10,6 @@ import (
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"os"
 	"sort"
 )
 
@@ -50,9 +49,9 @@ func applyWebhooks(cmd *cobra.Command, args []string) error {
 		projectKeys = append(projectKeys, p)
 	}
 	sort.Strings(projectKeys)
-	progressBar, _ := pterm.DefaultProgressbar.WithTotal(len(desiredWebhooks)).WithRemoveWhenDone(true).WithWriter(os.Stderr).Start()
+	progressBar, _ := pterm.DefaultProgressbar.WithTotal(len(desiredWebhooks)).WithRemoveWhenDone(true).Start()
 	for _, projectKey := range projectKeys {
-		progressBar.Title = projectKey
+		progressBar.UpdateTitle(projectKey)
 		actualWebhooks, err := getProjectWebhooks(baseUrl, projectKey, limit, token, true)
 		if err != nil {
 			return err
@@ -233,6 +232,7 @@ func createProjectWebhook(baseUrl string, projectKey string, token string, webho
 	if _, err := pkg.PostRequest(url, token, bytes.NewReader(payload), nil); err != nil {
 		return err
 	}
+	pterm.Info.Println(pterm.Green("🪝 Created") + " webhook '" + webhook.Name + "' in project '" + projectKey + "'")
 	return nil
 }
 
@@ -245,6 +245,7 @@ func updateProjectWebhook(baseUrl string, projectKey string, token string, webho
 	if _, err := pkg.PutRequest(url, token, bytes.NewReader(payload), nil); err != nil {
 		return err
 	}
+	pterm.Info.Println(pterm.Blue("♻️ Updated") + " webhook '" + webhook.Name + "' in project '" + projectKey + "'")
 	return nil
 }
 
@@ -253,6 +254,7 @@ func deleteProjectWebhook(baseUrl string, projectKey string, token string, webho
 	if _, err := pkg.DeleteRequest(url, token, nil); err != nil {
 		return err
 	}
+	pterm.Info.Println(pterm.Red("🗑️ Deleted") + " webhook '" + webhook.Name + "' in project '" + projectKey + "'")
 	return nil
 }
 
@@ -265,6 +267,7 @@ func createRepositoryWebhook(baseUrl string, projectKey string, repoSlug string,
 	if _, err := pkg.PostRequest(url, token, bytes.NewReader(payload), nil); err != nil {
 		return err
 	}
+	pterm.Info.Println(pterm.Green("🪝 Created") + " webhook '" + webhook.Name + "' in repository '" + projectKey + "/" + repoSlug + "'")
 	return nil
 }
 
@@ -277,6 +280,7 @@ func updateRepositoryWebhook(baseUrl string, projectKey string, repoSlug string,
 	if _, err := pkg.PutRequest(url, token, bytes.NewReader(payload), nil); err != nil {
 		return err
 	}
+	pterm.Info.Println(pterm.Blue("♻️ Updated") + " webhook '" + webhook.Name + "' in repository '" + projectKey + "/" + repoSlug + "'")
 	return nil
 }
 
@@ -285,5 +289,6 @@ func deleteRepositoryWebhook(baseUrl string, projectKey string, repoSlug string,
 	if _, err := pkg.DeleteRequest(url, token, nil); err != nil {
 		return err
 	}
+	pterm.Info.Println(pterm.Red("️🗑️ Deleted") + " webhook '" + webhook.Name + "' in repository '" + projectKey + "/" + repoSlug + "'")
 	return nil
 }
