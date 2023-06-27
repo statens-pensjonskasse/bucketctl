@@ -87,6 +87,38 @@ type UserPermissionsResponse struct {
 	Values []*UserPermission `json:"values"`
 }
 
+type Restriction struct {
+	Id         int                 `json:"id" yaml:"id"`
+	Type       string              `json:"type" yaml:"type"`
+	Scope      *RestrictionScope   `json:"scope" yaml:"scope"`
+	Matcher    *RestrictionMatcher `json:"matcher" yaml:"matcher"`
+	Users      []*User             `json:"users" yaml:"users"`
+	Groups     []string            `json:"groups" yaml:"groups"`
+	AccessKeys []*interface{}      `json:"accessKeys" yaml:"accessKeys"`
+}
+
+type RestrictionScope struct {
+	ResourceId int    `json:"resourceId" yaml:"resourceId"`
+	Type       string `json:"type" yaml:"type"`
+}
+
+type RestrictionMatcher struct {
+	Id        string                  `json:"id" yaml:"id"`
+	DisplayID string                  `json:"displayID" yaml:"displayID"`
+	Active    bool                    `json:"active" yaml:"active"`
+	Type      *RestrictionMatcherType `json:"type" yaml:"type"`
+}
+
+type RestrictionMatcherType struct {
+	Id   string `json:"id" yaml:"id"`
+	Name string `json:"name" yaml:"name"`
+}
+
+type RestrictionResponse struct {
+	response
+	Values []*Restriction `json:"values"`
+}
+
 type Webhook struct {
 	Id                      int         `json:"id" yaml:"id"`
 	Name                    string      `json:"name" yaml:"name"`

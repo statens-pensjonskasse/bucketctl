@@ -46,7 +46,6 @@ func listWebhooks(cmd *cobra.Command, args []string) error {
 		if err != nil {
 			return err
 		}
-
 		projectWebhooksMap[projectKey] = new(ProjectWebhooks)
 		projectWebhooksMap[projectKey].Repositories = make(map[string]*RepositoryWebhooks)
 		projectWebhooksMap[projectKey].Repositories[repoSlug] = webhooks

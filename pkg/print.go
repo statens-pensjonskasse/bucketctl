@@ -1,6 +1,7 @@
 package pkg
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"github.com/pterm/pterm"
@@ -46,13 +47,20 @@ func (e *OutputFormatType) Type() string {
 func PrintData[T interface{}](data T, prettyPrintFunction func(a T) [][]string) error {
 	outputFormat := OutputFormatType(viper.GetString("output"))
 
+	if prettyPrintFunction == nil && outputFormat == OutputPretty {
+		outputFormat = "yaml"
+	}
+
 	switch outputFormat {
 	case OutputYaml:
-		yamlData, err := yaml.Marshal(&data)
+		var buf bytes.Buffer
+		yamlEncoder := yaml.NewEncoder(&buf)
+		yamlEncoder.SetIndent(2)
+		err := yamlEncoder.Encode(&data)
 		if err != nil {
 			return err
 		}
-		pterm.Println(string(yamlData))
+		pterm.Println(buf.String())
 	case OutputJson:
 		jsonData, err := json.MarshalIndent(&data, "", "  ")
 		if err != nil {

@@ -6,6 +6,7 @@ import (
 	"bucketctl/pkg/cmd/permission"
 	"bucketctl/pkg/cmd/project"
 	"bucketctl/pkg/cmd/repository"
+	"bucketctl/pkg/cmd/settings"
 	"bucketctl/pkg/cmd/version"
 	"bucketctl/pkg/cmd/webhook"
 	"github.com/pterm/pterm"
@@ -55,6 +56,7 @@ func init() {
 	rootCmd.AddCommand(permission.Cmd)
 	rootCmd.AddCommand(project.Cmd)
 	rootCmd.AddCommand(repository.Cmd)
+	rootCmd.AddCommand(settings.Cmd)
 	rootCmd.AddCommand(version.Cmd)
 	rootCmd.AddCommand(webhook.Cmd)
 }

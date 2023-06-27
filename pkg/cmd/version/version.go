@@ -11,6 +11,6 @@ var Cmd = &cobra.Command{
 	Use:   "version",
 	Short: "Print version number",
 	Run: func(cmd *cobra.Command, args []string) {
-		pterm.Println("GoBit version", version)
+		pterm.Println("bucketctl version", version)
 	},
 }

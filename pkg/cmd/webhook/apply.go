@@ -206,7 +206,7 @@ func rateCandidateWebhooksSimilarity(baseWebhooks []*types.Webhook, candidateWeb
 func sortWebhooksByBestAvailableCandidate(similar []*similarWebhooks) {
 	sort.Slice(similar, func(i, j int) bool {
 		var ci, cj int
-		// Finner indeksene til de beste tilgjengelige kandidaten til sammenligningsgrunnlag
+		// Finner indeksene til de beste tilgjengelige kandidatene for sammenligningsgrunnlag
 		for wi, w := range similar[i].candidates {
 			if *w.webhook != nil {
 				ci = wi
