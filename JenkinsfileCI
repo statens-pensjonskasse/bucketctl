@@ -6,10 +6,10 @@ ciPipeline {
             .useMake(
                 buildImage: 'old-dockerhub.spk.no:5000/base-golang/golang',
                 build: 'build',
-                test: 'test'
+                test: 'coverage'
             )
             .withSonarQube()
             .withVersionStrategy(strategy: 'semver')
             .withGitTaggingStrategy(semantic: 'main')
-//            .withSlackNotifications(channels: 'parsec-ci')
+            .withSlackNotifications(channels: 'parsec-ci')
 }

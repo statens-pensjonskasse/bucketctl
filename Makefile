@@ -8,5 +8,8 @@ build: ## Bygger bin/bucketctl
 test: ## Kjører tester
 	go test ./...
 
+coverage:
+	go test ./... -coverprofile=bin/coverage.out
+
 install: test build ## Installerer under ${GOPATH}/bin
 	go install -v ./...
