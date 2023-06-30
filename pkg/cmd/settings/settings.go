@@ -46,7 +46,7 @@ var Cmd = &cobra.Command{
 
 func init() {
 	Cmd.AddCommand(listSettingsCmd)
-
+	Cmd.AddCommand(listAllSettingsCmd)
 }
 
 func getProjectRestrictions(baseUrl string, projectKey string, limit int, token string, includeRepos bool) (*ProjectSettings, error) {
