@@ -1,7 +1,6 @@
 package pkg
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
 	"github.com/pterm/pterm"
@@ -53,14 +52,11 @@ func PrintData[T interface{}](data T, prettyPrintFunction func(a T) [][]string) 
 
 	switch outputFormat {
 	case OutputYaml:
-		var buf bytes.Buffer
-		yamlEncoder := yaml.NewEncoder(&buf)
-		yamlEncoder.SetIndent(2)
-		err := yamlEncoder.Encode(&data)
+		yamlData, err := yaml.Marshal(&data)
 		if err != nil {
 			return err
 		}
-		pterm.Println(buf.String())
+		pterm.Println(string(yamlData))
 	case OutputJson:
 		jsonData, err := json.MarshalIndent(&data, "", "  ")
 		if err != nil {

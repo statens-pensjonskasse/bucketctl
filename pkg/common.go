@@ -49,7 +49,12 @@ func HttpRequest(method string, url string, payload io.Reader, token string, par
 	if params != nil && len(params) > 0 {
 		q := req.URL.Query()
 		for key, val := range params[0] {
-			q.Add(key, val)
+			if strings.HasPrefix(key, "Header ") {
+				headerKey := strings.TrimPrefix(key, "Header ")
+				req.Header.Set(headerKey, val)
+			} else {
+				q.Add(key, val)
+			}
 		}
 		req.URL.RawQuery = q.Encode()
 	}

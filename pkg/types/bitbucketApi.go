@@ -57,6 +57,10 @@ type Group struct {
 	Name string `json:"name" yaml:"name"`
 }
 
+type DefaultProjectPermission struct {
+	Permitted bool `json:"permitted" yaml:"permitted"`
+}
+
 type GroupPermission struct {
 	Group      Group  `json:"group"`
 	Permission string `json:"permission"`

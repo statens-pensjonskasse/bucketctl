@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"sort"
+	"strconv"
 )
 
 var (
@@ -77,6 +78,11 @@ func applyPermissions(cmd *cobra.Command, args []string) error {
 					actualProjectPermissions.Repositories[repoSlug] = &RepositoryPermissions{Permissions: &Permissions{}}
 				}
 			}
+		}
+
+		// Set default prosjekttilgang for innloggede brukere
+		if err := setDefaultProjectPermission(baseUrl, projectKey, desiredPermissions[projectKey].DefaultPermission, true, token); err != nil {
+			return err
 		}
 
 		// Finner tilganger i 'actualProjectPermissions' som ikke finnes i 'desiredProjectPermissions'. Disse tilgangene skal fjernes.
@@ -180,6 +186,21 @@ func (entities Entities) containsGroup(group string) bool {
 		}
 	}
 	return false
+}
+
+func setDefaultProjectPermission(baseUrl string, projectKey string, permission string, allow bool, token string) error {
+	url := fmt.Sprintf("%s/rest/api/latest/projects/%s/permissions/%s/all", baseUrl, projectKey, permission)
+	params := map[string]string{
+		"allow": strconv.FormatBool(allow),
+		// Workaround for https://confluence.atlassian.com/cloudkb/xsrf-check-failed-when-calling-cloud-apis-826874382.html
+		"Header X-Atlassian-Token": "no-check",
+	}
+
+	_, err := pkg.PostRequest(url, token, nil, params)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func removeProjectPermissions(baseUrl string, projectKey string, token string, projectPermissions *ProjectPermissions) error {

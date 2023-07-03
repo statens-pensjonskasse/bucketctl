@@ -20,8 +20,9 @@ type Entities struct {
 type Permissions map[string]*Entities
 
 type ProjectPermissions struct {
-	Permissions  *Permissions                      `json:"permissions,omitempty" yaml:"permissions,omitempty"`
-	Repositories map[string]*RepositoryPermissions `json:"repositories,omitempty" yaml:"repositories,omitempty"`
+	DefaultPermission string                            `json:"default-permission" yaml:"default-permission"`
+	Permissions       *Permissions                      `json:"permissions,omitempty" yaml:"permissions,omitempty"`
+	Repositories      map[string]*RepositoryPermissions `json:"repositories,omitempty" yaml:"repositories,omitempty"`
 }
 
 type RepositoryPermissions struct {
@@ -38,6 +39,24 @@ func init() {
 	Cmd.AddCommand(applyPermissionsCmd)
 	Cmd.AddCommand(listAllPermissionsCmd)
 	Cmd.AddCommand(listPermissionsCmd)
+}
+
+func getDefaultProjectPermission(baseUrl string, projectKey string, token string) (string, error) {
+	for _, permission := range []string{"PROJECT_ADMIN", "PROJECT_WRITE", "PROJECT_READ"} {
+		url := fmt.Sprintf("%s/rest/api/latest/projects/%s/permissions/%s/all", baseUrl, projectKey, permission)
+		body, err := pkg.GetRequestBody(url, token)
+		if err != nil {
+			return "", err
+		}
+		var defaultProjectPermission types.DefaultProjectPermission
+		if err := json.Unmarshal(body, &defaultProjectPermission); err != nil {
+			return "", err
+		}
+		if defaultProjectPermission.Permitted {
+			return permission, nil
+		}
+	}
+	return "", nil
 }
 
 func getGroupPermissions(url string, token string) ([]*types.GroupPermission, error) {
@@ -122,7 +141,15 @@ func getProjectPermissions(baseUrl string, projectKey string, limit int, token s
 		grantedPermissions[userWithPermission.Permission].Users = append(grantedPermissions[userWithPermission.Permission].Users, userWithPermission.User.Name)
 	}
 
-	projectPermissions := ProjectPermissions{Permissions: &grantedPermissions}
+	defaultPermission, err := getDefaultProjectPermission(baseUrl, projectKey, token)
+	if err != nil {
+		return nil, err
+	}
+
+	projectPermissions := ProjectPermissions{
+		Permissions:       &grantedPermissions,
+		DefaultPermission: defaultPermission,
+	}
 
 	if includeRepos {
 		// Hent rettigheter for alle repositories i prosjektet
