@@ -68,16 +68,24 @@ func initConfig() {
 		home, err := os.UserHomeDir()
 		cobra.CheckErr(err)
 
-		viper.AddConfigPath(filepath.Join(home, ".bucketctl"))
+		viper.AddConfigPath(filepath.Join(home, ".config", "bucketctl"))
 		viper.SetConfigName("config")
 		viper.SetConfigType("yaml")
 
-		cfgFile = filepath.Join(home, ".bucketctl", "config.yaml")
+		cfgFile = filepath.Join(home, ".config", "bucketctl", "config.yaml")
 	}
 
 	viper.AutomaticEnv()
 
-	if err := pkg.CreateFileIfNotExists(cfgFile); err != nil {
+	if err := pkg.CreateDirIfNotExists(cfgFile, 0700); err != nil {
+		cobra.CheckErr(err)
+	}
+
+	if err := pkg.CreateFileIfNotExists(cfgFile, 0600); err != nil {
+		cobra.CheckErr(err)
+	}
+
+	if err := pkg.CheckFilePermission(cfgFile, 0600); err != nil {
 		cobra.CheckErr(err)
 	}
 

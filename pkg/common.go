@@ -10,6 +10,7 @@ import (
 	"io/fs"
 	"net/http"
 	"os"
+	"path"
 	"strconv"
 	"strings"
 	"time"
@@ -17,15 +18,38 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func CreateFileIfNotExists(file string) error {
+func CreateDirIfNotExists(dir string, perm os.FileMode) error {
+	baseDir := path.Dir(dir)
+	info, err := os.Stat(baseDir)
+	if err == nil && info.IsDir() {
+		return nil
+	}
+	return os.MkdirAll(baseDir, perm)
+}
+
+func CreateFileIfNotExists(file string, perm os.FileMode) error {
 	if _, err := os.Stat(file); err != nil {
 		if errors.Is(err, fs.ErrNotExist) {
 			var fileHandle, err = os.Create(file)
 			defer fileHandle.Close()
 			if err != nil {
-				return errors.New(err.Error())
+				return err
+			}
+			if err := os.Chmod(file, perm); err != nil {
+				return err
 			}
 		}
+	}
+	return nil
+}
+
+func CheckFilePermission(file string, perm os.FileMode) error {
+	stat, err := os.Stat(file)
+	if err != nil {
+		return err
+	}
+	if stat.Mode() != perm {
+		return errors.New("Unexpected file permission '" + stat.Mode().String() + "' for file '" + file + "', expected '" + perm.String() + "'")
 	}
 	return nil
 }
