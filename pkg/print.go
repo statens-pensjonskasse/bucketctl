@@ -46,8 +46,8 @@ func (e *OutputFormatType) Type() string {
 func PrintData[T interface{}](data T, prettyPrintFunction func(a T) [][]string) error {
 	outputFormat := OutputFormatType(viper.GetString("output"))
 
-	if prettyPrintFunction == nil && outputFormat == OutputPretty {
-		outputFormat = "yaml"
+	if prettyPrintFunction == nil && (outputFormat == OutputPretty || outputFormat == "") {
+		outputFormat = OutputYaml
 	}
 
 	switch outputFormat {
@@ -63,10 +63,6 @@ func PrintData[T interface{}](data T, prettyPrintFunction func(a T) [][]string) 
 			return err
 		}
 		pterm.Println(string(jsonData))
-	case OutputPretty:
-		if err := pterm.DefaultTable.WithHasHeader().WithData(prettyPrintFunction(data)).Render(); err != nil {
-			return err
-		}
 	default:
 		if err := pterm.DefaultTable.WithHasHeader().WithData(prettyPrintFunction(data)).Render(); err != nil {
 			return err

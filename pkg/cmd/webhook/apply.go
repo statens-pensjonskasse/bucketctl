@@ -44,11 +44,7 @@ func applyWebhooks(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	projectKeys := make([]string, 0, len(desiredWebhooks))
-	for p := range desiredWebhooks {
-		projectKeys = append(projectKeys, p)
-	}
-	sort.Strings(projectKeys)
+	projectKeys := pkg.GetLexicallySortedKeys(desiredWebhooks)
 	progressBar, _ := pterm.DefaultProgressbar.WithTotal(len(desiredWebhooks)).WithRemoveWhenDone(true).Start()
 	for _, projectKey := range projectKeys {
 		progressBar.UpdateTitle(projectKey)

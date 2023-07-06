@@ -101,6 +101,14 @@ type Restriction struct {
 	AccessKeys []*interface{}      `json:"accessKeys" yaml:"accessKeys"`
 }
 
+type CreateRestriction struct {
+	Type       string              `json:"type,omitempty" yaml:"type"`
+	Matcher    *RestrictionMatcher `json:"matcher,omitempty" yaml:"matcher"`
+	Users      []string            `json:"users,omitempty" yaml:"users"`
+	Groups     []string            `json:"groups,omitempty" yaml:"groups"`
+	AccessKeys []string            `json:"accessKeys" yaml:"accessKeys"`
+}
+
 type RestrictionScope struct {
 	ResourceId int    `json:"resourceId" yaml:"resourceId"`
 	Type       string `json:"type" yaml:"type"`

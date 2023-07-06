@@ -7,7 +7,6 @@ import (
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"sort"
 	"strconv"
 )
 
@@ -44,11 +43,7 @@ func applyPermissions(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	projectKeys := make([]string, 0, len(desiredPermissions))
-	for p := range desiredPermissions {
-		projectKeys = append(projectKeys, p)
-	}
-	sort.Strings(projectKeys)
+	projectKeys := pkg.GetLexicallySortedKeys(desiredPermissions)
 	progressBar, _ := pterm.DefaultProgressbar.WithTotal(len(desiredPermissions)).WithRemoveWhenDone(true).Start()
 	for _, projectKey := range projectKeys {
 		progressBar.UpdateTitle(projectKey)
