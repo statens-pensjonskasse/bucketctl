@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
+	"sort"
+	"strconv"
 )
 
 type Repository struct {
@@ -63,4 +65,21 @@ func GetProjectRepositories(baseUrl string, projectKey string, limit int) (map[s
 	}
 
 	return repositories, nil
+}
+
+func prettyFormatRepositories(reposMap map[string]*Repository) [][]string {
+	repos := make([]string, 0, len(reposMap))
+	for s := range reposMap {
+		repos = append(repos, s)
+	}
+	sort.Strings(repos)
+
+	var data [][]string
+	data = append(data, []string{"ID", "Slug", "State", "Public", "Archived"})
+	for _, slug := range repos {
+		row := []string{strconv.Itoa(reposMap[slug].Id), slug, reposMap[slug].StatusMessage, strconv.FormatBool(reposMap[slug].Public), strconv.FormatBool(reposMap[slug].Archived)}
+		data = append(data, row)
+	}
+
+	return data
 }

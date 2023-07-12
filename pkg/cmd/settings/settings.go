@@ -12,7 +12,7 @@ import (
 
 type ProjectSettings struct {
 	Restrictions map[string]*Restrictions       `json:"restrictions,omitempty" yaml:"restrictions,omitempty"`
-	Repositories map[string]*RepositorySettings `json:"repositories,omitempty" yaml:"repositories,omitempty"`
+	Repositories map[string]*RepositorySettings `json:types.RepoSlugFlagsitories,omitempty" yaml:types.RepoSlugFlagsitories,omitempty"`
 }
 
 type RepositorySettings struct {
@@ -40,7 +40,7 @@ var (
 
 var Cmd = &cobra.Command{
 	Use:     "settings",
-	Short:   "Settings commands",
+	Short:   "View and edit Bitbucket project and repository settings",
 	Aliases: []string{"setting"},
 }
 

@@ -201,7 +201,7 @@ func getRepositoryPermissions(baseUrl string, projectKey string, repoSlug string
 	return &RepositoryPermissions{Permissions: &grantedPermissions}, nil
 }
 
-func PrettyFormatProjectPermissions(projectPermissionsMap map[string]*ProjectPermissions) [][]string {
+func prettyFormatProjectPermissions(projectPermissionsMap map[string]*ProjectPermissions) [][]string {
 	// Sorter prosjekt alfabetisk
 	projects := make([]string, 0, len(projectPermissionsMap))
 	for k := range projectPermissionsMap {
@@ -210,7 +210,7 @@ func PrettyFormatProjectPermissions(projectPermissionsMap map[string]*ProjectPer
 	sort.Strings(projects)
 
 	var data [][]string
-	data = append(data, []string{"Project", "Repository", "Permission", "Groups", "Users"})
+	data = append(data, []string{"Project", "repository", "Permission", "Groups", "Users"})
 
 	for _, projectKey := range projects {
 		formattedProjectPermissions := prettyFormatPermissions(projectKey, "ALL", projectPermissionsMap[projectKey].Permissions)

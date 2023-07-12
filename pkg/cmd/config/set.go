@@ -6,6 +6,13 @@ import (
 	"github.com/spf13/viper"
 )
 
+var setConfigCmd = &cobra.Command{
+	Use:     "set",
+	Aliases: []string{"s"},
+	Short:   "Set config",
+	RunE:    setConfig,
+}
+
 func setConfig(cmd *cobra.Command, args []string) error {
 	if err := viper.WriteConfig(); err != nil {
 		return err

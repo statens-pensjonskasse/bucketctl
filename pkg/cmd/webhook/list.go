@@ -2,37 +2,37 @@ package webhook
 
 import (
 	"bucketctl/pkg"
+	"bucketctl/pkg/types"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
 var listWebhooksCmd = &cobra.Command{
 	PreRun: func(cmd *cobra.Command, args []string) {
-		Cmd.MarkPersistentFlagRequired("repo")
-		viper.BindPFlag("key", cmd.Flags().Lookup("key"))
-		viper.BindPFlag("repo", cmd.Flags().Lookup("repo"))
-		viper.BindPFlag("include-repos", cmd.Flags().Lookup("include-repos"))
+		viper.BindPFlag(types.ProjectKeyFlag, cmd.Flags().Lookup(types.ProjectKeyFlag))
+		viper.BindPFlag(types.RepoSlugFlag, cmd.Flags().Lookup(types.RepoSlugFlag))
+		viper.BindPFlag(types.IncludeReposFlag, cmd.Flags().Lookup(types.IncludeReposFlag))
 	},
 	Use:   "list",
-	Short: "List Webhooks for given repo",
+	Short: "List webhooks for given project or repo",
 	RunE:  listWebhooks,
 }
 
 func init() {
-	listWebhooksCmd.Flags().StringVarP(&key, "key", "k", "", "Project key")
-	listWebhooksCmd.Flags().StringVarP(&repo, "repo", "r", "", "Repository slug. Leave empty to query project webhooks.")
-	listWebhooksCmd.Flags().Bool("include-repos", false, "Include repository permissions when querying project")
+	listWebhooksCmd.Flags().StringVarP(&key, types.ProjectKeyFlag, "k", "", "Project key")
+	listWebhooksCmd.Flags().StringVarP(&repo, types.RepoSlugFlag, "r", "", "Repo slug. Leave empty to query project webhooks.")
+	listWebhooksCmd.Flags().Bool(types.IncludeReposFlag, false, "Include repository permissions when querying project")
 
-	listWebhooksCmd.MarkFlagRequired("key")
+	listWebhooksCmd.MarkFlagRequired(types.ProjectKeyFlag)
 }
 
 func listWebhooks(cmd *cobra.Command, args []string) error {
-	baseUrl := viper.GetString("baseUrl")
-	projectKey := viper.GetString("key")
-	repoSlug := viper.GetString("repo")
-	limit := viper.GetInt("limit")
-	token := viper.GetString("token")
-	includeRepos := viper.GetBool("include-repos")
+	baseUrl := viper.GetString(types.BaseUrlFlag)
+	projectKey := viper.GetString(types.ProjectKeyFlag)
+	repoSlug := viper.GetString(types.RepoSlugFlag)
+	limit := viper.GetInt(types.LimitFlag)
+	token := viper.GetString(types.TokenFlag)
+	includeRepos := viper.GetBool(types.IncludeReposFlag)
 
 	projectWebhooksMap := make(map[string]*ProjectWebhooks)
 	if repoSlug == "" {

@@ -3,6 +3,7 @@ package permission
 import (
 	"bucketctl/pkg"
 	"bucketctl/pkg/cmd/project"
+	"bucketctl/pkg/types"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -16,16 +17,16 @@ var listAllPermissionsCmd = &cobra.Command{
 }
 
 func listAllPermissions(cmd *cobra.Command, args []string) error {
-	baseUrl := viper.GetString("baseUrl")
-	limit := viper.GetInt("limit")
-	token := viper.GetString("token")
+	baseUrl := viper.GetString(types.BaseUrlFlag)
+	limit := viper.GetInt(types.LimitFlag)
+	token := viper.GetString(types.TokenFlag)
 
 	permissions, err := getAllPermissions(baseUrl, limit, token)
 	if err != nil {
 		return err
 	}
 
-	return pkg.PrintData(permissions, PrettyFormatProjectPermissions)
+	return pkg.PrintData(permissions, prettyFormatProjectPermissions)
 }
 
 func getAllPermissions(baseUrl string, limit int, token string) (map[string]*ProjectPermissions, error) {

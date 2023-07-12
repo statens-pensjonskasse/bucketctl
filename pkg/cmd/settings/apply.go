@@ -13,31 +13,32 @@ import (
 )
 
 var (
-	fileName string
+	filename string
 )
 
 var applySettingsCmd = &cobra.Command{
 	PreRun: func(cmd *cobra.Command, args []string) {
-		viper.BindPFlag("file", cmd.Flags().Lookup("file"))
-		viper.BindPFlag("include-repos", cmd.Flags().Lookup("include-repos"))
+		viper.BindPFlag(types.FilenameFlag, cmd.Flags().Lookup(types.FilenameFlag))
+		viper.BindPFlag(types.IncludeReposFlag, cmd.Flags().Lookup(types.IncludeReposFlag))
 	},
-	Use:  "apply",
-	RunE: applySettings,
+	Use:   "apply",
+	Short: "Apply a settings configuration file",
+	RunE:  applySettings,
 }
 
 func init() {
-	applySettingsCmd.Flags().StringVarP(&fileName, "file", "f", "", "Settings file")
-	applySettingsCmd.Flags().Bool("include-repos", false, "Include repositories")
+	applySettingsCmd.Flags().StringVarP(&filename, types.FilenameFlag, "f", "", "Settings file")
+	applySettingsCmd.Flags().Bool(types.IncludeReposFlag, false, "Include repositories")
 
-	applySettingsCmd.MarkFlagRequired("file")
+	applySettingsCmd.MarkFlagRequired(types.FilenameFlag)
 }
 
 func applySettings(cmd *cobra.Command, args []string) error {
-	file := viper.GetString("file")
-	baseUrl := viper.GetString("baseUrl")
-	limit := viper.GetInt("limit")
-	token := viper.GetString("token")
-	includeRepos := viper.GetBool("include-repos")
+	file := viper.GetString(types.FilenameFlag)
+	baseUrl := viper.GetString(types.BaseUrlFlag)
+	limit := viper.GetInt(types.LimitFlag)
+	token := viper.GetString(types.TokenFlag)
+	includeRepos := viper.GetBool(types.IncludeReposFlag)
 
 	var desiredSettings map[string]*ProjectSettings
 	if err := pkg.ReadConfigFile(file, &desiredSettings); err != nil {

@@ -3,6 +3,7 @@ package permission
 import (
 	"bucketctl/pkg"
 	"bucketctl/pkg/cmd/repository"
+	"bucketctl/pkg/types"
 	"fmt"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
@@ -11,31 +12,32 @@ import (
 )
 
 var (
-	fileName string
+	filename string
 )
 
 var applyPermissionsCmd = &cobra.Command{
 	PreRun: func(cmd *cobra.Command, args []string) {
-		viper.BindPFlag("file", cmd.Flags().Lookup("file"))
-		viper.BindPFlag("include-repos", cmd.Flags().Lookup("include-repos"))
+		viper.BindPFlag(types.FilenameFlag, cmd.Flags().Lookup(types.FilenameFlag))
+		viper.BindPFlag(types.IncludeReposFlag, cmd.Flags().Lookup(types.IncludeReposFlag))
 	},
-	Use:  "apply",
-	RunE: applyPermissions,
+	Use:   "apply",
+	Short: "Apply a permissions configuration file",
+	RunE:  applyPermissions,
 }
 
 func init() {
-	applyPermissionsCmd.Flags().StringVarP(&fileName, "file", "f", "", "Permissions file")
-	applyPermissionsCmd.Flags().Bool("include-repos", false, "Include repositories")
+	applyPermissionsCmd.Flags().StringVarP(&filename, types.FilenameFlag, "f", "", "Permissions file")
+	applyPermissionsCmd.Flags().Bool(types.IncludeReposFlag, false, "Include repositories")
 
-	applyPermissionsCmd.MarkFlagRequired("file")
+	applyPermissionsCmd.MarkFlagRequired(types.FilenameFlag)
 }
 
 func applyPermissions(cmd *cobra.Command, args []string) error {
-	file := viper.GetString("file")
-	baseUrl := viper.GetString("baseUrl")
-	limit := viper.GetInt("limit")
-	token := viper.GetString("token")
-	includeRepos := viper.GetBool("include-repos")
+	file := viper.GetString(types.FilenameFlag)
+	baseUrl := viper.GetString(types.BaseUrlFlag)
+	limit := viper.GetInt(types.LimitFlag)
+	token := viper.GetString(types.TokenFlag)
+	includeRepos := viper.GetBool(types.IncludeReposFlag)
 
 	// Les inn fil (yaml eller json) med ønskede tilganger
 	var desiredPermissions map[string]*ProjectPermissions

@@ -2,37 +2,37 @@ package settings
 
 import (
 	"bucketctl/pkg"
+	"bucketctl/pkg/types"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
 var listSettingsCmd = &cobra.Command{
 	PreRun: func(cmd *cobra.Command, args []string) {
-		Cmd.MarkPersistentFlagRequired("repo")
-		viper.BindPFlag("key", cmd.Flags().Lookup("key"))
-		viper.BindPFlag("repo", cmd.Flags().Lookup("repo"))
-		viper.BindPFlag("include-repos", cmd.Flags().Lookup("include-repos"))
+		viper.BindPFlag(types.ProjectKeyFlag, cmd.Flags().Lookup(types.ProjectKeyFlag))
+		viper.BindPFlag(types.RepoSlugFlag, cmd.Flags().Lookup(types.RepoSlugFlag))
+		viper.BindPFlag(types.IncludeReposFlag, cmd.Flags().Lookup(types.IncludeReposFlag))
 	},
 	Use:   "list",
-	Short: "List settings for given project/repo",
+	Short: "List settings for given project or repository",
 	RunE:  listSettings,
 }
 
 func init() {
-	listSettingsCmd.Flags().StringVarP(&key, "key", "k", "", "Project key")
-	listSettingsCmd.Flags().StringVarP(&repo, "repo", "r", "", "Repository slug. Leave empty to query project webhooks.")
-	listSettingsCmd.Flags().Bool("include-repos", false, "Include repository permissions when querying project")
+	listSettingsCmd.Flags().StringVarP(&key, types.ProjectKeyFlag, "k", "", "Project key")
+	listSettingsCmd.Flags().StringVarP(&repo, types.RepoSlugFlag, "r", "", "Repo slug. Leave empty to query project webhooks.")
+	listSettingsCmd.Flags().Bool(types.IncludeReposFlag, false, "Include repository permissions when querying project")
 
-	listSettingsCmd.MarkFlagRequired("key")
+	listSettingsCmd.MarkFlagRequired(types.ProjectKeyFlag)
 }
 
 func listSettings(cmd *cobra.Command, args []string) error {
-	baseUrl := viper.GetString("baseUrl")
-	projectKey := viper.GetString("key")
-	repoSlug := viper.GetString("repo")
-	limit := viper.GetInt("limit")
-	token := viper.GetString("token")
-	includeRepos := viper.GetBool("include-repos")
+	baseUrl := viper.GetString(types.BaseUrlFlag)
+	projectKey := viper.GetString(types.ProjectKeyFlag)
+	repoSlug := viper.GetString(types.RepoSlugFlag)
+	limit := viper.GetInt(types.LimitFlag)
+	token := viper.GetString(types.TokenFlag)
+	includeRepos := viper.GetBool(types.IncludeReposFlag)
 
 	projectSettingsMap := make(map[string]*ProjectSettings)
 	if repoSlug == "" {

@@ -6,7 +6,7 @@ import (
 
 type response struct {
 	Size          int    `json:"size"`
-	Limit         int    `json:"limit"`
+	Limit         int    `json:types.LimitFlag`
 	IsLastPage    bool   `json:"isLastPage"`
 	Start         int    `json:"start"`
 	NextPageStart int    `json:"nextPageStart"`
@@ -42,7 +42,7 @@ type RepositoriesResponse struct {
 
 type Project struct {
 	Id          int    `json:"id"`
-	Key         string `json:"key"`
+	Key         string `json:types.ProjectKeyFlag`
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	Public      bool   `json:"public"`

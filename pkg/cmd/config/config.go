@@ -14,17 +14,3 @@ func init() {
 	Cmd.AddCommand(getConfigCmd)
 	Cmd.AddCommand(setConfigCmd)
 }
-
-var getConfigCmd = &cobra.Command{
-	Use:     "get",
-	Aliases: []string{"g", "list", "l"},
-	Short:   "Get config",
-	RunE:    getConfig,
-}
-
-var setConfigCmd = &cobra.Command{
-	Use:     "set",
-	Aliases: []string{"s"},
-	Short:   "Set config",
-	RunE:    setConfig,
-}

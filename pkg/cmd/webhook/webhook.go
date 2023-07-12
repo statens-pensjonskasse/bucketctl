@@ -15,7 +15,7 @@ import (
 
 type ProjectWebhooks struct {
 	Webhooks     []*types.Webhook               `json:"webhooks,omitempty" yaml:"webhooks,omitempty"`
-	Repositories map[string]*RepositoryWebhooks `json:"repositories,omitempty" yaml:"repositories,omitempty"`
+	Repositories map[string]*RepositoryWebhooks `json:types.RepoSlugFlagsitories,omitempty" yaml:types.RepoSlugFlagsitories,omitempty"`
 }
 
 type RepositoryWebhooks struct {
@@ -29,7 +29,7 @@ var (
 
 var Cmd = &cobra.Command{
 	Use:     "webhook",
-	Short:   "Webhook commands",
+	Short:   "View and edit repository and project webhooks",
 	Aliases: []string{"wh"},
 }
 

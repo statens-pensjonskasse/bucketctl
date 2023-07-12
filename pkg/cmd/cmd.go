@@ -9,6 +9,7 @@ import (
 	"bucketctl/pkg/cmd/settings"
 	"bucketctl/pkg/cmd/version"
 	"bucketctl/pkg/cmd/webhook"
+	"bucketctl/pkg/types"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -40,17 +41,17 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "Config file (default $HOME/.bucketctl/config.yaml")
-	rootCmd.PersistentFlags().StringVar(&baseUrl, "baseUrl", "https://git.spk.no", "Base url for BitBucket instance")
-	rootCmd.PersistentFlags().IntVarP(&limit, "limit", "l", 100, "Max return values")
-	rootCmd.PersistentFlags().StringVarP(&userToken, "token", "t", "", "Token for user")
-	rootCmd.PersistentFlags().VarP(&outputFormat, "output", "o", "Output format. One of: pretty, yaml, json")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, types.ConfigFlag, "", "Config file (default $HOME/.bucketctl/config.yaml")
+	rootCmd.PersistentFlags().StringVar(&baseUrl, types.BaseUrlFlag, "", "Base url for BitBucket instance")
+	rootCmd.PersistentFlags().IntVarP(&limit, types.LimitFlag, "l", 500, "Max return values")
+	rootCmd.PersistentFlags().StringVarP(&userToken, types.TokenFlag, "t", "", "Http access token")
+	rootCmd.PersistentFlags().VarP(&outputFormat, types.OutputFlag, "o", "Output format. One of: pretty, yaml, json")
 
-	viper.BindPFlag("config", rootCmd.PersistentFlags().Lookup("config"))
-	viper.BindPFlag("baseUrl", rootCmd.PersistentFlags().Lookup("baseUrl"))
-	viper.BindPFlag("limit", rootCmd.PersistentFlags().Lookup("limit"))
-	viper.BindPFlag("token", rootCmd.PersistentFlags().Lookup("token"))
-	viper.BindPFlag("output", rootCmd.PersistentFlags().Lookup("output"))
+	viper.BindPFlag(types.ConfigFlag, rootCmd.PersistentFlags().Lookup(types.ConfigFlag))
+	viper.BindPFlag(types.BaseUrlFlag, rootCmd.PersistentFlags().Lookup(types.BaseUrlFlag))
+	viper.BindPFlag(types.LimitFlag, rootCmd.PersistentFlags().Lookup(types.LimitFlag))
+	viper.BindPFlag(types.TokenFlag, rootCmd.PersistentFlags().Lookup(types.TokenFlag))
+	viper.BindPFlag(types.OutputFlag, rootCmd.PersistentFlags().Lookup(types.OutputFlag))
 
 	rootCmd.AddCommand(config.Cmd)
 	rootCmd.AddCommand(permission.Cmd)
@@ -93,5 +94,5 @@ func initConfig() {
 		cobra.CheckErr(err)
 	}
 
-	viper.SetDefault("config", viper.ConfigFileUsed())
+	viper.SetDefault(types.ConfigFlag, viper.ConfigFileUsed())
 }

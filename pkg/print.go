@@ -1,6 +1,7 @@
 package pkg
 
 import (
+	"bucketctl/pkg/types"
 	"encoding/json"
 	"errors"
 	"github.com/pterm/pterm"
@@ -44,7 +45,7 @@ func (e *OutputFormatType) Type() string {
 }
 
 func PrintData[T interface{}](data T, prettyPrintFunction func(a T) [][]string) error {
-	outputFormat := OutputFormatType(viper.GetString("output"))
+	outputFormat := OutputFormatType(viper.GetString(types.OutputFlag))
 
 	if prettyPrintFunction == nil && (outputFormat == OutputPretty || outputFormat == "") {
 		outputFormat = OutputYaml

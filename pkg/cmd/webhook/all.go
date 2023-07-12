@@ -3,6 +3,7 @@ package webhook
 import (
 	"bucketctl/pkg"
 	"bucketctl/pkg/cmd/project"
+	"bucketctl/pkg/types"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -16,9 +17,9 @@ var listAllWebhooksCmd = &cobra.Command{
 }
 
 func listAllWebhooks(cmd *cobra.Command, args []string) error {
-	baseUrl := viper.GetString("baseUrl")
-	limit := viper.GetInt("limit")
-	token := viper.GetString("token")
+	baseUrl := viper.GetString(types.BaseUrlFlag)
+	limit := viper.GetInt(types.LimitFlag)
+	token := viper.GetString(types.TokenFlag)
 
 	webhooks, err := getAllWebhooks(baseUrl, limit, token)
 	if err != nil {

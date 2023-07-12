@@ -14,30 +14,31 @@ import (
 )
 
 var (
-	fileName string
+	filename string
 )
 
 var applyWebhooksCmd = &cobra.Command{
 	PreRun: func(cmd *cobra.Command, args []string) {
-		viper.BindPFlag("file", cmd.Flags().Lookup("file"))
-		viper.BindPFlag("include-repos", cmd.Flags().Lookup("include-repos"))
+		viper.BindPFlag(types.FilenameFlag, cmd.Flags().Lookup(types.FilenameFlag))
+		viper.BindPFlag(types.IncludeReposFlag, cmd.Flags().Lookup(types.IncludeReposFlag))
 	},
-	Use:  "apply",
-	RunE: applyWebhooks,
+	Use:   "apply",
+	Short: "Apply a webhooks configuration file",
+	RunE:  applyWebhooks,
 }
 
 func init() {
-	applyWebhooksCmd.Flags().StringVarP(&fileName, "file", "f", "", "Webhooks file")
-	applyWebhooksCmd.Flags().Bool("include-repos", false, "Include repositories")
+	applyWebhooksCmd.Flags().StringVarP(&filename, types.FilenameFlag, "f", "", "Webhooks file")
+	applyWebhooksCmd.Flags().Bool(types.IncludeReposFlag, false, "Include repositories")
 
-	applyWebhooksCmd.MarkFlagRequired("file")
+	applyWebhooksCmd.MarkFlagRequired(types.FilenameFlag)
 }
 
 func applyWebhooks(cmd *cobra.Command, args []string) error {
-	file := viper.GetString("file")
-	baseUrl := viper.GetString("baseUrl")
-	limit := viper.GetInt("limit")
-	token := viper.GetString("token")
+	file := viper.GetString(types.FilenameFlag)
+	baseUrl := viper.GetString(types.BaseUrlFlag)
+	limit := viper.GetInt(types.LimitFlag)
+	token := viper.GetString(types.TokenFlag)
 
 	var desiredWebhooks map[string]*ProjectWebhooks
 	if err := pkg.ReadConfigFile(file, &desiredWebhooks); err != nil {
