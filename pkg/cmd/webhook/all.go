@@ -26,11 +26,11 @@ func listAllWebhooks(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	return pkg.PrintData(webhooks, PrettyFormatProjectWebhooks)
+	return pkg.PrintData(webhooks, prettyFormatProjectWebhooks)
 }
 
 func getAllWebhooks(baseUrl string, limit int, token string) (map[string]*ProjectWebhooks, error) {
-	projects, err := project.GetProjects(baseUrl, limit)
+	projects, err := project.GetProjects(baseUrl, token, limit)
 	if err != nil {
 		return nil, err
 	}

@@ -16,9 +16,10 @@ var listProjectsCmd = &cobra.Command{
 
 func listProjects(cmd *cobra.Command, args []string) error {
 	var baseUrl = viper.GetString(types.BaseUrlFlag)
+	var token = viper.GetString(types.TokenFlag)
 	var limit = viper.GetInt(types.LimitFlag)
 
-	projects, err := GetProjects(baseUrl, limit)
+	projects, err := GetProjects(baseUrl, token, limit)
 	if err != nil {
 		return err
 	}

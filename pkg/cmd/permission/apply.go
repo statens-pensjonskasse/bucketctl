@@ -57,7 +57,7 @@ func applyPermissions(cmd *cobra.Command, args []string) error {
 		if includeRepos {
 			// Fyller inn data om manglende repositories med tom Permissions struct.
 			// Tom Permissions struct betyr ingen ekstra rettigheter på repo-nivå.
-			allProjectRepositories, err := repository.GetProjectRepositories(baseUrl, projectKey, limit)
+			allProjectRepositories, err := repository.GetProjectRepositories(baseUrl, projectKey, token, limit)
 			if err != nil {
 				return err
 			}

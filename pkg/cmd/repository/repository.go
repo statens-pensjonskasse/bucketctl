@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
-	"sort"
 	"strconv"
 )
 
@@ -33,10 +32,10 @@ func init() {
 	Cmd.AddCommand(listRepositoriesCmd)
 }
 
-func GetProjectRepositories(baseUrl string, projectKey string, limit int) (map[string]*Repository, error) {
+func GetProjectRepositories(baseUrl string, projectKey string, token string, limit int) (map[string]*Repository, error) {
 	url := fmt.Sprintf("%s/rest/api/latest/projects/%s/repos?limit=%d", baseUrl, projectKey, limit)
 
-	body, err := pkg.GetRequestBody(url, "")
+	body, err := pkg.GetRequestBody(url, token)
 	if err != nil {
 		return nil, err
 	}
@@ -68,14 +67,10 @@ func GetProjectRepositories(baseUrl string, projectKey string, limit int) (map[s
 }
 
 func prettyFormatRepositories(reposMap map[string]*Repository) [][]string {
-	repos := make([]string, 0, len(reposMap))
-	for s := range reposMap {
-		repos = append(repos, s)
-	}
-	sort.Strings(repos)
-
 	var data [][]string
 	data = append(data, []string{"ID", "Slug", "State", "Public", "Archived"})
+
+	repos := pkg.GetLexicallySortedKeys(reposMap)
 	for _, slug := range repos {
 		row := []string{strconv.Itoa(reposMap[slug].Id), slug, reposMap[slug].StatusMessage, strconv.FormatBool(reposMap[slug].Public), strconv.FormatBool(reposMap[slug].Archived)}
 		data = append(data, row)

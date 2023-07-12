@@ -26,7 +26,7 @@ var listPermissionsCmd = &cobra.Command{
 
 func init() {
 	listPermissionsCmd.Flags().StringVarP(&key, types.ProjectKeyFlag, "k", "", "Project key")
-	listPermissionsCmd.Flags().StringVarP(&repo, types.RepoSlugFlag, "r", "", "Repo slug. Leave empty to query project permissions.")
+	listPermissionsCmd.Flags().StringVarP(&repo, types.RepoSlugFlag, "r", "", "Repository slug. Leave empty to query project permissions.")
 	listPermissionsCmd.Flags().Bool(types.IncludeReposFlag, false, "Include repository permissions when querying project permissions")
 
 	listPermissionsCmd.MarkFlagRequired(types.ProjectKeyFlag)

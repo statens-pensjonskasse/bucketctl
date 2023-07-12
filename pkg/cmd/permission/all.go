@@ -30,7 +30,7 @@ func listAllPermissions(cmd *cobra.Command, args []string) error {
 }
 
 func getAllPermissions(baseUrl string, limit int, token string) (map[string]*ProjectPermissions, error) {
-	projects, err := project.GetProjects(baseUrl, limit)
+	projects, err := project.GetProjects(baseUrl, token, limit)
 	if err != nil {
 		return nil, err
 	}

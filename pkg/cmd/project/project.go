@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
-	"sort"
 	"strconv"
 )
 
@@ -28,10 +27,10 @@ func init() {
 	Cmd.AddCommand(listProjectsCmd)
 }
 
-func GetProjects(baseUrl string, limit int) (map[string]*Project, error) {
+func GetProjects(baseUrl string, token string, limit int) (map[string]*Project, error) {
 	url := fmt.Sprintf("%s/rest/api/latest/projects?limit=%d", baseUrl, limit)
 
-	body, err := pkg.GetRequestBody(url, "")
+	body, err := pkg.GetRequestBody(url, token)
 	if err != nil {
 		return nil, err
 	}
@@ -59,14 +58,10 @@ func GetProjects(baseUrl string, limit int) (map[string]*Project, error) {
 }
 
 func prettyFormatProjects(projectsMap map[string]*Project) [][]string {
-	projects := make([]string, 0, len(projectsMap))
-	for p := range projectsMap {
-		projects = append(projects, p)
-	}
-	sort.Strings(projects)
-
 	var data [][]string
-	data = append(data, []string{"ID", types.ProjectKeyFlag, "Name", "Description"})
+	data = append(data, []string{"ID", "Project Key", "Name", "Description"})
+
+	projects := pkg.GetLexicallySortedKeys(projectsMap)
 	for _, key := range projects {
 		row := []string{strconv.Itoa(projectsMap[key].Id), key, projectsMap[key].Name, projectsMap[key].Description}
 		data = append(data, row)

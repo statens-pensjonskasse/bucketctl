@@ -20,7 +20,7 @@ var listWebhooksCmd = &cobra.Command{
 
 func init() {
 	listWebhooksCmd.Flags().StringVarP(&key, types.ProjectKeyFlag, "k", "", "Project key")
-	listWebhooksCmd.Flags().StringVarP(&repo, types.RepoSlugFlag, "r", "", "Repo slug. Leave empty to query project webhooks.")
+	listWebhooksCmd.Flags().StringVarP(&repo, types.RepoSlugFlag, "r", "", "Repository slug. Leave empty to query project webhooks.")
 	listWebhooksCmd.Flags().Bool(types.IncludeReposFlag, false, "Include repository permissions when querying project")
 
 	listWebhooksCmd.MarkFlagRequired(types.ProjectKeyFlag)
@@ -51,5 +51,5 @@ func listWebhooks(cmd *cobra.Command, args []string) error {
 		projectWebhooksMap[projectKey].Repositories[repoSlug] = webhooks
 	}
 
-	return pkg.PrintData(projectWebhooksMap, PrettyFormatProjectWebhooks)
+	return pkg.PrintData(projectWebhooksMap, prettyFormatProjectWebhooks)
 }

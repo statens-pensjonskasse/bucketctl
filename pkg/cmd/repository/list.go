@@ -29,9 +29,10 @@ func init() {
 func listRepositories(cmd *cobra.Command, args []string) error {
 	var baseUrl = viper.GetString(types.BaseUrlFlag)
 	var projectKey = viper.GetString(types.ProjectKeyFlag)
+	var token = viper.GetString(types.TokenFlag)
 	var limit = viper.GetInt(types.LimitFlag)
 
-	repos, err := GetProjectRepositories(baseUrl, projectKey, limit)
+	repos, err := GetProjectRepositories(baseUrl, projectKey, token, limit)
 	if err != nil {
 		return err
 	}

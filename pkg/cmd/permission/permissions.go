@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
-	"sort"
 	"strings"
 )
 
@@ -153,7 +152,7 @@ func getProjectPermissions(baseUrl string, projectKey string, limit int, token s
 
 	if includeRepos {
 		// Hent rettigheter for alle repositories i prosjektet
-		projectRepositories, err := repository.GetProjectRepositories(baseUrl, projectKey, limit)
+		projectRepositories, err := repository.GetProjectRepositories(baseUrl, projectKey, token, limit)
 		if err != nil {
 			return nil, err
 		}
@@ -202,16 +201,10 @@ func getRepositoryPermissions(baseUrl string, projectKey string, repoSlug string
 }
 
 func prettyFormatProjectPermissions(projectPermissionsMap map[string]*ProjectPermissions) [][]string {
-	// Sorter prosjekt alfabetisk
-	projects := make([]string, 0, len(projectPermissionsMap))
-	for k := range projectPermissionsMap {
-		projects = append(projects, k)
-	}
-	sort.Strings(projects)
-
 	var data [][]string
-	data = append(data, []string{"Project", "repository", "Permission", "Groups", "Users"})
+	data = append(data, []string{"Project", "Repository", "Permission", "Groups", "Users"})
 
+	projects := pkg.GetLexicallySortedKeys(projectPermissionsMap)
 	for _, projectKey := range projects {
 		formattedProjectPermissions := prettyFormatPermissions(projectKey, "ALL", projectPermissionsMap[projectKey].Permissions)
 		data = append(data, formattedProjectPermissions...)
@@ -223,14 +216,9 @@ func prettyFormatProjectPermissions(projectPermissionsMap map[string]*ProjectPer
 }
 
 func prettyFormatRepositoryPermissions(projectKey string, repositoryPermissionsMap map[string]*RepositoryPermissions) [][]string {
-	// Sorter repoene alfabetisk
-	repositories := make([]string, 0, len(repositoryPermissionsMap))
-	for k := range repositoryPermissionsMap {
-		repositories = append(repositories, k)
-	}
-	sort.Strings(repositories)
-
 	var data [][]string
+
+	repositories := pkg.GetLexicallySortedKeys(repositoryPermissionsMap)
 	for _, repoSlug := range repositories {
 		repoPermissions := prettyFormatPermissions(projectKey, repoSlug, repositoryPermissionsMap[repoSlug].Permissions)
 		data = append(data, repoPermissions...)

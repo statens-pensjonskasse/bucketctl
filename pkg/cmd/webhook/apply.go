@@ -70,7 +70,7 @@ func applyWebhooks(cmd *cobra.Command, args []string) error {
 				return err
 			}
 		}
-		allProjectRepositories, err := repository.GetProjectRepositories(baseUrl, projectKey, limit)
+		allProjectRepositories, err := repository.GetProjectRepositories(baseUrl, projectKey, token, limit)
 		if err != nil {
 			return err
 		}

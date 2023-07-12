@@ -2,7 +2,6 @@ package config
 
 import (
 	"bucketctl/pkg"
-	"bucketctl/pkg/types"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"sort"
@@ -17,7 +16,7 @@ var getConfigCmd = &cobra.Command{
 
 func prettyFormatConfig(settings map[string]interface{}) [][]string {
 	var data [][]string
-	data = append(data, []string{types.ProjectKeyFlag, "Value"})
+	data = append(data, []string{"Project Key", "Value"})
 
 	for key := range settings {
 		row := []string{key, viper.GetString(key)}
@@ -32,7 +31,7 @@ func getConfig(cmd *cobra.Command, args []string) error {
 	sort.Strings(keys)
 
 	var data [][]string
-	data = append(data, []string{types.ProjectKeyFlag, "Value"})
+	data = append(data, []string{"Project Key", "Value"})
 
 	for _, key := range keys {
 		row := []string{key, viper.GetString(key)}

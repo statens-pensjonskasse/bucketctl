@@ -20,7 +20,7 @@ var listSettingsCmd = &cobra.Command{
 
 func init() {
 	listSettingsCmd.Flags().StringVarP(&key, types.ProjectKeyFlag, "k", "", "Project key")
-	listSettingsCmd.Flags().StringVarP(&repo, types.RepoSlugFlag, "r", "", "Repo slug. Leave empty to query project webhooks.")
+	listSettingsCmd.Flags().StringVarP(&repo, types.RepoSlugFlag, "r", "", "Repository slug. Leave empty to query project webhooks.")
 	listSettingsCmd.Flags().Bool(types.IncludeReposFlag, false, "Include repository permissions when querying project")
 
 	listSettingsCmd.MarkFlagRequired(types.ProjectKeyFlag)
@@ -52,5 +52,5 @@ func listSettings(cmd *cobra.Command, args []string) error {
 		projectSettingsMap[projectKey].Repositories[repoSlug].Restrictions = repoRestrictions.Restrictions
 	}
 
-	return pkg.PrintData(projectSettingsMap, nil)
+	return pkg.PrintData(projectSettingsMap, prettyFormatProjectsSettings)
 }

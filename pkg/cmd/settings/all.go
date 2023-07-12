@@ -30,7 +30,7 @@ func listAllSettings(cmd *cobra.Command, args []string) error {
 }
 
 func getAllSettings(baseUrl string, limit int, token string) (map[string]*ProjectSettings, error) {
-	projects, err := project.GetProjects(baseUrl, limit)
+	projects, err := project.GetProjects(baseUrl, token, limit)
 	if err != nil {
 		return nil, err
 	}

@@ -8,11 +8,12 @@ import (
 	"fmt"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
+	"strings"
 )
 
 type ProjectSettings struct {
 	Restrictions map[string]*Restrictions       `json:"restrictions,omitempty" yaml:"restrictions,omitempty"`
-	Repositories map[string]*RepositorySettings `json:types.RepoSlugFlagsitories,omitempty" yaml:types.RepoSlugFlagsitories,omitempty"`
+	Repositories map[string]*RepositorySettings `json:"repositories,omitempty" yaml:"repositories,omitempty"`
 }
 
 type RepositorySettings struct {
@@ -70,7 +71,7 @@ func getProjectRestrictions(baseUrl string, projectKey string, limit int, token 
 	projectSettings := &ProjectSettings{Restrictions: projectRestrictions}
 
 	if includeRepos {
-		projectRepositories, err := repository.GetProjectRepositories(baseUrl, projectKey, limit)
+		projectRepositories, err := repository.GetProjectRepositories(baseUrl, projectKey, token, limit)
 		if err != nil {
 			return nil, err
 		}
@@ -144,4 +145,72 @@ func getRestrictions(url string, token string) ([]*types.Restriction, error) {
 	}
 
 	return restrictions.Values, nil
+}
+
+func prettyFormatProjectsSettings(projectSettingsMap map[string]*ProjectSettings) [][]string {
+	var data [][]string
+
+	data = append(data, []string{"Project", "Repository", "Matcher", "Branch", "Restriction", "Exempt Groups", "Exempt Users"})
+	projects := pkg.GetLexicallySortedKeys(projectSettingsMap)
+	for _, projectKey := range projects {
+		projectSettings := prettyFormatRestrictions(projectKey, "ALL", projectSettingsMap[projectKey].Restrictions)
+		data = append(data, projectSettings...)
+
+		repoSettings := prettyFormatRepositorySettings(projectKey, projectSettingsMap[projectKey].Repositories)
+		data = append(data, repoSettings...)
+	}
+
+	return data
+}
+
+func prettyFormatRepositorySettings(projectKey string, repoSettingsMap map[string]*RepositorySettings) [][]string {
+	var data [][]string
+
+	repositories := pkg.GetLexicallySortedKeys(repoSettingsMap)
+	for _, repoSlug := range repositories {
+		repoSettings := prettyFormatRestrictions(projectKey, repoSlug, repoSettingsMap[repoSlug].Restrictions)
+		data = append(data, repoSettings...)
+	}
+
+	return data
+}
+
+func prettyFormatRestrictions(projectKey string, repoSlug string, restrictions map[string]*Restrictions) [][]string {
+	var data [][]string
+
+	for matcher, restriction := range restrictions {
+		for branch, branchRestriction := range restriction.Branches {
+			branchRestrictions := prettyFormatBranchRestrictions(projectKey, repoSlug, matcher, branch, branchRestriction)
+			data = append(data, branchRestrictions...)
+		}
+	}
+
+	return data
+}
+
+func prettyFormatBranchRestrictions(projectKey string, repoSlug string, matcher string, branch string, branchRestrictions *BranchRestrictions) [][]string {
+	var data [][]string
+
+	restrictions := pkg.GetLexicallySortedKeys(branchRestrictions.Restrictions)
+	for _, restriction := range restrictions {
+		var users string
+		for _, user := range branchRestrictions.Restrictions[restriction].ExemptUsers {
+			users += user + "\n"
+		}
+		users = strings.Trim(users, "\n")
+
+		var groups string
+		for _, group := range branchRestrictions.Restrictions[restriction].ExemptGroups {
+			groups += group + "\n"
+		}
+		groups = strings.Trim(groups, "\n")
+
+		data = append(data, []string{projectKey, repoSlug, matcher, branch, restriction, groups, users})
+		projectKey = ""
+		repoSlug = ""
+		matcher = ""
+		branch = ""
+	}
+
+	return data
 }

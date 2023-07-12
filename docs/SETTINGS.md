@@ -30,6 +30,9 @@
 
 * `BRANCH` – Navn på branch
 * `MODEL_BRANCH` – Type branch (`production`/`development`)
+* `MODEL_CATEGORY` – Branch-kategori (`FEATURE`/`BUGFIX`/`HOTFIX`/`RELEASE`)
+* `PATTERN` – Match på pattern (
+  se [Bitbucket docs](https://confluence.atlassian.com/bitbucketserver/branch-permission-patterns-776639814.html))
 
 #### `<branch>`
 

@@ -100,7 +100,7 @@ func getProjectWebhooks(baseUrl string, projectKey string, limit int, token stri
 	projectWebhooks := &ProjectWebhooks{Webhooks: webhooks}
 
 	if includeRepos {
-		projectRepositories, err := repository.GetProjectRepositories(baseUrl, projectKey, limit)
+		projectRepositories, err := repository.GetProjectRepositories(baseUrl, projectKey, token, limit)
 		if err != nil {
 			return nil, err
 		}
@@ -130,17 +130,11 @@ func getRepositoryWebhooks(baseUrl string, projectKey string, repoSlug string, l
 	return &RepositoryWebhooks{Webhooks: webhooks}, nil
 }
 
-func PrettyFormatProjectWebhooks(projectWebhooksMap map[string]*ProjectWebhooks) [][]string {
+func prettyFormatProjectWebhooks(projectWebhooksMap map[string]*ProjectWebhooks) [][]string {
 	var data [][]string
-	data = append(data, []string{"Project", "Repository", "ID", "Name", "Events", "URL", "Active", "VerifySSL"})
+	data = append(data, []string{"Project", "Repository", "ID", "Name", "Events", "URL", "Active", "Verify SSL"})
 
-	// Sorter prosjekt alfabetisk
-	projects := make([]string, 0, len(projectWebhooksMap))
-	for k := range projectWebhooksMap {
-		projects = append(projects, k)
-	}
-	sort.Strings(projects)
-
+	projects := pkg.GetLexicallySortedKeys(projectWebhooksMap)
 	for _, projectKey := range projects {
 		formattedProjectWebhooks := prettyFormatWebhooks(projectKey, "PROJECT", projectWebhooksMap[projectKey].Webhooks)
 		data = append(data, formattedProjectWebhooks...)
