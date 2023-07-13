@@ -9,6 +9,9 @@ import (
 
 var listWebhooksCmd = &cobra.Command{
 	PreRun: func(cmd *cobra.Command, args []string) {
+		if viper.GetString(types.ProjectKeyFlag) == "" {
+			cmd.MarkFlagRequired(types.ProjectKeyFlag)
+		}
 		viper.BindPFlag(types.ProjectKeyFlag, cmd.Flags().Lookup(types.ProjectKeyFlag))
 		viper.BindPFlag(types.RepoSlugFlag, cmd.Flags().Lookup(types.RepoSlugFlag))
 		viper.BindPFlag(types.IncludeReposFlag, cmd.Flags().Lookup(types.IncludeReposFlag))
@@ -22,8 +25,6 @@ func init() {
 	listWebhooksCmd.Flags().StringVarP(&key, types.ProjectKeyFlag, "k", "", "Project key")
 	listWebhooksCmd.Flags().StringVarP(&repo, types.RepoSlugFlag, "r", "", "Repository slug. Leave empty to query project webhooks.")
 	listWebhooksCmd.Flags().Bool(types.IncludeReposFlag, false, "Include repository permissions when querying project")
-
-	listWebhooksCmd.MarkFlagRequired(types.ProjectKeyFlag)
 }
 
 func listWebhooks(cmd *cobra.Command, args []string) error {

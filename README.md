@@ -23,7 +23,7 @@ dette kan lages under profilen din i Bitbucket.
 For enkelhestsskyld kan dette lagres i config sammen med base url
 
 ```shell
-bucketctl config set --token <token> --base-url 
+bucketctl config set --token <token> --base-url <url>
 ```
 
 ## Eksempler

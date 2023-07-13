@@ -7,10 +7,10 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/fs"
 	"net/http"
 	"os"
 	"path"
+	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
@@ -18,6 +18,14 @@ import (
 
 	"gopkg.in/yaml.v3"
 )
+
+func GetConfigPath() (string, error) {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(home, ".config", "bucketctl"), nil
+}
 
 func CreateDirIfNotExists(dir string, perm os.FileMode) error {
 	baseDir := path.Dir(dir)
@@ -28,18 +36,32 @@ func CreateDirIfNotExists(dir string, perm os.FileMode) error {
 	return os.MkdirAll(baseDir, perm)
 }
 
-func CreateFileIfNotExists(file string, perm os.FileMode) error {
+func FileNotExists(file string) bool {
 	if _, err := os.Stat(file); err != nil {
-		if errors.Is(err, fs.ErrNotExist) {
-			var fileHandle, err = os.Create(file)
-			defer fileHandle.Close()
-			if err != nil {
-				return err
-			}
-			if err := os.Chmod(file, perm); err != nil {
-				return err
-			}
+		if errors.Is(err, os.ErrNotExist) {
+			return true
 		}
+	}
+	return false
+}
+
+func CreateFileIfNotExists(file string, perm os.FileMode) error {
+	if FileNotExists(file) {
+		if err := CreateFile(file, perm); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func CreateFile(file string, perm os.FileMode) error {
+	var fileHandle, err = os.Create(file)
+	defer fileHandle.Close()
+	if err != nil {
+		return err
+	}
+	if err := os.Chmod(file, perm); err != nil {
+		return err
 	}
 	return nil
 }
@@ -53,6 +75,14 @@ func CheckFilePermission(file string, perm os.FileMode) error {
 		return errors.New("Unexpected file permission '" + stat.Mode().String() + "' for file '" + file + "', expected '" + perm.String() + "'")
 	}
 	return nil
+}
+
+func WriteFile(filename string, data []byte, perm os.FileMode) error {
+	return os.WriteFile(filename, data, perm)
+}
+
+func RemoveFile(filename string) error {
+	return os.Remove(filename)
 }
 
 func HttpRequest(method string, url string, payload io.Reader, token string, params ...map[string]string) (*http.Response, error) {

@@ -19,6 +19,7 @@ import (
 
 var (
 	cfgFile      string
+	context      string
 	baseUrl      string
 	userToken    string
 	limit        int
@@ -41,13 +42,13 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, types.ConfigFlag, "", "Config file (default $HOME/.bucketctl/config.yaml")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, types.ConfigFlag, "", "Base config file (default $HOME/.bucketctl/config.yaml")
+	rootCmd.PersistentFlags().StringVarP(&context, types.ContextFlag, "x", "", "Context to use for overriding base config")
 	rootCmd.PersistentFlags().StringVar(&baseUrl, types.BaseUrlFlag, "", "Base url for BitBucket instance")
 	rootCmd.PersistentFlags().IntVarP(&limit, types.LimitFlag, "l", 500, "Max return values")
 	rootCmd.PersistentFlags().StringVarP(&userToken, types.TokenFlag, "t", "", "Http access token")
 	rootCmd.PersistentFlags().VarP(&outputFormat, types.OutputFlag, "o", "Output format. One of: pretty, yaml, json")
 
-	viper.BindPFlag(types.ConfigFlag, rootCmd.PersistentFlags().Lookup(types.ConfigFlag))
 	viper.BindPFlag(types.BaseUrlFlag, rootCmd.PersistentFlags().Lookup(types.BaseUrlFlag))
 	viper.BindPFlag(types.LimitFlag, rootCmd.PersistentFlags().Lookup(types.LimitFlag))
 	viper.BindPFlag(types.TokenFlag, rootCmd.PersistentFlags().Lookup(types.TokenFlag))
@@ -63,36 +64,28 @@ func init() {
 }
 
 func initConfig() {
-	if cfgFile != "" {
-		viper.SetConfigFile(cfgFile)
-	} else {
-		home, err := os.UserHomeDir()
-		cobra.CheckErr(err)
+	cfgPath, err := pkg.GetConfigPath()
+	cobra.CheckErr(err)
+	viper.AddConfigPath(cfgPath)
 
-		viper.AddConfigPath(filepath.Join(home, ".config", "bucketctl"))
-		viper.SetConfigName("config")
-		viper.SetConfigType("yaml")
-
-		cfgFile = filepath.Join(home, ".config", "bucketctl", "config.yaml")
+	if cfgFile == "" {
+		cfgFile = filepath.Join(cfgPath, "config.yaml")
 	}
+
+	cobra.CheckErr(pkg.CreateDirIfNotExists(cfgFile, 0700))
+	cobra.CheckErr(pkg.CreateFileIfNotExists(cfgFile, 0600))
+	cobra.CheckErr(pkg.CheckFilePermission(cfgFile, 0600))
 
 	viper.AutomaticEnv()
 
-	if err := pkg.CreateDirIfNotExists(cfgFile, 0700); err != nil {
-		cobra.CheckErr(err)
-	}
+	viper.SetConfigFile(cfgFile)
+	viper.SetConfigPermissions(0600)
+	cobra.CheckErr(viper.ReadInConfig())
 
-	if err := pkg.CreateFileIfNotExists(cfgFile, 0600); err != nil {
-		cobra.CheckErr(err)
+	if context != "" {
+		viper.SetConfigName(context)
+		viper.SetConfigPermissions(0600)
+		cobra.CheckErr(viper.MergeInConfig())
+		viper.SetConfigFile(cfgFile)
 	}
-
-	if err := pkg.CheckFilePermission(cfgFile, 0600); err != nil {
-		cobra.CheckErr(err)
-	}
-
-	if err := viper.ReadInConfig(); err != nil {
-		cobra.CheckErr(err)
-	}
-
-	viper.SetDefault(types.ConfigFlag, viper.ConfigFileUsed())
 }

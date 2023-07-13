@@ -1,7 +1,10 @@
 package config
 
 import (
+	"bucketctl/pkg"
+	"bucketctl/pkg/cmd/config/context"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var Cmd = &cobra.Command{
@@ -11,6 +14,20 @@ var Cmd = &cobra.Command{
 }
 
 func init() {
+	Cmd.AddCommand(context.Cmd)
 	Cmd.AddCommand(getConfigCmd)
 	Cmd.AddCommand(setConfigCmd)
+}
+
+func prettyFormatConfig(settingMap map[string]interface{}) [][]string {
+	var data [][]string
+	data = append(data, []string{"Key", "Value"})
+
+	keys := pkg.GetLexicallySortedKeys(settingMap)
+	for _, key := range keys {
+		row := []string{key, viper.GetString(key)}
+		data = append(data, row)
+	}
+
+	return data
 }

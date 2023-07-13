@@ -2,6 +2,7 @@ package types
 
 const (
 	ConfigFlag       = "config"
+	ContextFlag      = "context"
 	BaseUrlFlag      = "base-url"
 	LimitFlag        = "limit"
 	TokenFlag        = "token"

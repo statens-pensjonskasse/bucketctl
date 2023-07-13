@@ -13,6 +13,9 @@ var (
 
 var listRepositoriesCmd = &cobra.Command{
 	PreRun: func(cmd *cobra.Command, args []string) {
+		if viper.GetString(types.ProjectKeyFlag) == "" {
+			cmd.MarkFlagRequired(types.ProjectKeyFlag)
+		}
 		viper.BindPFlag(types.ProjectKeyFlag, cmd.Flags().Lookup(types.ProjectKeyFlag))
 	},
 	Use:     "list",
@@ -23,7 +26,6 @@ var listRepositoriesCmd = &cobra.Command{
 
 func init() {
 	listRepositoriesCmd.Flags().StringVarP(&key, types.ProjectKeyFlag, "k", "", "Project key")
-	listRepositoriesCmd.MarkFlagRequired(types.ProjectKeyFlag)
 }
 
 func listRepositories(cmd *cobra.Command, args []string) error {
