@@ -1,8 +1,8 @@
 package settings
 
 import (
-	"bucketctl/pkg"
 	"bucketctl/pkg/cmd/project"
+	"bucketctl/pkg/common"
 	"bucketctl/pkg/types"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
@@ -26,7 +26,7 @@ func listAllSettings(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	return pkg.PrintData(settings, nil)
+	return common.PrintData(settings, nil)
 }
 
 func getAllSettings(baseUrl string, limit int, token string) (map[string]*ProjectSettings, error) {

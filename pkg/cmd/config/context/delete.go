@@ -1,7 +1,7 @@
 package context
 
 import (
-	"bucketctl/pkg"
+	"bucketctl/pkg/common"
 	"errors"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
@@ -20,17 +20,17 @@ func deleteContext(cmd *cobra.Command, args []string) error {
 		return errors.New("can't delete base config")
 	}
 
-	cfgPath, err := pkg.GetConfigPath()
+	cfgPath, err := common.GetConfigPath()
 	if err != nil {
 		return err
 	}
 
 	contextFile := filepath.Join(cfgPath, context+".yaml")
-	if pkg.FileNotExists(contextFile) {
+	if common.FileNotExists(contextFile) {
 		return errors.New("context '" + context + "' doesn't exists")
 	}
 
-	if err := pkg.RemoveFile(contextFile); err != nil {
+	if err := common.RemoveFile(contextFile); err != nil {
 		return err
 	}
 

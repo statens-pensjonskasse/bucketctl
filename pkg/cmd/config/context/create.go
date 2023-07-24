@@ -1,7 +1,7 @@
 package context
 
 import (
-	"bucketctl/pkg"
+	"bucketctl/pkg/common"
 	"errors"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
@@ -17,17 +17,17 @@ var createCmd = &cobra.Command{
 }
 
 func createContext(cmd *cobra.Command, args []string) error {
-	cfgPath, err := pkg.GetConfigPath()
+	cfgPath, err := common.GetConfigPath()
 	if err != nil {
 		return err
 	}
 
 	contextFile := filepath.Join(cfgPath, context+".yaml")
-	if !pkg.FileNotExists(contextFile) {
+	if !common.FileNotExists(contextFile) {
 		return errors.New("context '" + context + "' already exists")
 	}
 
-	if err := pkg.CreateFileIfNotExists(filepath.Join(cfgPath, context+".yaml"), 0600); err != nil {
+	if err := common.CreateFileIfNotExists(filepath.Join(cfgPath, context+".yaml"), 0600); err != nil {
 		return err
 	}
 
@@ -38,7 +38,7 @@ func createContext(cmd *cobra.Command, args []string) error {
 	removeEmptyEntries(&config)
 
 	yamlData, err := yaml.Marshal(&config)
-	if err := pkg.WriteFile(contextFile, yamlData, 0600); err != nil {
+	if err := common.WriteFile(contextFile, yamlData, 0600); err != nil {
 		return err
 	}
 

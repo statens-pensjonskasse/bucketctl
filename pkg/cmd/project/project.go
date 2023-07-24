@@ -1,7 +1,7 @@
 package project
 
 import (
-	"bucketctl/pkg"
+	"bucketctl/pkg/common"
 	"bucketctl/pkg/types"
 	"encoding/json"
 	"fmt"
@@ -30,7 +30,7 @@ func init() {
 func GetProjects(baseUrl string, token string, limit int) (map[string]*Project, error) {
 	url := fmt.Sprintf("%s/rest/api/latest/projects?limit=%d", baseUrl, limit)
 
-	body, err := pkg.GetRequestBody(url, token)
+	body, err := common.GetRequestBody(url, token)
 	if err != nil {
 		return nil, err
 	}
@@ -61,7 +61,7 @@ func prettyFormatProjects(projectsMap map[string]*Project) [][]string {
 	var data [][]string
 	data = append(data, []string{"ID", "Project Key", "Name", "Description"})
 
-	projects := pkg.GetLexicallySortedKeys(projectsMap)
+	projects := common.GetLexicallySortedKeys(projectsMap)
 	for _, key := range projects {
 		row := []string{strconv.Itoa(projectsMap[key].Id), key, projectsMap[key].Name, projectsMap[key].Description}
 		data = append(data, row)

@@ -1,7 +1,7 @@
 package permission
 
 import (
-	"bucketctl/pkg"
+	"bucketctl/pkg/common"
 	"bucketctl/pkg/types"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -60,5 +60,5 @@ func listPermissions(cmd *cobra.Command, args []string) error {
 		projectPermissionsMap[projectKey].Repositories[repoSlug] = permissions
 	}
 
-	return pkg.PrintData(projectPermissionsMap, prettyFormatProjectPermissions)
+	return common.PrintData(projectPermissionsMap, prettyFormatProjectPermissions)
 }

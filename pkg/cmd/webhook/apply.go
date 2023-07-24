@@ -1,8 +1,8 @@
 package webhook
 
 import (
-	"bucketctl/pkg"
 	"bucketctl/pkg/cmd/repository"
+	"bucketctl/pkg/common"
 	"bucketctl/pkg/types"
 	"bytes"
 	"encoding/json"
@@ -41,11 +41,11 @@ func applyWebhooks(cmd *cobra.Command, args []string) error {
 	token := viper.GetString(types.TokenFlag)
 
 	var desiredWebhooks map[string]*ProjectWebhooks
-	if err := pkg.ReadConfigFile(file, &desiredWebhooks); err != nil {
+	if err := common.ReadConfigFile(file, &desiredWebhooks); err != nil {
 		return err
 	}
 
-	projectKeys := pkg.GetLexicallySortedKeys(desiredWebhooks)
+	projectKeys := common.GetLexicallySortedKeys(desiredWebhooks)
 	progressBar, _ := pterm.DefaultProgressbar.WithTotal(len(desiredWebhooks)).WithRemoveWhenDone(true).Start()
 	for _, projectKey := range projectKeys {
 		progressBar.UpdateTitle(projectKey)
@@ -226,7 +226,7 @@ func createProjectWebhook(baseUrl string, projectKey string, token string, webho
 	if err != nil {
 		return err
 	}
-	if _, err := pkg.PostRequest(url, token, bytes.NewReader(payload), nil); err != nil {
+	if _, err := common.PostRequest(url, token, bytes.NewReader(payload), nil); err != nil {
 		return err
 	}
 	pterm.Info.Println(pterm.Green("🪝 Created") + " webhook '" + webhook.Name + "' in project '" + projectKey + "'")
@@ -239,7 +239,7 @@ func updateProjectWebhook(baseUrl string, projectKey string, token string, webho
 	if err != nil {
 		return err
 	}
-	if _, err := pkg.PutRequest(url, token, bytes.NewReader(payload), nil); err != nil {
+	if _, err := common.PutRequest(url, token, bytes.NewReader(payload), nil); err != nil {
 		return err
 	}
 	pterm.Info.Println(pterm.Blue("♻️ Updated") + " webhook '" + webhook.Name + "' in project '" + projectKey + "'")
@@ -248,7 +248,7 @@ func updateProjectWebhook(baseUrl string, projectKey string, token string, webho
 
 func deleteProjectWebhook(baseUrl string, projectKey string, token string, webhook *types.Webhook) error {
 	url := fmt.Sprintf("%s/rest/api/latest/projects/%s/webhooks/%d", baseUrl, projectKey, webhook.Id)
-	if _, err := pkg.DeleteRequest(url, token, nil); err != nil {
+	if _, err := common.DeleteRequest(url, token, nil); err != nil {
 		return err
 	}
 	pterm.Info.Println(pterm.Red("🗑️ Deleted") + " webhook '" + webhook.Name + "' in project '" + projectKey + "'")
@@ -261,7 +261,7 @@ func createRepositoryWebhook(baseUrl string, projectKey string, repoSlug string,
 	if err != nil {
 		return err
 	}
-	if _, err := pkg.PostRequest(url, token, bytes.NewReader(payload), nil); err != nil {
+	if _, err := common.PostRequest(url, token, bytes.NewReader(payload), nil); err != nil {
 		return err
 	}
 	pterm.Info.Println(pterm.Green("🪝 Created") + " webhook '" + webhook.Name + "' in repository '" + projectKey + "/" + repoSlug + "'")
@@ -274,7 +274,7 @@ func updateRepositoryWebhook(baseUrl string, projectKey string, repoSlug string,
 	if err != nil {
 		return err
 	}
-	if _, err := pkg.PutRequest(url, token, bytes.NewReader(payload), nil); err != nil {
+	if _, err := common.PutRequest(url, token, bytes.NewReader(payload), nil); err != nil {
 		return err
 	}
 	pterm.Info.Println(pterm.Blue("♻️ Updated") + " webhook '" + webhook.Name + "' in repository '" + projectKey + "/" + repoSlug + "'")
@@ -283,7 +283,7 @@ func updateRepositoryWebhook(baseUrl string, projectKey string, repoSlug string,
 
 func deleteRepositoryWebhook(baseUrl string, projectKey string, repoSlug string, token string, webhook *types.Webhook) error {
 	url := fmt.Sprintf("%s/rest/api/latest/projects/%s/repos/%s/webhooks/%d", baseUrl, projectKey, repoSlug, webhook.Id)
-	if _, err := pkg.DeleteRequest(url, token, nil); err != nil {
+	if _, err := common.DeleteRequest(url, token, nil); err != nil {
 		return err
 	}
 	pterm.Info.Println(pterm.Red("️🗑️ Deleted") + " webhook '" + webhook.Name + "' in repository '" + projectKey + "/" + repoSlug + "'")

@@ -1,4 +1,4 @@
-package pkg
+package common
 
 import (
 	"bucketctl/pkg/types"

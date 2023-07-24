@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"bucketctl/pkg"
 	"bucketctl/pkg/cmd/config"
 	"bucketctl/pkg/cmd/permission"
 	"bucketctl/pkg/cmd/project"
@@ -9,6 +8,7 @@ import (
 	"bucketctl/pkg/cmd/settings"
 	"bucketctl/pkg/cmd/version"
 	"bucketctl/pkg/cmd/webhook"
+	"bucketctl/pkg/common"
 	"bucketctl/pkg/types"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
@@ -23,7 +23,7 @@ var (
 	baseUrl      string
 	userToken    string
 	limit        int
-	outputFormat pkg.OutputFormatType
+	outputFormat common.OutputFormatType
 
 	rootCmd = &cobra.Command{
 		Use:   "bucketctl",
@@ -64,7 +64,7 @@ func init() {
 }
 
 func initConfig() {
-	cfgPath, err := pkg.GetConfigPath()
+	cfgPath, err := common.GetConfigPath()
 	cobra.CheckErr(err)
 	viper.AddConfigPath(cfgPath)
 
@@ -72,9 +72,9 @@ func initConfig() {
 		cfgFile = filepath.Join(cfgPath, "config.yaml")
 	}
 
-	cobra.CheckErr(pkg.CreateDirIfNotExists(cfgFile, 0700))
-	cobra.CheckErr(pkg.CreateFileIfNotExists(cfgFile, 0600))
-	cobra.CheckErr(pkg.CheckFilePermission(cfgFile, 0600))
+	cobra.CheckErr(common.CreateDirIfNotExists(cfgFile, 0700))
+	cobra.CheckErr(common.CreateFileIfNotExists(cfgFile, 0600))
+	cobra.CheckErr(common.CheckFilePermission(cfgFile, 0600))
 
 	viper.AutomaticEnv()
 

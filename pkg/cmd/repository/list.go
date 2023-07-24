@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"bucketctl/pkg"
+	"bucketctl/pkg/common"
 	"bucketctl/pkg/types"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -39,5 +39,5 @@ func listRepositories(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	return pkg.PrintData(repos, prettyFormatRepositories)
+	return common.PrintData(repos, prettyFormatRepositories)
 }

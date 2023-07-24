@@ -52,8 +52,8 @@
 ## Branch restrictions
 
 Branch restriction unntak er _permissive_.
-Det vil si at dersom skriv til en branch uten PR (`pull-request-only`) er satt på prosjektnivå uten unntak, 
-men også er anngitt på repo-nivå med et unntak for en gruppe, så vil dette unntaket gjelde for den gruppa i det gitte 
+Det vil si at dersom skriv til en branch uten PR (`pull-request-only`) er satt på prosjektnivå uten unntak,
+men også er anngitt på repo-nivå med et unntak for en gruppe, så vil dette unntaket gjelde for den gruppa i det gitte
 repoet.
 
 Dersom samme branch dekkes av to forskjellige restrictions gjelder samme regler.

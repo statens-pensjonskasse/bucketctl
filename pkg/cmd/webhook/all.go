@@ -1,8 +1,8 @@
 package webhook
 
 import (
-	"bucketctl/pkg"
 	"bucketctl/pkg/cmd/project"
+	"bucketctl/pkg/common"
 	"bucketctl/pkg/types"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
@@ -26,7 +26,7 @@ func listAllWebhooks(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	return pkg.PrintData(webhooks, prettyFormatProjectWebhooks)
+	return common.PrintData(webhooks, prettyFormatProjectWebhooks)
 }
 
 func getAllWebhooks(baseUrl string, limit int, token string) (map[string]*ProjectWebhooks, error) {

@@ -1,8 +1,8 @@
 package permission
 
 import (
-	"bucketctl/pkg"
 	"bucketctl/pkg/cmd/project"
+	"bucketctl/pkg/common"
 	"bucketctl/pkg/types"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
@@ -26,7 +26,7 @@ func listAllPermissions(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	return pkg.PrintData(permissions, prettyFormatProjectPermissions)
+	return common.PrintData(permissions, prettyFormatProjectPermissions)
 }
 
 func getAllPermissions(baseUrl string, limit int, token string) (map[string]*ProjectPermissions, error) {

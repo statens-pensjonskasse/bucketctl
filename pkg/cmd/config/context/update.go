@@ -1,7 +1,7 @@
 package context
 
 import (
-	"bucketctl/pkg"
+	"bucketctl/pkg/common"
 	"errors"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
@@ -20,18 +20,18 @@ func init() {
 }
 
 func updateContext(cmd *cobra.Command, args []string) error {
-	cfgPath, err := pkg.GetConfigPath()
+	cfgPath, err := common.GetConfigPath()
 	if err != nil {
 		return err
 	}
 
 	contextFile := filepath.Join(cfgPath, context+".yaml")
-	if pkg.FileNotExists(contextFile) {
+	if common.FileNotExists(contextFile) {
 		return errors.New("context '" + context + "' doesn't exists")
 	}
 
 	var config map[string]interface{}
-	if err := pkg.ReadConfigFile(contextFile, &config); err != nil {
+	if err := common.ReadConfigFile(contextFile, &config); err != nil {
 		return err
 	}
 
@@ -41,5 +41,5 @@ func updateContext(cmd *cobra.Command, args []string) error {
 	removeEmptyEntries(&config)
 
 	yamlData, err := yaml.Marshal(&config)
-	return pkg.WriteFile(contextFile, yamlData, 0600)
+	return common.WriteFile(contextFile, yamlData, 0600)
 }

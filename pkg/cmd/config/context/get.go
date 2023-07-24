@@ -1,7 +1,7 @@
 package context
 
 import (
-	"bucketctl/pkg"
+	"bucketctl/pkg/common"
 	"github.com/spf13/cobra"
 )
 
@@ -19,9 +19,9 @@ func getContext(cmd *cobra.Command, args []string) error {
 	}
 
 	var config map[string]string
-	if err := pkg.ReadConfigFile(contextFile, &config); err != nil {
+	if err := common.ReadConfigFile(contextFile, &config); err != nil {
 		return err
 	}
 
-	return pkg.PrintData(config, prettyFormatContext)
+	return common.PrintData(config, prettyFormatContext)
 }

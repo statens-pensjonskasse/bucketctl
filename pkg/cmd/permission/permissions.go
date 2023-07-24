@@ -1,8 +1,8 @@
 package permission
 
 import (
-	"bucketctl/pkg"
 	"bucketctl/pkg/cmd/repository"
+	"bucketctl/pkg/common"
 	"bucketctl/pkg/types"
 	"encoding/json"
 	"fmt"
@@ -43,7 +43,7 @@ func init() {
 func getDefaultProjectPermission(baseUrl string, projectKey string, token string) (string, error) {
 	for _, permission := range []string{"PROJECT_ADMIN", "PROJECT_WRITE", "PROJECT_READ"} {
 		url := fmt.Sprintf("%s/rest/api/latest/projects/%s/permissions/%s/all", baseUrl, projectKey, permission)
-		body, err := pkg.GetRequestBody(url, token)
+		body, err := common.GetRequestBody(url, token)
 		if err != nil {
 			return "", err
 		}
@@ -59,7 +59,7 @@ func getDefaultProjectPermission(baseUrl string, projectKey string, token string
 }
 
 func getGroupPermissions(url string, token string) ([]*types.GroupPermission, error) {
-	body, err := pkg.GetRequestBody(url, token)
+	body, err := common.GetRequestBody(url, token)
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +87,7 @@ func getRepositoryGroupPermissions(baseUrl string, projectKey string, repoSlug s
 }
 
 func getUserPermissions(url string, token string) ([]*types.UserPermission, error) {
-	body, err := pkg.GetRequestBody(url, token)
+	body, err := common.GetRequestBody(url, token)
 	if err != nil {
 		return nil, err
 	}
@@ -204,7 +204,7 @@ func prettyFormatProjectPermissions(projectPermissionsMap map[string]*ProjectPer
 	var data [][]string
 	data = append(data, []string{"Project", "Repository", "Permission", "Groups", "Users"})
 
-	projects := pkg.GetLexicallySortedKeys(projectPermissionsMap)
+	projects := common.GetLexicallySortedKeys(projectPermissionsMap)
 	for _, projectKey := range projects {
 		formattedProjectPermissions := prettyFormatPermissions(projectKey, "ALL", projectPermissionsMap[projectKey].Permissions)
 		data = append(data, formattedProjectPermissions...)
@@ -218,7 +218,7 @@ func prettyFormatProjectPermissions(projectPermissionsMap map[string]*ProjectPer
 func prettyFormatRepositoryPermissions(projectKey string, repositoryPermissionsMap map[string]*RepositoryPermissions) [][]string {
 	var data [][]string
 
-	repositories := pkg.GetLexicallySortedKeys(repositoryPermissionsMap)
+	repositories := common.GetLexicallySortedKeys(repositoryPermissionsMap)
 	for _, repoSlug := range repositories {
 		repoPermissions := prettyFormatPermissions(projectKey, repoSlug, repositoryPermissionsMap[repoSlug].Permissions)
 		data = append(data, repoPermissions...)

@@ -1,8 +1,8 @@
 package permission
 
 import (
-	"bucketctl/pkg"
 	"bucketctl/pkg/cmd/repository"
+	"bucketctl/pkg/common"
 	"bucketctl/pkg/types"
 	"fmt"
 	"github.com/pterm/pterm"
@@ -41,11 +41,11 @@ func applyPermissions(cmd *cobra.Command, args []string) error {
 
 	// Les inn fil (yaml eller json) med ønskede tilganger
 	var desiredPermissions map[string]*ProjectPermissions
-	if err := pkg.ReadConfigFile(file, &desiredPermissions); err != nil {
+	if err := common.ReadConfigFile(file, &desiredPermissions); err != nil {
 		return err
 	}
 
-	projectKeys := pkg.GetLexicallySortedKeys(desiredPermissions)
+	projectKeys := common.GetLexicallySortedKeys(desiredPermissions)
 	progressBar, _ := pterm.DefaultProgressbar.WithTotal(len(desiredPermissions)).WithRemoveWhenDone(true).Start()
 	for _, projectKey := range projectKeys {
 		progressBar.UpdateTitle(projectKey)
@@ -193,7 +193,7 @@ func setDefaultProjectPermission(baseUrl string, projectKey string, permission s
 		"Header X-Atlassian-Token": "no-check",
 	}
 
-	_, err := pkg.PostRequest(url, token, nil, params)
+	_, err := common.PostRequest(url, token, nil, params)
 	if err != nil {
 		return err
 	}
@@ -224,7 +224,7 @@ func removeUserProjectPermissions(baseUrl string, projectKey string, token strin
 		"name": user,
 	}
 
-	if _, err := pkg.DeleteRequest(url, token, params); err != nil {
+	if _, err := common.DeleteRequest(url, token, params); err != nil {
 		return err
 	}
 	return nil
@@ -236,7 +236,7 @@ func removeGroupProjectPermissions(baseUrl string, projectKey string, token stri
 		"name": group,
 	}
 
-	if _, err := pkg.DeleteRequest(url, token, params); err != nil {
+	if _, err := common.DeleteRequest(url, token, params); err != nil {
 		return err
 	}
 	return nil
@@ -266,7 +266,7 @@ func removeUserRepositoryPermissions(baseUrl string, projectKey string, repoSlug
 		"name": user,
 	}
 
-	if _, err := pkg.DeleteRequest(url, token, params); err != nil {
+	if _, err := common.DeleteRequest(url, token, params); err != nil {
 		return err
 	}
 	return nil
@@ -278,7 +278,7 @@ func removeGroupRepositoryPermissions(baseUrl string, projectKey string, repoSlu
 		"name": group,
 	}
 
-	if _, err := pkg.DeleteRequest(url, token, params); err != nil {
+	if _, err := common.DeleteRequest(url, token, params); err != nil {
 		return err
 	}
 	return nil
@@ -309,7 +309,7 @@ func grantUserProjectPermission(baseUrl string, projectKey string, token string,
 		"permission": permission,
 	}
 
-	if _, err := pkg.PutRequest(url, token, nil, params); err != nil {
+	if _, err := common.PutRequest(url, token, nil, params); err != nil {
 		return err
 	}
 	return nil
@@ -322,7 +322,7 @@ func grantGroupProjectPermission(baseUrl string, projectKey string, token string
 		"permission": permission,
 	}
 
-	if _, err := pkg.PutRequest(url, token, nil, params); err != nil {
+	if _, err := common.PutRequest(url, token, nil, params); err != nil {
 		return err
 	}
 	return nil
@@ -353,7 +353,7 @@ func grantUserRepositoryPermission(baseUrl string, projectKey string, repoSlug s
 		"permission": permission,
 	}
 
-	if _, err := pkg.PutRequest(url, token, nil, params); err != nil {
+	if _, err := common.PutRequest(url, token, nil, params); err != nil {
 		return err
 	}
 	return nil
@@ -366,7 +366,7 @@ func grantGroupRepositoryPermission(baseUrl string, projectKey string, reposSlug
 		"permission": permission,
 	}
 
-	if _, err := pkg.PutRequest(url, token, nil, params); err != nil {
+	if _, err := common.PutRequest(url, token, nil, params); err != nil {
 		return err
 	}
 	return nil

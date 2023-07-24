@@ -1,7 +1,7 @@
 package webhook
 
 import (
-	"bucketctl/pkg"
+	"bucketctl/pkg/common"
 	"bucketctl/pkg/types"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -52,5 +52,5 @@ func listWebhooks(cmd *cobra.Command, args []string) error {
 		projectWebhooksMap[projectKey].Repositories[repoSlug] = webhooks
 	}
 
-	return pkg.PrintData(projectWebhooksMap, prettyFormatProjectWebhooks)
+	return common.PrintData(projectWebhooksMap, prettyFormatProjectWebhooks)
 }

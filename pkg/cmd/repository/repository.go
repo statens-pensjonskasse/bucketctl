@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"bucketctl/pkg"
+	"bucketctl/pkg/common"
 	"bucketctl/pkg/types"
 	"encoding/json"
 	"fmt"
@@ -35,7 +35,7 @@ func init() {
 func GetProjectRepositories(baseUrl string, projectKey string, token string, limit int) (map[string]*Repository, error) {
 	url := fmt.Sprintf("%s/rest/api/latest/projects/%s/repos?limit=%d", baseUrl, projectKey, limit)
 
-	body, err := pkg.GetRequestBody(url, token)
+	body, err := common.GetRequestBody(url, token)
 	if err != nil {
 		return nil, err
 	}
@@ -70,7 +70,7 @@ func prettyFormatRepositories(reposMap map[string]*Repository) [][]string {
 	var data [][]string
 	data = append(data, []string{"ID", "Slug", "State", "Public", "Archived"})
 
-	repos := pkg.GetLexicallySortedKeys(reposMap)
+	repos := common.GetLexicallySortedKeys(reposMap)
 	for _, slug := range repos {
 		row := []string{strconv.Itoa(reposMap[slug].Id), slug, reposMap[slug].StatusMessage, strconv.FormatBool(reposMap[slug].Public), strconv.FormatBool(reposMap[slug].Archived)}
 		data = append(data, row)

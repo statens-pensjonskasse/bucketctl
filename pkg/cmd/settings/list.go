@@ -1,7 +1,7 @@
 package settings
 
 import (
-	"bucketctl/pkg"
+	"bucketctl/pkg/common"
 	"bucketctl/pkg/types"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -53,5 +53,5 @@ func listSettings(cmd *cobra.Command, args []string) error {
 		projectSettingsMap[projectKey].Repositories[repoSlug].Restrictions = repoRestrictions.Restrictions
 	}
 
-	return pkg.PrintData(projectSettingsMap, prettyFormatProjectsSettings)
+	return common.PrintData(projectSettingsMap, prettyFormatProjectsSettings)
 }

@@ -1,7 +1,7 @@
 package context
 
 import (
-	"bucketctl/pkg"
+	"bucketctl/pkg/common"
 	"bucketctl/pkg/types"
 	"errors"
 	"github.com/spf13/cobra"
@@ -57,7 +57,7 @@ func prettyFormatContext(contextMap map[string]string) [][]string {
 	var data [][]string
 	data = append(data, []string{"Key", "Value"})
 
-	keys := pkg.GetLexicallySortedKeys(contextMap)
+	keys := common.GetLexicallySortedKeys(contextMap)
 	for _, k := range keys {
 		row := []string{k, contextMap[k]}
 		data = append(data, row)

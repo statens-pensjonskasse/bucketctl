@@ -1,8 +1,8 @@
 package webhook
 
 import (
-	"bucketctl/pkg"
 	"bucketctl/pkg/cmd/repository"
+	"bucketctl/pkg/common"
 	"bucketctl/pkg/types"
 	"encoding/json"
 	"fmt"
@@ -40,7 +40,7 @@ func init() {
 }
 
 func getWebhook(url string, token string) (*types.Webhook, error) {
-	resp, err := pkg.GetRequest(url, token)
+	resp, err := common.GetRequest(url, token)
 	if err != nil {
 		if resp.StatusCode == 404 {
 			return nil, nil
@@ -72,7 +72,7 @@ func getRepositoryWebhook(baseUrl string, projectKey string, repoSlug string, we
 }
 
 func getWebhooks(url string, token string) ([]*types.Webhook, error) {
-	body, err := pkg.GetRequestBody(url, token)
+	body, err := common.GetRequestBody(url, token)
 	if err != nil {
 		return nil, err
 	}
@@ -134,7 +134,7 @@ func prettyFormatProjectWebhooks(projectWebhooksMap map[string]*ProjectWebhooks)
 	var data [][]string
 	data = append(data, []string{"Project", "Repository", "ID", "Name", "Events", "URL", "Active", "Verify SSL"})
 
-	projects := pkg.GetLexicallySortedKeys(projectWebhooksMap)
+	projects := common.GetLexicallySortedKeys(projectWebhooksMap)
 	for _, projectKey := range projects {
 		formattedProjectWebhooks := prettyFormatWebhooks(projectKey, "PROJECT", projectWebhooksMap[projectKey].Webhooks)
 		data = append(data, formattedProjectWebhooks...)

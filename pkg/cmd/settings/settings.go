@@ -1,8 +1,8 @@
 package settings
 
 import (
-	"bucketctl/pkg"
 	"bucketctl/pkg/cmd/repository"
+	"bucketctl/pkg/common"
 	"bucketctl/pkg/types"
 	"encoding/json"
 	"fmt"
@@ -130,7 +130,7 @@ func (restrictions *Restrictions) addRestriction(r *types.Restriction) {
 }
 
 func getRestrictions(url string, token string) ([]*types.Restriction, error) {
-	body, err := pkg.GetRequestBody(url, token)
+	body, err := common.GetRequestBody(url, token)
 	if err != nil {
 		return nil, err
 	}
@@ -151,7 +151,7 @@ func prettyFormatProjectsSettings(projectSettingsMap map[string]*ProjectSettings
 	var data [][]string
 
 	data = append(data, []string{"Project", "Repository", "Matcher", "Branch", "Restriction", "Exempt Groups", "Exempt Users"})
-	projects := pkg.GetLexicallySortedKeys(projectSettingsMap)
+	projects := common.GetLexicallySortedKeys(projectSettingsMap)
 	for _, projectKey := range projects {
 		projectSettings := prettyFormatRestrictions(projectKey, "ALL", projectSettingsMap[projectKey].Restrictions)
 		data = append(data, projectSettings...)
@@ -166,7 +166,7 @@ func prettyFormatProjectsSettings(projectSettingsMap map[string]*ProjectSettings
 func prettyFormatRepositorySettings(projectKey string, repoSettingsMap map[string]*RepositorySettings) [][]string {
 	var data [][]string
 
-	repositories := pkg.GetLexicallySortedKeys(repoSettingsMap)
+	repositories := common.GetLexicallySortedKeys(repoSettingsMap)
 	for _, repoSlug := range repositories {
 		repoSettings := prettyFormatRestrictions(projectKey, repoSlug, repoSettingsMap[repoSlug].Restrictions)
 		data = append(data, repoSettings...)
@@ -191,7 +191,7 @@ func prettyFormatRestrictions(projectKey string, repoSlug string, restrictions m
 func prettyFormatBranchRestrictions(projectKey string, repoSlug string, matcher string, branch string, branchRestrictions *BranchRestrictions) [][]string {
 	var data [][]string
 
-	restrictions := pkg.GetLexicallySortedKeys(branchRestrictions.Restrictions)
+	restrictions := common.GetLexicallySortedKeys(branchRestrictions.Restrictions)
 	for _, restriction := range restrictions {
 		var users string
 		for _, user := range branchRestrictions.Restrictions[restriction].ExemptUsers {

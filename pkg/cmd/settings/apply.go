@@ -1,7 +1,7 @@
 package settings
 
 import (
-	"bucketctl/pkg"
+	"bucketctl/pkg/common"
 	"bucketctl/pkg/types"
 	"bytes"
 	"encoding/json"
@@ -41,11 +41,11 @@ func applySettings(cmd *cobra.Command, args []string) error {
 	includeRepos := viper.GetBool(types.IncludeReposFlag)
 
 	var desiredSettings map[string]*ProjectSettings
-	if err := pkg.ReadConfigFile(file, &desiredSettings); err != nil {
+	if err := common.ReadConfigFile(file, &desiredSettings); err != nil {
 		return err
 	}
 
-	projectKeys := pkg.GetLexicallySortedKeys(desiredSettings)
+	projectKeys := common.GetLexicallySortedKeys(desiredSettings)
 	progressBar, _ := pterm.DefaultProgressbar.WithTotal(len(desiredSettings)).WithRemoveWhenDone(true).Start()
 	for _, projectKey := range projectKeys {
 		progressBar.UpdateTitle(projectKey)
@@ -97,7 +97,7 @@ func findRestrictionsToUpdate(desired map[string]*Restrictions, actual map[strin
 							actualExemptions := actual[matcherType].Branches[branchType].Restrictions[restrictionType]
 							desiredExemptions := desired[matcherType].Branches[branchType].Restrictions[restrictionType]
 							// Dersom unntakene er forskjellige må vi oppdatere
-							if !(pkg.SlicesContainsSameElements(desiredExemptions.ExemptUsers, actualExemptions.ExemptUsers) && pkg.SlicesContainsSameElements(desiredExemptions.ExemptGroups, actualExemptions.ExemptGroups)) {
+							if !(common.SlicesContainsSameElements(desiredExemptions.ExemptUsers, actualExemptions.ExemptUsers) && common.SlicesContainsSameElements(desiredExemptions.ExemptGroups, actualExemptions.ExemptGroups)) {
 								restrictionToAdd = restriction
 							}
 						}
@@ -196,7 +196,7 @@ func updateRestrictions(url string, token string, restrictions map[string]*Restr
 				if err != nil {
 					return err
 				}
-				if _, err := pkg.PostRequest(url, token, bytes.NewReader(payload), nil); err != nil {
+				if _, err := common.PostRequest(url, token, bytes.NewReader(payload), nil); err != nil {
 					return err
 				}
 				pterm.Info.Println(pterm.Blue("⚙️ Updated/Created ") + "'" + restrictionType + "' restriction for '" + branchType + "' (" + matcherType + ") in " + scope)
@@ -210,7 +210,7 @@ func deleteRestriction(url string, token string, restrictions map[string]*Restri
 	for matcherType, matcherRestriction := range restrictions {
 		for branchType, branchRestriction := range matcherRestriction.Branches {
 			for restrictionType, restriction := range branchRestriction.Restrictions {
-				if _, err := pkg.DeleteRequest(url+strconv.Itoa(restriction.id), token, nil); err != nil {
+				if _, err := common.DeleteRequest(url+strconv.Itoa(restriction.id), token, nil); err != nil {
 					return err
 				}
 				pterm.Info.Println(pterm.Red("🗑️ Deleted ") + "'" + restrictionType + "' restriction for '" + branchType + "' (" + matcherType + ") in " + scope)

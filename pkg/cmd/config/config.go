@@ -1,8 +1,8 @@
 package config
 
 import (
-	"bucketctl/pkg"
 	"bucketctl/pkg/cmd/config/context"
+	"bucketctl/pkg/common"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -23,7 +23,7 @@ func prettyFormatConfig(settingMap map[string]interface{}) [][]string {
 	var data [][]string
 	data = append(data, []string{"Key", "Value"})
 
-	keys := pkg.GetLexicallySortedKeys(settingMap)
+	keys := common.GetLexicallySortedKeys(settingMap)
 	for _, key := range keys {
 		row := []string{key, viper.GetString(key)}
 		data = append(data, row)
