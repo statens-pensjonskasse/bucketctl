@@ -13,3 +13,6 @@ coverage:
 
 install: test build ## Installerer under ${GOPATH}/bin
 	go install -v ./...
+
+install-linux: test build ## Installerer binary under /usr/local/bin (krever sudo)
+	sudo install -o root -g root -m 0755 bin/bucketctl /usr/local/bin/
