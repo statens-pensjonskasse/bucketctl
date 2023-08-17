@@ -26,6 +26,15 @@ For enkelhestsskyld kan dette lagres i config sammen med base url
 bucketctl config set --token <token> --base-url <url>
 ```
 
+Det er også mulig å lage forskjellige kontekster som bygger oppå basisconfig.
+En ny kontekst kan f.eks. lages med
+
+```shell
+bucketctl config context create --context infra --key INFRA --include-repos
+```
+
+for å heller bruke kunne konteksten `-x infra` enn å skrive `--key INFRA --include-repos` hver gang.
+
 ## Eksempler
 
 Hent alle prosjekter

@@ -23,7 +23,7 @@ var Cmd = &cobra.Command{
 }
 
 func init() {
-	Cmd.PersistentFlags().StringVar(&context, types.ContextFlag, "", "Context to use")
+	Cmd.PersistentFlags().StringVarP(&context, types.ContextFlag, "x", "", "Context to use")
 	Cmd.MarkPersistentFlagRequired(types.ContextFlag)
 
 	Cmd.PersistentFlags().StringVarP(&key, types.ProjectKeyFlag, "k", "", "Project key")
