@@ -185,8 +185,17 @@ func (base *Webhook) Equivalent(candidate *Webhook) bool {
 	if !reflect.DeepEqual(base.Configuration, candidate.Configuration) {
 		return false
 	}
-	if !reflect.DeepEqual(base.Events, candidate.Events) {
+	if len(base.Events) != len(candidate.Events) {
 		return false
+	}
+	elements := make(map[string]struct{}, len(base.Events))
+	for _, v := range base.Events {
+		elements[v] = struct{}{}
+	}
+	for _, v := range candidate.Events {
+		if _, ok := elements[v]; !ok {
+			return false
+		}
 	}
 	return true
 }
