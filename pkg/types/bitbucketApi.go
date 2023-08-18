@@ -92,21 +92,21 @@ type UserPermissionsResponse struct {
 }
 
 type Restriction struct {
-	Id         int                 `json:"id" yaml:"id"`
-	Type       string              `json:"type" yaml:"type"`
-	Scope      *RestrictionScope   `json:"scope" yaml:"scope"`
-	Matcher    *RestrictionMatcher `json:"matcher" yaml:"matcher"`
-	Users      []*User             `json:"users" yaml:"users"`
-	Groups     []string            `json:"groups" yaml:"groups"`
-	AccessKeys []*interface{}      `json:"accessKeys" yaml:"accessKeys"`
+	Id         int               `json:"id" yaml:"id"`
+	Type       string            `json:"type" yaml:"type"`
+	Scope      *RestrictionScope `json:"scope" yaml:"scope"`
+	Matcher    *Matcher          `json:"matcher" yaml:"matcher"`
+	Users      []*User           `json:"users" yaml:"users"`
+	Groups     []string          `json:"groups" yaml:"groups"`
+	AccessKeys []*interface{}    `json:"accessKeys" yaml:"accessKeys"`
 }
 
 type CreateRestriction struct {
-	Type       string              `json:"type,omitempty" yaml:"type"`
-	Matcher    *RestrictionMatcher `json:"matcher,omitempty" yaml:"matcher"`
-	Users      []string            `json:"users,omitempty" yaml:"users"`
-	Groups     []string            `json:"groups,omitempty" yaml:"groups"`
-	AccessKeys []string            `json:"accessKeys" yaml:"accessKeys"`
+	Type       string   `json:"type,omitempty" yaml:"type"`
+	Matcher    *Matcher `json:"matcher,omitempty" yaml:"matcher"`
+	Users      []string `json:"users,omitempty" yaml:"users"`
+	Groups     []string `json:"groups,omitempty" yaml:"groups"`
+	AccessKeys []string `json:"accessKeys" yaml:"accessKeys"`
 }
 
 type RestrictionScope struct {
@@ -114,14 +114,14 @@ type RestrictionScope struct {
 	Type       string `json:"type" yaml:"type"`
 }
 
-type RestrictionMatcher struct {
-	Id        string                  `json:"id" yaml:"id"`
-	DisplayID string                  `json:"displayID" yaml:"displayID"`
-	Active    bool                    `json:"active" yaml:"active"`
-	Type      *RestrictionMatcherType `json:"type" yaml:"type"`
+type Matcher struct {
+	Id        string       `json:"id" yaml:"id"`
+	DisplayID string       `json:"displayID" yaml:"displayID"`
+	Active    bool         `json:"active" yaml:"active"`
+	Type      *MatcherType `json:"type" yaml:"type"`
 }
 
-type RestrictionMatcherType struct {
+type MatcherType struct {
 	Id   string `json:"id" yaml:"id"`
 	Name string `json:"name" yaml:"name"`
 }
@@ -129,6 +129,27 @@ type RestrictionMatcherType struct {
 type RestrictionResponse struct {
 	response
 	Values []*Restriction `json:"values"`
+}
+
+type BranchModel struct {
+	Production  *Branch       `json:"production"`
+	Development *Branch       `json:"development"`
+	Types       []*BranchType `json:"types,omitempty"`
+}
+
+type Branch struct {
+	Id              string `json:"id,omitempty"`
+	DisplayId       string `json:"displayId,omitempty"`
+	Type            string `json:"type,omitempty"`
+	LatestCommit    string `json:"latestCommit,omitempty"`
+	LatestChangeset string `json:"latestChangeset,omitempty"`
+	IsDefault       bool   `json:"isDefault,omitempty"`
+}
+
+type BranchType struct {
+	Id          string `json:"id,omitempty"`
+	DisplayName string `json:"displayName,omitempty"`
+	Prefix      string `json:"prefix,omitempty"`
 }
 
 type Webhook struct {
@@ -189,11 +210,13 @@ func (base *Webhook) Equivalent(candidate *Webhook) bool {
 		return false
 	}
 	elements := make(map[string]struct{}, len(base.Events))
+	// Create a map with all the (unique) elements of list A as keys
 	for _, v := range base.Events {
 		elements[v] = struct{}{}
 	}
+	// Check that all the elements of list B has a key in the map
 	for _, v := range candidate.Events {
-		if _, ok := elements[v]; !ok {
+		if _, exists := elements[v]; !exists {
 			return false
 		}
 	}

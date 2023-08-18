@@ -183,9 +183,9 @@ func updateRestrictions(url string, token string, restrictions map[string]*Restr
 				payload, err := json.Marshal(
 					&types.CreateRestriction{
 						Type: restrictionType,
-						Matcher: &types.RestrictionMatcher{
+						Matcher: &types.Matcher{
 							Id: branchType,
-							Type: &types.RestrictionMatcherType{
+							Type: &types.MatcherType{
 								Id: matcherType,
 							},
 						},

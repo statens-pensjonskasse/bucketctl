@@ -1,6 +1,8 @@
 package common
 
-import "sort"
+import (
+	"sort"
+)
 
 func GetLexicallySortedKeys[T any](stringMap map[string]T) []string {
 	keys := make([]string, 0, len(stringMap))
