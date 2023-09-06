@@ -22,8 +22,8 @@ var listSettingsCmd = &cobra.Command{
 }
 
 func init() {
-	listSettingsCmd.Flags().StringVarP(&key, types.ProjectKeyFlag, "k", "", "Project key")
-	listSettingsCmd.Flags().StringVarP(&repo, types.RepoSlugFlag, "r", "", "Repository slug. Leave empty to query project webhooks.")
+	listSettingsCmd.Flags().StringVarP(&key, types.ProjectKeyFlag, types.ProjectKeyFlagShorthand, "", "Project key")
+	listSettingsCmd.Flags().StringVarP(&repo, types.RepoSlugFlag, types.RepoSlugFlagShorthand, "", "Repository slug. Leave empty to query project webhooks.")
 	listSettingsCmd.Flags().Bool(types.IncludeReposFlag, false, "Include repository permissions when querying project")
 }
 

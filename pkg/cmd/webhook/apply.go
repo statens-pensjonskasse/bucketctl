@@ -28,7 +28,7 @@ var applyWebhooksCmd = &cobra.Command{
 }
 
 func init() {
-	applyWebhooksCmd.Flags().StringVarP(&filename, types.FilenameFlag, "f", "", "Webhooks file")
+	applyWebhooksCmd.Flags().StringVarP(&filename, types.FilenameFlag, types.FilenameFlagShorthand, "", "Webhooks file")
 	applyWebhooksCmd.Flags().Bool(types.IncludeReposFlag, false, "Include repositories")
 
 	applyWebhooksCmd.MarkFlagRequired(types.FilenameFlag)

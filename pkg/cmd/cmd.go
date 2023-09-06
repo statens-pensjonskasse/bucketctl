@@ -2,8 +2,10 @@ package cmd
 
 import (
 	"bucketctl/pkg/cmd/config"
+	"bucketctl/pkg/cmd/git"
 	"bucketctl/pkg/cmd/permission"
 	"bucketctl/pkg/cmd/project"
+	"bucketctl/pkg/cmd/pullRequest"
 	"bucketctl/pkg/cmd/repository"
 	"bucketctl/pkg/cmd/settings"
 	"bucketctl/pkg/cmd/version"
@@ -21,6 +23,7 @@ var (
 	cfgFile      string
 	context      string
 	baseUrl      string
+	gitUrl       string
 	userToken    string
 	limit        int
 	outputFormat common.OutputFormatType
@@ -43,20 +46,24 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, types.ConfigFlag, "", "Base config file (default $HOME/.bucketctl/config.yaml")
-	rootCmd.PersistentFlags().StringVarP(&context, types.ContextFlag, "x", "", "Context to use for overriding base config")
+	rootCmd.PersistentFlags().StringVarP(&context, types.ContextFlag, types.ContextFlagShorthand, "", "Context to use for overriding base config")
 	rootCmd.PersistentFlags().StringVar(&baseUrl, types.BaseUrlFlag, "", "Base url for BitBucket instance")
-	rootCmd.PersistentFlags().IntVarP(&limit, types.LimitFlag, "l", 500, "Max return values")
-	rootCmd.PersistentFlags().StringVarP(&userToken, types.TokenFlag, "t", "", "Http access token")
-	rootCmd.PersistentFlags().VarP(&outputFormat, types.OutputFlag, "o", "Output format. One of: pretty, yaml, json")
+	rootCmd.PersistentFlags().StringVar(&gitUrl, types.GitUrlFlag, "", "Base url for Git-commands")
+	rootCmd.PersistentFlags().IntVarP(&limit, types.LimitFlag, types.LimitFlagShorthand, 1000, "Max return values")
+	rootCmd.PersistentFlags().StringVarP(&userToken, types.TokenFlag, types.TokenFlagShorthand, "", "Http access token")
+	rootCmd.PersistentFlags().VarP(&outputFormat, types.OutputFlag, types.OutputFlagShorthand, "Output format. One of: pretty, yaml, json")
 
 	viper.BindPFlag(types.BaseUrlFlag, rootCmd.PersistentFlags().Lookup(types.BaseUrlFlag))
+	viper.BindPFlag(types.GitUrlFlag, rootCmd.PersistentFlags().Lookup(types.GitUrlFlag))
 	viper.BindPFlag(types.LimitFlag, rootCmd.PersistentFlags().Lookup(types.LimitFlag))
 	viper.BindPFlag(types.TokenFlag, rootCmd.PersistentFlags().Lookup(types.TokenFlag))
 	viper.BindPFlag(types.OutputFlag, rootCmd.PersistentFlags().Lookup(types.OutputFlag))
 
+	rootCmd.AddCommand(git.Cmd)
 	rootCmd.AddCommand(config.Cmd)
 	rootCmd.AddCommand(permission.Cmd)
 	rootCmd.AddCommand(project.Cmd)
+	rootCmd.AddCommand(pullRequest.Cmd)
 	rootCmd.AddCommand(repository.Cmd)
 	rootCmd.AddCommand(settings.Cmd)
 	rootCmd.AddCommand(version.Cmd)

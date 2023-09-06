@@ -23,11 +23,11 @@ var Cmd = &cobra.Command{
 }
 
 func init() {
-	Cmd.PersistentFlags().StringVarP(&context, types.ContextFlag, "x", "", "Context to use")
+	Cmd.PersistentFlags().StringVarP(&context, types.ContextFlag, types.ContextFlagShorthand, "", "Context to use")
 	Cmd.MarkPersistentFlagRequired(types.ContextFlag)
 
-	Cmd.PersistentFlags().StringVarP(&key, types.ProjectKeyFlag, "k", "", "Project key")
-	Cmd.PersistentFlags().StringVarP(&repo, types.RepoSlugFlag, "r", "", "Repository slug")
+	Cmd.PersistentFlags().StringVarP(&key, types.ProjectKeyFlag, types.ProjectKeyFlagShorthand, "", "Project key")
+	Cmd.PersistentFlags().StringVarP(&repo, types.RepoSlugFlag, types.RepoSlugFlagShorthand, "", "Repository slug")
 	Cmd.PersistentFlags().Bool(types.IncludeReposFlag, false, "Include repository permissions when querying project permissions")
 
 	Cmd.AddCommand(createCmd)

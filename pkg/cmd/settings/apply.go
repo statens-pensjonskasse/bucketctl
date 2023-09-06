@@ -27,7 +27,7 @@ var applySettingsCmd = &cobra.Command{
 }
 
 func init() {
-	applySettingsCmd.Flags().StringVarP(&filename, types.FilenameFlag, "f", "", "Settings file")
+	applySettingsCmd.Flags().StringVarP(&filename, types.FilenameFlag, types.FilenameFlagShorthand, "", "Settings file")
 	applySettingsCmd.Flags().Bool(types.IncludeReposFlag, false, "Include repositories")
 
 	applySettingsCmd.MarkFlagRequired(types.FilenameFlag)

@@ -26,7 +26,7 @@ var applyPermissionsCmd = &cobra.Command{
 }
 
 func init() {
-	applyPermissionsCmd.Flags().StringVarP(&filename, types.FilenameFlag, "f", "", "Permissions file")
+	applyPermissionsCmd.Flags().StringVarP(&filename, types.FilenameFlag, types.FilenameFlagShorthand, "", "Permissions file")
 	applyPermissionsCmd.Flags().Bool(types.IncludeReposFlag, false, "Include repositories")
 
 	applyPermissionsCmd.MarkFlagRequired(types.FilenameFlag)

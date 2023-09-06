@@ -7,6 +7,10 @@ import (
 	"fmt"
 )
 
+const (
+	RefPrefix = "refs/heads/"
+)
+
 func GetBranchModel(baseUrl string, projectKey string, repoSlug string, token string) (*types.BranchModel, error) {
 	url := fmt.Sprintf("%s/rest/branch-utils/latest/projects/%s/repos/%s/branchmodel", baseUrl, projectKey, repoSlug)
 

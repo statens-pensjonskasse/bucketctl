@@ -21,18 +21,41 @@ type Error struct {
 	} `json:"errors"`
 }
 
+type Commit struct {
+	Id                 string    `json:"id,omitempty"`
+	DisplayId          string    `json:"displayId,omitempty"`
+	Author             *User     `json:"author,omitempty"`
+	AuthorTimestamp    int       `json:"authorTimestamp,omitempty"`
+	Committer          *User     `json:"committer,omitempty"`
+	CommitterTimestamp int       `json:"committerTimestamp,omitempty"`
+	Message            string    `json:"message,omitempty"`
+	Parents            []*Commit `json:"parents,omitempty"`
+}
+
+type CommitsResponse struct {
+	response
+	Values []*Commit `json:"values,omitempty"`
+}
+
+type Ref struct {
+	Id         string      `json:"id,omitempty"`
+	DisplayId  string      `json:"displayId,omitempty"`
+	Type       string      `json:"type,omitempty"`
+	Repository *Repository `json:"repository,omitempty"`
+}
+
 type Repository struct {
-	Id            int     `json:"id"`
-	Name          string  `json:"name"`
-	Slug          string  `json:"slug"`
-	HierarchyId   string  `json:"hierarchyId"`
-	ScmId         string  `json:"scmId"`
-	State         string  `json:"state"`
-	StatusMessage string  `json:"statusMessage"`
-	Forkable      bool    `json:"forkable"`
-	Public        bool    `json:"public"`
-	Archived      bool    `json:"archived"`
-	Project       Project `json:"project"`
+	Id            int      `json:"id,omitempty"`
+	Name          string   `json:"name,omitempty"`
+	Slug          string   `json:"slug,omitempty"`
+	HierarchyId   string   `json:"hierarchyId,omitempty"`
+	ScmId         string   `json:"scmId,omitempty"`
+	State         string   `json:"state,omitempty"`
+	StatusMessage string   `json:"statusMessage,omitempty"`
+	Forkable      bool     `json:"forkable,omitempty"`
+	Public        bool     `json:"public,omitempty"`
+	Archived      bool     `json:"archived,omitempty"`
+	Project       *Project `json:"project,omitempty"`
 }
 
 type RepositoriesResponse struct {
@@ -40,12 +63,28 @@ type RepositoriesResponse struct {
 	Values []*Repository `json:"values"`
 }
 
+type PullRequestParticipant struct {
+	User            *User    `json:"user,omitempty"`
+	Role            string   `json:"role,omitempty"`
+	Status          string   `json:"status,omitempty"`
+	HtmlDescription string   `json:"htmlDescription,omitempty"`
+	Links           struct{} `json:"links"`
+}
+
+type DefaultReviewers struct {
+	Id               int      `json:"id,omitempty"`
+	Scope            *Scope   `json:"scope,omitempty"`
+	SourceRefMatcher *Matcher `json:"sourceRefMatcher,omitempty"`
+	TargetRefMatcher *Matcher `json:"targetRefMatcher,omitempty"`
+	Reviewers        []*User  `json:"reviewers,omitempty"`
+}
+
 type Project struct {
-	Id          int    `json:"id"`
-	Key         string `json:types.ProjectKeyFlag`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Public      bool   `json:"public"`
+	Id          int    `json:"id,omitempty"`
+	Key         string `json:"key,omitempty"`
+	Name        string `json:"name,omitempty"`
+	Description string `json:"description,omitempty"`
+	Public      bool   `json:"public,omitempty"`
 }
 
 type ProjectsResponse struct {
@@ -72,13 +111,13 @@ type GroupPermissionsResponse struct {
 }
 
 type User struct {
-	Name         string `json:"name" yaml:"name"`
-	EmailAddress string `json:"emailAddress" yaml:"emailAddress"`
-	Active       bool   `json:"active" yaml:"active"`
-	DisplayName  string `json:"displayName" yaml:"displayName"`
-	Id           int    `json:"id" yaml:"id"`
-	Slug         string `json:"slug" yaml:"slug"`
-	Type         string `json:"type" yaml:"type"`
+	Name         string `json:"name,omitempty" yaml:"name"`
+	EmailAddress string `json:"emailAddress,omitempty" yaml:"emailAddress"`
+	Active       bool   `json:"active,omitempty" yaml:"active"`
+	DisplayName  string `json:"displayName,omitempty" yaml:"displayName"`
+	Id           int    `json:"id,omitempty" yaml:"id"`
+	Slug         string `json:"slug,omitempty" yaml:"slug"`
+	Type         string `json:"type,omitempty" yaml:"type"`
 }
 
 type UserPermission struct {
@@ -92,13 +131,13 @@ type UserPermissionsResponse struct {
 }
 
 type Restriction struct {
-	Id         int               `json:"id" yaml:"id"`
-	Type       string            `json:"type" yaml:"type"`
-	Scope      *RestrictionScope `json:"scope" yaml:"scope"`
-	Matcher    *Matcher          `json:"matcher" yaml:"matcher"`
-	Users      []*User           `json:"users" yaml:"users"`
-	Groups     []string          `json:"groups" yaml:"groups"`
-	AccessKeys []*interface{}    `json:"accessKeys" yaml:"accessKeys"`
+	Id         int            `json:"id" yaml:"id"`
+	Type       string         `json:"type" yaml:"type"`
+	Scope      *Scope         `json:"scope" yaml:"scope"`
+	Matcher    *Matcher       `json:"matcher" yaml:"matcher"`
+	Users      []*User        `json:"users" yaml:"users"`
+	Groups     []string       `json:"groups" yaml:"groups"`
+	AccessKeys []*interface{} `json:"accessKeys" yaml:"accessKeys"`
 }
 
 type CreateRestriction struct {
@@ -109,7 +148,7 @@ type CreateRestriction struct {
 	AccessKeys []string `json:"accessKeys" yaml:"accessKeys"`
 }
 
-type RestrictionScope struct {
+type Scope struct {
 	ResourceId int    `json:"resourceId" yaml:"resourceId"`
 	Type       string `json:"type" yaml:"type"`
 }
@@ -150,6 +189,60 @@ type BranchType struct {
 	Id          string `json:"id,omitempty"`
 	DisplayName string `json:"displayName,omitempty"`
 	Prefix      string `json:"prefix,omitempty"`
+}
+
+type PullRequest struct {
+	Title       string                    `json:"title,omitempty"`
+	Description string                    `json:"description,omitempty"`
+	State       string                    `json:"state,omitempty"`
+	Open        bool                      `json:"open,omitempty"`
+	Closed      bool                      `json:"closed,omitempty"`
+	Locked      bool                      `json:"locked,omitempty"`
+	FromRef     *Ref                      `json:"fromRef,omitempty"`
+	ToRef       *Ref                      `json:"toRef,omitempty"`
+	Reviewers   []*PullRequestParticipant `json:"reviewers,omitempty"`
+}
+
+type PullRequestInfo struct {
+	Id           int                       `json:"id,omitempty"`
+	Version      int                       `json:"version,omitempty"`
+	Title        string                    `json:"title,omitempty"`
+	Description  string                    `json:"description,omitempty"`
+	State        string                    `json:"state,omitempty"`
+	Open         bool                      `json:"open,omitempty"`
+	Closed       bool                      `json:"closed,omitempty"`
+	Locked       bool                      `json:"locked,omitempty"`
+	CreatedDate  int                       `json:"createdDate,omitempty"`
+	UpdatedDate  int                       `json:"updatedDate,omitempty"`
+	Author       *PullRequestParticipant   `json:"author,omitempty"`
+	FromRef      *Ref                      `json:"fromRef,omitempty"`
+	ToRef        *Ref                      `json:"toRef,omitempty"`
+	Reviewers    []*PullRequestParticipant `json:"reviewers,omitempty"`
+	Participants []*PullRequestParticipant `json:"participants,omitempty"`
+	Links        *Links                    `json:"links,omitempty"`
+}
+
+type PullRequestProperties struct {
+	MergeResult       *MergeResult `json:"mergeResult,omitempty"`
+	QgStatus          string       `json:"qgStatus,omitempty"`
+	ResolvedTaskCount int          `json:"resolvedTaskCount,omitempty"`
+	CommentCount      int          `json:"commentCount,omitempty"`
+	OpenTaskCount     int          `json:"openTaskCount,omitempty"`
+}
+
+type MergeResult struct {
+	Outcome string `json:"outcome,omitempty"`
+	Current bool   `json:"current,omitempty"`
+}
+
+type Links struct {
+	Self  []*Href `json:"self,omitempty"`
+	Clone []*Href `json:"clone,omitempty"`
+}
+
+type Href struct {
+	Href string `json:"href,omitempty"`
+	Name string `json:"name,omitempty"`
 }
 
 type Webhook struct {

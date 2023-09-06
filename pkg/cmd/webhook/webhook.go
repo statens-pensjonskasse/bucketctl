@@ -15,7 +15,7 @@ import (
 
 type ProjectWebhooks struct {
 	Webhooks     []*types.Webhook               `json:"webhooks,omitempty" yaml:"webhooks,omitempty"`
-	Repositories map[string]*RepositoryWebhooks `json:types.RepoSlugFlagsitories,omitempty" yaml:types.RepoSlugFlagsitories,omitempty"`
+	Repositories map[string]*RepositoryWebhooks `json:"repositories,omitempty" yaml:"repositories,omitempty"`
 }
 
 type RepositoryWebhooks struct {

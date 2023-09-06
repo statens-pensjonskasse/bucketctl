@@ -13,6 +13,7 @@ import (
 type Repository struct {
 	Id            int    `json:"id,omitempty" yaml:"id,omitempty"`
 	Name          string `json:"name,omitempty" yaml:"name,omitempty"`
+	Slug          string `json:"slug,omitempty" yaml:"slug,omitempty"`
 	HierarchyId   string `json:"hierarchyId,omitempty" yaml:"hierarchyId,omitempty"`
 	ScmId         string `json:"scmId,omitempty" yaml:"scmId,omitempty"`
 	State         string `json:"state,omitempty" yaml:"state,omitempty"`
@@ -53,6 +54,7 @@ func GetProjectRepositories(baseUrl string, projectKey string, token string, lim
 		repositories[r.Slug] = &Repository{
 			Id:            r.Id,
 			Name:          r.Name,
+			Slug:          r.Slug,
 			HierarchyId:   r.HierarchyId,
 			ScmId:         r.ScmId,
 			State:         r.State,
@@ -66,6 +68,31 @@ func GetProjectRepositories(baseUrl string, projectKey string, token string, lim
 	return repositories, nil
 }
 
+func GetRepository(baseUrl string, projectKey string, repoSlug string, token string) (*Repository, error) {
+	url := fmt.Sprintf("%s/rest/api/latest/projects/%s/repos/%s", baseUrl, projectKey, repoSlug)
+
+	body, err := common.GetRequestBody(url, token)
+	if err != nil {
+		return nil, err
+	}
+	var repoResponse types.Repository
+	if err := json.Unmarshal(body, &repoResponse); err != nil {
+		return nil, err
+	}
+	return &Repository{
+		Id:            repoResponse.Id,
+		Name:          repoResponse.Name,
+		Slug:          repoResponse.Slug,
+		HierarchyId:   repoResponse.HierarchyId,
+		ScmId:         repoResponse.ScmId,
+		State:         repoResponse.State,
+		StatusMessage: repoResponse.StatusMessage,
+		Forkable:      repoResponse.Forkable,
+		Public:        repoResponse.Public,
+		Archived:      repoResponse.Archived,
+	}, nil
+}
+
 func prettyFormatRepositories(reposMap map[string]*Repository) [][]string {
 	var data [][]string
 	data = append(data, []string{"ID", "Slug", "State", "Public", "Archived"})
@@ -77,4 +104,20 @@ func prettyFormatRepositories(reposMap map[string]*Repository) [][]string {
 	}
 
 	return data
+}
+
+func GetDefaultBranch(baseUrl string, projectKey string, repoSlug string, token string) (*types.Ref, error) {
+	url := fmt.Sprintf("%s/rest/api/latest/projects/%s/repos/%s/default-branch", baseUrl, projectKey, repoSlug)
+
+	body, err := common.GetRequestBody(url, token)
+	if err != nil {
+		return nil, err
+	}
+
+	var branch *types.Ref
+	if err := json.Unmarshal(body, &branch); err != nil {
+		return nil, err
+	}
+
+	return branch, nil
 }

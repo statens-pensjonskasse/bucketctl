@@ -25,7 +25,7 @@ var listRepositoriesCmd = &cobra.Command{
 }
 
 func init() {
-	listRepositoriesCmd.Flags().StringVarP(&key, types.ProjectKeyFlag, "k", "", "Project key")
+	listRepositoriesCmd.Flags().StringVarP(&key, types.ProjectKeyFlag, types.ProjectKeyFlagShorthand, "", "Project key")
 }
 
 func listRepositories(cmd *cobra.Command, args []string) error {
