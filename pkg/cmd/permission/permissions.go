@@ -1,6 +1,7 @@
 package permission
 
 import (
+	project2 "bucketctl/pkg/cmd/project"
 	"bucketctl/pkg/cmd/repository"
 	"bucketctl/pkg/common"
 	"bucketctl/pkg/types"
@@ -19,6 +20,7 @@ type Entities struct {
 type Permissions map[string]*Entities
 
 type ProjectPermissions struct {
+	Public            bool                              `json:"public" yaml:"public"`
 	DefaultPermission string                            `json:"default-permission" yaml:"default-permission"`
 	Permissions       *Permissions                      `json:"permissions,omitempty" yaml:"permissions,omitempty"`
 	Repositories      map[string]*RepositoryPermissions `json:"repositories,omitempty" yaml:"repositories,omitempty"`
@@ -38,6 +40,14 @@ func init() {
 	Cmd.AddCommand(applyPermissionsCmd)
 	Cmd.AddCommand(listAllPermissionsCmd)
 	Cmd.AddCommand(listPermissionsCmd)
+}
+
+func isProjectPublic(baseUrl string, projectKey string, token string) (bool, error) {
+	project, err := project2.GetProject(baseUrl, projectKey, token)
+	if err != nil {
+		return false, err
+	}
+	return project.Public, err
 }
 
 func getDefaultProjectPermission(baseUrl string, projectKey string, token string) (string, error) {
@@ -145,9 +155,15 @@ func getProjectPermissions(baseUrl string, projectKey string, limit int, token s
 		return nil, err
 	}
 
+	isPublic, err := isProjectPublic(baseUrl, projectKey, token)
+	if err != nil {
+		return nil, err
+	}
+
 	projectPermissions := ProjectPermissions{
-		Permissions:       &grantedPermissions,
+		Public:            isPublic,
 		DefaultPermission: defaultPermission,
+		Permissions:       &grantedPermissions,
 	}
 
 	if includeRepos {

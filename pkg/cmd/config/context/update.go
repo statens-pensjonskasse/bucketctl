@@ -15,10 +15,6 @@ var updateCmd = &cobra.Command{
 	RunE:    updateContext,
 }
 
-func init() {
-
-}
-
 func updateContext(cmd *cobra.Command, args []string) error {
 	cfgPath, err := common.GetConfigPath()
 	if err != nil {

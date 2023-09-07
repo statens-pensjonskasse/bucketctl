@@ -101,7 +101,7 @@ func createPullRequest(cmd *cobra.Command, args []string) error {
 		reviewers = append(reviewers, &types.PullRequestParticipant{User: &types.User{Name: username}})
 	}
 
-	repository := &types.Repository{Slug: repoSlug, Project: &types.Project{Key: projectKey}}
+	r := &types.Repository{Slug: repoSlug, Project: &types.Project{Key: projectKey}}
 
 	pullRequest := &types.PullRequest{
 		Title:       title,
@@ -110,8 +110,8 @@ func createPullRequest(cmd *cobra.Command, args []string) error {
 		Open:        true,
 		Closed:      false,
 		Locked:      false,
-		FromRef:     &types.Ref{Id: fromRef, Repository: repository},
-		ToRef:       &types.Ref{Id: toRef, Repository: repository},
+		FromRef:     &types.Ref{Id: fromRef, Repository: r},
+		ToRef:       &types.Ref{Id: toRef, Repository: r},
 		Reviewers:   reviewers,
 	}
 

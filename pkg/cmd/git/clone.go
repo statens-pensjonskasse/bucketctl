@@ -82,8 +82,6 @@ func clone(cmd *cobra.Command, args []string) error {
 		repoPath := filepath.Join(basePath, slug)
 		url := fmt.Sprintf("%s/%s/%s.git", gitUrl, projectKey, slug)
 
-		home, _ := os.UserHomeDir()
-
 		// Try to clone without Auth
 		var err error
 		_, err = git.PlainClone(repoPath, false, &git.CloneOptions{
@@ -92,11 +90,10 @@ func clone(cmd *cobra.Command, args []string) error {
 
 		if err != nil {
 			if strings.Contains(err.Error(), "ssh: handshake failed") {
+				home, _ := os.UserHomeDir()
 				sshFile := home + "/.ssh/id_ed25519"
-				pterm.Info.Println(sshFile)
 
 				auth, err := getSSHPublicKeys(sshFile)
-				pterm.Warning.Println(err)
 				if err != nil {
 					return err
 				}
@@ -112,7 +109,9 @@ func clone(cmd *cobra.Command, args []string) error {
 				} else {
 					defaultBranch, err := repository.GetDefaultBranch(baseUrl, projectKey, slug, token)
 					if err != nil {
-						return errors.New("Error fetching default branch for " + projectKey + "/" + slug)
+						pterm.Error.Println("⚠️ Error fetching default branch for " + projectKey + "/" + slug)
+						progressBar.Increment()
+						continue
 					}
 					if err := syncRefWithRemote(repoPath, defaultBranch.Id, force); err == nil {
 						pterm.Info.Println("🔝 Synced " + projectKey + "/" + slug + "/" + defaultBranch.DisplayId + " with origin")

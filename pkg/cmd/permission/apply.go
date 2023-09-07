@@ -1,6 +1,7 @@
 package permission
 
 import (
+	"bucketctl/pkg/cmd/project"
 	"bucketctl/pkg/cmd/repository"
 	"bucketctl/pkg/common"
 	"bucketctl/pkg/types"
@@ -77,9 +78,18 @@ func applyPermissions(cmd *cobra.Command, args []string) error {
 			}
 		}
 
+		// Set public property
+		if actualProjectPermissions.Public != desiredPermissions[projectKey].Public {
+			if err := setProjectPublicProperty(baseUrl, projectKey, desiredPermissions[projectKey].Public, token); err != nil {
+				return err
+			}
+		}
+
 		// Set default prosjekttilgang for innloggede brukere
-		if err := setDefaultProjectPermission(baseUrl, projectKey, desiredPermissions[projectKey].DefaultPermission, true, token); err != nil {
-			return err
+		if actualProjectPermissions.DefaultPermission != desiredPermissions[projectKey].DefaultPermission {
+			if err := setDefaultProjectPermission(baseUrl, projectKey, desiredPermissions[projectKey].DefaultPermission, token); err != nil {
+				return err
+			}
 		}
 
 		// Finner tilganger i 'actualProjectPermissions' som ikke finnes i 'desiredProjectPermissions'. Disse tilgangene skal fjernes.
@@ -185,18 +195,50 @@ func (entities Entities) containsGroup(group string) bool {
 	return false
 }
 
-func setDefaultProjectPermission(baseUrl string, projectKey string, permission string, allow bool, token string) error {
+func setProjectPublicProperty(baseUrl string, projectKey string, isPublic bool, token string) error {
+	if _, err := project.UpdateProject(baseUrl, token, &types.Project{Key: projectKey, Public: isPublic}); err != nil {
+		return err
+	}
+	if isPublic {
+		pterm.Info.Println(pterm.Green("🔓 Opened") + " public access for project '" + projectKey + "'")
+	} else {
+		pterm.Info.Println(pterm.Red("🔒 Closed") + " public access for project '" + projectKey + "'")
+	}
+	return nil
+}
+
+func changeDefaultProjectPermission(baseUrl string, projectKey string, permission string, allow bool, token string) error {
 	url := fmt.Sprintf("%s/rest/api/latest/projects/%s/permissions/%s/all", baseUrl, projectKey, permission)
 	params := map[string]string{
 		"allow": strconv.FormatBool(allow),
 		// Workaround for https://confluence.atlassian.com/cloudkb/xsrf-check-failed-when-calling-cloud-apis-826874382.html
 		"Header X-Atlassian-Token": "no-check",
 	}
-
 	_, err := common.PostRequest(url, token, nil, params)
 	if err != nil {
 		return err
 	}
+	return nil
+}
+
+func revokeDefaultProjectPermission(baseUrl string, projectKey string, permission string, token string) error {
+	return changeDefaultProjectPermission(baseUrl, projectKey, permission, false, token)
+}
+
+func setDefaultProjectPermission(baseUrl string, projectKey string, permission string, token string) error {
+	if err := changeDefaultProjectPermission(baseUrl, projectKey, permission, true, token); err != nil {
+		return err
+	}
+	// Revoke all other default permissions
+	for _, p := range []string{"REPO_CREATE", "PROJECT_ADMIN", "PROJECT_WRITE", "PROJECT_READ"} {
+		if p == permission {
+			continue
+		}
+		if err := revokeDefaultProjectPermission(baseUrl, projectKey, p, token); err != nil {
+			return err
+		}
+	}
+	pterm.Info.Println(pterm.Blue("🖋️Changed") + " default permission for project '" + projectKey + "' to '" + permission + "'")
 	return nil
 }
 

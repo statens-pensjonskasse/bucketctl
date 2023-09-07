@@ -6,7 +6,7 @@ import (
 
 type response struct {
 	Size          int    `json:"size"`
-	Limit         int    `json:types.LimitFlag`
+	Limit         int    `json:"limit"`
 	IsLastPage    bool   `json:"isLastPage"`
 	Start         int    `json:"start"`
 	NextPageStart int    `json:"nextPageStart"`
@@ -52,9 +52,9 @@ type Repository struct {
 	ScmId         string   `json:"scmId,omitempty"`
 	State         string   `json:"state,omitempty"`
 	StatusMessage string   `json:"statusMessage,omitempty"`
-	Forkable      bool     `json:"forkable,omitempty"`
-	Public        bool     `json:"public,omitempty"`
-	Archived      bool     `json:"archived,omitempty"`
+	Forkable      bool     `json:"forkable"`
+	Public        bool     `json:"public"`
+	Archived      bool     `json:"archived"`
 	Project       *Project `json:"project,omitempty"`
 }
 
@@ -64,11 +64,10 @@ type RepositoriesResponse struct {
 }
 
 type PullRequestParticipant struct {
-	User            *User    `json:"user,omitempty"`
-	Role            string   `json:"role,omitempty"`
-	Status          string   `json:"status,omitempty"`
-	HtmlDescription string   `json:"htmlDescription,omitempty"`
-	Links           struct{} `json:"links"`
+	User   *User    `json:"user,omitempty"`
+	Role   string   `json:"role,omitempty"`
+	Status string   `json:"status,omitempty"`
+	Links  struct{} `json:"links"`
 }
 
 type DefaultReviewers struct {
@@ -80,11 +79,13 @@ type DefaultReviewers struct {
 }
 
 type Project struct {
-	Id          int    `json:"id,omitempty"`
-	Key         string `json:"key,omitempty"`
-	Name        string `json:"name,omitempty"`
-	Description string `json:"description,omitempty"`
-	Public      bool   `json:"public,omitempty"`
+	Id          int    `json:"id,omitempty" yaml:"id,omitempty"`
+	Key         string `json:"key,omitempty" yaml:"key,omitempty"`
+	Name        string `json:"name,omitempty" yaml:"name,omitempty"`
+	Description string `json:"description,omitempty" yaml:"description,omitempty"`
+	Public      bool   `json:"public" yaml:"public"`
+	Type        string `json:"type,omitempty" yaml:"type,omitempty"`
+	Links       *Links `json:"links,omitempty" yaml:"links,omitempty"`
 }
 
 type ProjectsResponse struct {
@@ -113,7 +114,7 @@ type GroupPermissionsResponse struct {
 type User struct {
 	Name         string `json:"name,omitempty" yaml:"name"`
 	EmailAddress string `json:"emailAddress,omitempty" yaml:"emailAddress"`
-	Active       bool   `json:"active,omitempty" yaml:"active"`
+	Active       bool   `json:"active" yaml:"active"`
 	DisplayName  string `json:"displayName,omitempty" yaml:"displayName"`
 	Id           int    `json:"id,omitempty" yaml:"id"`
 	Slug         string `json:"slug,omitempty" yaml:"slug"`
@@ -182,7 +183,7 @@ type Branch struct {
 	Type            string `json:"type,omitempty"`
 	LatestCommit    string `json:"latestCommit,omitempty"`
 	LatestChangeset string `json:"latestChangeset,omitempty"`
-	IsDefault       bool   `json:"isDefault,omitempty"`
+	IsDefault       bool   `json:"isDefault"`
 }
 
 type BranchType struct {
@@ -192,15 +193,17 @@ type BranchType struct {
 }
 
 type PullRequest struct {
-	Title       string                    `json:"title,omitempty"`
-	Description string                    `json:"description,omitempty"`
-	State       string                    `json:"state,omitempty"`
-	Open        bool                      `json:"open,omitempty"`
-	Closed      bool                      `json:"closed,omitempty"`
-	Locked      bool                      `json:"locked,omitempty"`
-	FromRef     *Ref                      `json:"fromRef,omitempty"`
-	ToRef       *Ref                      `json:"toRef,omitempty"`
-	Reviewers   []*PullRequestParticipant `json:"reviewers,omitempty"`
+	Title           string                    `json:"title,omitempty"`
+	Description     string                    `json:"description,omitempty"`
+	State           string                    `json:"state,omitempty"`
+	Open            bool                      `json:"open"`
+	Closed          bool                      `json:"closed"`
+	Locked          bool                      `json:"locked"`
+	FromRef         *Ref                      `json:"fromRef,omitempty"`
+	ToRef           *Ref                      `json:"toRef,omitempty"`
+	Reviewers       []*PullRequestParticipant `json:"reviewers,omitempty"`
+	HtmlDescription string                    `json:"htmlDescription,omitempty"`
+	Links           *Links
 }
 
 type PullRequestInfo struct {
@@ -209,9 +212,9 @@ type PullRequestInfo struct {
 	Title        string                    `json:"title,omitempty"`
 	Description  string                    `json:"description,omitempty"`
 	State        string                    `json:"state,omitempty"`
-	Open         bool                      `json:"open,omitempty"`
-	Closed       bool                      `json:"closed,omitempty"`
-	Locked       bool                      `json:"locked,omitempty"`
+	Open         bool                      `json:"open"`
+	Closed       bool                      `json:"closed"`
+	Locked       bool                      `json:"locked"`
 	CreatedDate  int                       `json:"createdDate,omitempty"`
 	UpdatedDate  int                       `json:"updatedDate,omitempty"`
 	Author       *PullRequestParticipant   `json:"author,omitempty"`
@@ -236,13 +239,13 @@ type MergeResult struct {
 }
 
 type Links struct {
-	Self  []*Href `json:"self,omitempty"`
-	Clone []*Href `json:"clone,omitempty"`
+	Self  []*Href `json:"self,omitempty" yaml:"self,omitempty"`
+	Clone []*Href `json:"clone,omitempty" yaml:"clone,omitempty"`
 }
 
 type Href struct {
-	Href string `json:"href,omitempty"`
-	Name string `json:"name,omitempty"`
+	Href string `json:"href,omitempty" yaml:"href,omitempty"`
+	Name string `json:"name,omitempty" yaml:"name,omitempty"`
 }
 
 type Webhook struct {

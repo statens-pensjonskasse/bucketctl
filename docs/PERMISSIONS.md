@@ -4,6 +4,7 @@
 
 ```yaml
 <PROJECT_KEY>:
+  public: <bool>
   default-permission: <DEFAULT_PROJECT_PERMISSION>
   permissions:
     <PROJECT_PERMISSION>:
