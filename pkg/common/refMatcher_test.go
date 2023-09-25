@@ -1,7 +1,7 @@
 package common
 
 import (
-	"bucketctl/pkg/types"
+	types2 "bucketctl/pkg/api/bitbucket/types"
 	"testing"
 )
 
@@ -14,20 +14,20 @@ const (
 )
 
 var (
-	branchModel = &types.BranchModel{
-		Production: &types.Branch{
+	branchModel = &types2.BranchModel{
+		Production: &types2.Branch{
 			Id:        "refs/heads/main",
 			DisplayId: "main",
 			Type:      "BRANCH",
 			IsDefault: false,
 		},
-		Development: &types.Branch{
+		Development: &types2.Branch{
 			Id:        "refs/heads/develop",
 			DisplayId: "develop",
 			Type:      "BRANCH",
 			IsDefault: true,
 		},
-		Types: []*types.BranchType{
+		Types: []*types2.BranchType{
 			{
 				Id:          "FEATURE",
 				DisplayName: "Feature",
@@ -43,11 +43,11 @@ var (
 )
 
 func Test_branchMatcher(t *testing.T) {
-	mainBranchMatcher := &types.Matcher{
+	mainBranchMatcher := &types2.Matcher{
 		Id:        "refs/heads/main",
 		DisplayID: "main",
 		Active:    true,
-		Type: &types.MatcherType{
+		Type: &types2.MatcherType{
 			Id:   "BRANCH",
 			Name: "Branch",
 		},
@@ -65,11 +65,11 @@ func Test_branchMatcher(t *testing.T) {
 }
 
 func Test_modelBranchMatcher(t *testing.T) {
-	modelBranchProductionMatcher := &types.Matcher{
+	modelBranchProductionMatcher := &types2.Matcher{
 		Id:        "production",
 		DisplayID: "Production",
 		Active:    true,
-		Type: &types.MatcherType{
+		Type: &types2.MatcherType{
 			Id:   "MODEL_BRANCH",
 			Name: "Branching model branch",
 		},
@@ -87,11 +87,11 @@ func Test_modelBranchMatcher(t *testing.T) {
 }
 
 func Test_modelCategoryMatcher(t *testing.T) {
-	modelCategoryFeatureMatcher := &types.Matcher{
+	modelCategoryFeatureMatcher := &types2.Matcher{
 		Id:        "FEATURE",
 		DisplayID: "Feature",
 		Active:    true,
-		Type: &types.MatcherType{
+		Type: &types2.MatcherType{
 			Id:   "MODEL_CATEGORY",
 			Name: "Branching model category",
 		},
@@ -112,12 +112,12 @@ func Test_modelCategoryMatcher(t *testing.T) {
 }
 
 func Test_patternMatcher(t *testing.T) {
-	patternType := &types.MatcherType{
+	patternType := &types2.MatcherType{
 		Id:   "PATTERN",
 		Name: "pattern",
 	}
 
-	patternFeatureMatcher := &types.Matcher{
+	patternFeatureMatcher := &types2.Matcher{
 		Id:        "feature/",
 		DisplayID: "feature/",
 		Active:    true,
@@ -127,7 +127,7 @@ func Test_patternMatcher(t *testing.T) {
 	refsNotMatchingPattern(t, patternFeatureMatcher, mainBranch, developBranch, hotfixBranch)
 
 	// Tests from https://confluence.atlassian.com/bitbucketserver088/branch-permission-patterns-1216582116.html
-	patternAnyMatcher := &types.Matcher{
+	patternAnyMatcher := &types2.Matcher{
 		Id:        "*",
 		DisplayID: "*",
 		Active:    true,
@@ -135,16 +135,16 @@ func Test_patternMatcher(t *testing.T) {
 	}
 	refsMatchingPattern(t, patternAnyMatcher, mainBranch, developBranch, featureBranch, featureMainBranch, "🍌")
 
-	patternPROJECTMatcher := &types.Matcher{
+	patternPROJECTMatcher := &types2.Matcher{
 		Id:        "PROJECT-*",
 		DisplayID: "PROJECT-*",
 		Active:    true,
 		Type:      patternType,
 	}
 	refsMatchingPattern(t, patternPROJECTMatcher, "refs/heads/PROJECT-1234", "refs/heads/stable/PROJECT-new", "refs/tags/PROJECT-1.1")
-	refsNotMatchingPattern(t, patternPROJECTMatcher, "refs/heads/project-1234", "refs/heads/stable/PROJECT_NEW", "refs/tags/PROJECT/1.1")
+	refsNotMatchingPattern(t, patternPROJECTMatcher, "refs/heads/permission-1234", "refs/heads/stable/PROJECT_NEW", "refs/tags/PROJECT/1.1")
 
-	patternQuestionMarkMatcher := &types.Matcher{
+	patternQuestionMarkMatcher := &types2.Matcher{
 		Id:        "?.?",
 		DisplayID: "?.?",
 		Active:    true,
@@ -153,23 +153,23 @@ func Test_patternMatcher(t *testing.T) {
 	refsMatchingPattern(t, patternQuestionMarkMatcher, "refs/heads/1.1", "refs/heads/stable/2.X", "refs/tags/3.1")
 	refsNotMatchingPattern(t, patternQuestionMarkMatcher, "refs/heads/1-1")
 
-	patternTagsMatcher := &types.Matcher{
+	patternTagsMatcher := &types2.Matcher{
 		Id:        "tags/",
 		DisplayID: "tags/",
 		Active:    true,
 		Type:      patternType,
 	}
-	refsMatchingPattern(t, patternTagsMatcher, "refs/heads/stable/tags/some_branch", "refs/tags/project-1.1.0")
+	refsMatchingPattern(t, patternTagsMatcher, "refs/heads/stable/tags/some_branch", "refs/tags/permission-1.1.0")
 
-	patternTagsStarMatcher := &types.Matcher{
+	patternTagsStarMatcher := &types2.Matcher{
 		Id:        "tags/**",
 		DisplayID: "tags/**",
 		Active:    true,
 		Type:      patternType,
 	}
-	refsMatchingPattern(t, patternTagsStarMatcher, "refs/heads/stable/tags/some_branch", "refs/tags/project-1.1.0")
+	refsMatchingPattern(t, patternTagsStarMatcher, "refs/heads/stable/tags/some_branch", "refs/tags/permission-1.1.0")
 
-	patternMasterBranchesMatcher := &types.Matcher{
+	patternMasterBranchesMatcher := &types2.Matcher{
 		Id:        "heads/**/master",
 		DisplayID: "heads/**/master",
 		Active:    true,
@@ -179,7 +179,7 @@ func Test_patternMatcher(t *testing.T) {
 	refsNotMatchingPattern(t, patternMasterBranchesMatcher, "refs/tags/master", "refs/heads/stable/master/horse")
 }
 
-func refsMatchingPattern(t *testing.T, matcher *types.Matcher, refs ...string) {
+func refsMatchingPattern(t *testing.T, matcher *types2.Matcher, refs ...string) {
 	for _, ref := range refs {
 		if !patternMatcher(matcher, ref) {
 			t.Errorf("Expected pattern %s to match %s", matcher.Id, ref)
@@ -187,7 +187,7 @@ func refsMatchingPattern(t *testing.T, matcher *types.Matcher, refs ...string) {
 	}
 }
 
-func refsNotMatchingPattern(t *testing.T, matcher *types.Matcher, refs ...string) {
+func refsNotMatchingPattern(t *testing.T, matcher *types2.Matcher, refs ...string) {
 	for _, ref := range refs {
 		if patternMatcher(matcher, ref) {
 			t.Errorf("Expected pattern %s to not match %s", matcher.Id, ref)

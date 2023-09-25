@@ -10,7 +10,7 @@
       configuration: { }
       url: <string>
       active: <bool>
-      scopeType: project
+      scopeType: permission
       sslVerificationRequired: <bool>
   repositories:
     <repo-slug>:

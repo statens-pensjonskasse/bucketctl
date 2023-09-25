@@ -2,6 +2,7 @@ package context
 
 import (
 	"bucketctl/pkg/common"
+	"bucketctl/pkg/printer"
 	"github.com/spf13/cobra"
 )
 
@@ -23,5 +24,5 @@ func getContext(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	return common.PrintData(config, prettyFormatContext)
+	return printer.PrintData(config, prettyFormatContext)
 }

@@ -1,7 +1,7 @@
 package config
 
 import (
-	"bucketctl/pkg/common"
+	"bucketctl/pkg/printer"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -24,5 +24,5 @@ func getConfig(cmd *cobra.Command, args []string) error {
 		data = append(data, row)
 	}
 
-	return common.PrintData(viper.AllSettings(), prettyFormatConfig)
+	return printer.PrintData(viper.AllSettings(), prettyFormatConfig)
 }

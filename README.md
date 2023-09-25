@@ -42,7 +42,7 @@ for å heller bruke kunne konteksten `-x infra` enn å skrive `--project INFRA -
 Hent alle prosjekter
 
 ```shell
-bucketctl project list 
+bucketctl permission list 
 ```
 
 Hent alle repositories under `PROJ`-prosjektet

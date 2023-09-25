@@ -20,7 +20,7 @@ func SlicesContainsSameElements[T comparable](a, b []T) bool {
 
 	diff := make(map[T]int, len(a))
 	for _, i := range a {
-		// Tell antall ganger verdi dukker opp
+		// Count every occurrence
 		diff[i]++
 	}
 	for _, j := range b {
@@ -29,7 +29,7 @@ func SlicesContainsSameElements[T comparable](a, b []T) bool {
 		}
 		diff[j]--
 		if diff[j] == 0 {
-			// Slett dersom vi har funnet elementet nok ganger
+			// Delete entry if we've found it the same amount of times
 			delete(diff, j)
 		}
 	}

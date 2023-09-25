@@ -1,8 +1,8 @@
 package pullRequest
 
 import (
+	"bucketctl/pkg/api/bitbucket/types"
 	"bucketctl/pkg/common"
-	"bucketctl/pkg/types"
 	"encoding/json"
 	"fmt"
 	"github.com/go-git/go-git/v5"
@@ -21,8 +21,8 @@ var Cmd = &cobra.Command{
 }
 
 func init() {
-	Cmd.PersistentFlags().StringVarP(&key, types.ProjectKeyFlag, types.ProjectKeyFlagShorthand, "", "Project key")
-	Cmd.PersistentFlags().StringVarP(&repo, types.RepoSlugFlag, types.RepoSlugFlagShorthand, "", "Repository slug")
+	Cmd.PersistentFlags().StringVarP(&key, common.ProjectKeyFlag, common.ProjectKeyFlagShorthand, "", "Project key")
+	Cmd.PersistentFlags().StringVarP(&repo, common.RepoSlugFlag, common.RepoSlugFlagShorthand, "", "Repository slug")
 
 	Cmd.AddCommand(createCmd)
 }

@@ -1,7 +1,7 @@
 package common
 
 import (
-	"bucketctl/pkg/types"
+	"bucketctl/pkg/api/bitbucket/types"
 	"crypto/tls"
 	"encoding/json"
 	"fmt"

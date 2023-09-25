@@ -1,10 +1,9 @@
 package pullRequest
 
 import (
-	"bucketctl/pkg/cmd/branch"
-	"bucketctl/pkg/cmd/repository"
+	"bucketctl/pkg/api/bitbucket"
+	"bucketctl/pkg/api/bitbucket/types"
 	"bucketctl/pkg/common"
-	"bucketctl/pkg/types"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -25,9 +24,9 @@ var (
 
 var createCmd = &cobra.Command{
 	PreRun: func(cmd *cobra.Command, args []string) {
-		viper.BindPFlag(types.ProjectKeyFlag, cmd.Flags().Lookup(types.ProjectKeyFlag))
-		viper.BindPFlag(types.RepoSlugFlag, cmd.Flags().Lookup(types.RepoSlugFlag))
-		viper.BindPFlag(types.NoDefaultReviewersFlag, cmd.Flags().Lookup(types.NoDefaultReviewersFlag))
+		viper.BindPFlag(common.ProjectKeyFlag, cmd.Flags().Lookup(common.ProjectKeyFlag))
+		viper.BindPFlag(common.RepoSlugFlag, cmd.Flags().Lookup(common.RepoSlugFlag))
+		viper.BindPFlag(common.NoDefaultReviewersFlag, cmd.Flags().Lookup(common.NoDefaultReviewersFlag))
 	},
 	Use:   "create",
 	Short: "Create a pull request for current workdir repository towards the default branch",
@@ -35,21 +34,21 @@ var createCmd = &cobra.Command{
 }
 
 func init() {
-	createCmd.Flags().StringVarP(&title, types.PullRequestTitleFlag, types.PullRequestTitleFlagShorthand, "", "Pull request title")
-	createCmd.Flags().StringVarP(&description, types.PullRequestDescriptionFlag, types.PullRequestDescriptionFlagShorthand, "", "Pull request description")
-	createCmd.Flags().StringVar(&fromBranch, types.PullRequestFromBranchFlag, "", "From branch (current branch)")
-	createCmd.Flags().StringVar(&toBranch, types.PullRequestToBranchFlag, "", "To branch (default branch)")
-	createCmd.Flags().Bool(types.NoDefaultReviewersFlag, false, "Don't add default reviewers")
-	reviewerUsernames = createCmd.Flags().StringSliceP(types.PullRequestReviewerFlag, types.PullRequestReviewerFlagShorthand, []string{}, "Reviewer username (e-mail)")
+	createCmd.Flags().StringVarP(&title, common.PullRequestTitleFlag, common.PullRequestTitleFlagShorthand, "", "Pull request title")
+	createCmd.Flags().StringVarP(&description, common.PullRequestDescriptionFlag, common.PullRequestDescriptionFlagShorthand, "", "Pull request description")
+	createCmd.Flags().StringVar(&fromBranch, common.PullRequestFromBranchFlag, "", "From branch (current branch)")
+	createCmd.Flags().StringVar(&toBranch, common.PullRequestToBranchFlag, "", "To branch (default branch)")
+	createCmd.Flags().Bool(common.NoDefaultReviewersFlag, false, "Don't add default reviewers")
+	reviewerUsernames = createCmd.Flags().StringSliceP(common.PullRequestReviewerFlag, common.PullRequestReviewerFlagShorthand, []string{}, "Reviewer username (e-mail)")
 }
 
 func createPullRequest(cmd *cobra.Command, args []string) error {
-	baseUrl := viper.GetString(types.BaseUrlFlag)
-	projectKey := viper.GetString(types.ProjectKeyFlag)
-	repoSlug := viper.GetString(types.RepoSlugFlag)
-	token := viper.GetString(types.TokenFlag)
+	baseUrl := viper.GetString(common.BaseUrlFlag)
+	projectKey := viper.GetString(common.ProjectKeyFlag)
+	repoSlug := viper.GetString(common.RepoSlugFlag)
+	token := viper.GetString(common.TokenFlag)
 
-	// Find project key and repo slug from origin url if not given
+	// Find permission key and repo slug from origin url if not given
 	if projectKey == "" || repoSlug == "" {
 		remoteUrl, err := getRemoteOriginUrl("./")
 		// Remote URL is on the format
@@ -66,7 +65,7 @@ func createPullRequest(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	branchModel, err := branch.GetBranchModel(baseUrl, projectKey, repoSlug, token)
+	branchModel, err := bitbucket.GetBranchModel(baseUrl, projectKey, repoSlug, token)
 	cobra.CheckErr(err)
 	fromRef, err := getFromRef()
 	cobra.CheckErr(err)
@@ -82,7 +81,7 @@ func createPullRequest(cmd *cobra.Command, args []string) error {
 		cobra.CheckErr(err)
 	}
 
-	if !viper.GetBool(types.NoDefaultReviewersFlag) {
+	if !viper.GetBool(common.NoDefaultReviewersFlag) {
 		// Add default reviewers for given source and target branch
 		defaultReviewers, err := getDefaultReviewers(baseUrl, projectKey, repoSlug, token)
 		cobra.CheckErr(err)
@@ -145,28 +144,28 @@ func getFromRef() (string, error) {
 		}
 		fromBranch = currentBranch
 	}
-	if !strings.HasPrefix(fromBranch, branch.RefPrefix) {
-		fromBranch = branch.RefPrefix + fromBranch
+	if !strings.HasPrefix(fromBranch, bitbucket.RefPrefix) {
+		fromBranch = bitbucket.RefPrefix + fromBranch
 	}
 	return fromBranch, nil
 }
 
 func getToRef(baseUrl string, projectKey string, repoSlug string, token string) (string, error) {
 	if toBranch == "" {
-		defaultBranch, err := repository.GetDefaultBranch(baseUrl, projectKey, repoSlug, token)
+		defaultBranch, err := bitbucket.GetDefaultBranch(baseUrl, projectKey, repoSlug, token)
 		if err != nil {
 			return "", err
 		}
 		toBranch = defaultBranch.Id
 	}
-	if !strings.HasPrefix(toBranch, branch.RefPrefix) {
-		toBranch = branch.RefPrefix + toBranch
+	if !strings.HasPrefix(toBranch, bitbucket.RefPrefix) {
+		toBranch = bitbucket.RefPrefix + toBranch
 	}
 	return toBranch, nil
 }
 
 func getTitle(fromRef string) string {
-	return strings.TrimPrefix(fromRef, branch.RefPrefix)
+	return strings.TrimPrefix(fromRef, bitbucket.RefPrefix)
 }
 
 func getDescription(baseUrl string, projectKey string, repoSlug string, token string, fromRef string, toRef string) (string, error) {
@@ -175,8 +174,8 @@ func getDescription(baseUrl string, projectKey string, repoSlug string, token st
 		"limit":         "10",
 		"merges":        "exclude",
 		"ignoreMissing": "true",
-		"since":         strings.TrimPrefix(toRef, branch.RefPrefix),
-		"until":         strings.TrimPrefix(fromRef, branch.RefPrefix),
+		"since":         strings.TrimPrefix(toRef, bitbucket.RefPrefix),
+		"until":         strings.TrimPrefix(fromRef, bitbucket.RefPrefix),
 	}
 	messages, err := getCommitMessagesBetween(url, token, params)
 	if err != nil {

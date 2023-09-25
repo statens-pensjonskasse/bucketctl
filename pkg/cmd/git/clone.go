@@ -1,9 +1,9 @@
 package git
 
 import (
-	"bucketctl/pkg/cmd/repository"
+	bitbucket2 "bucketctl/pkg/api/bitbucket"
+	"bucketctl/pkg/api/bitbucket/types"
 	"bucketctl/pkg/common"
-	"bucketctl/pkg/types"
 	"errors"
 	"fmt"
 	"github.com/go-git/go-git/v5"
@@ -18,38 +18,38 @@ import (
 
 var cloneCmd = &cobra.Command{
 	PreRun: func(cmd *cobra.Command, args []string) {
-		cmd.MarkFlagRequired(types.ProjectKeyFlag)
-		viper.BindPFlag(types.ProjectKeyFlag, cmd.Flags().Lookup(types.ProjectKeyFlag))
-		viper.BindPFlag(types.RepoSlugFlag, cmd.Flags().Lookup(types.RepoSlugFlag))
+		cmd.MarkFlagRequired(common.ProjectKeyFlag)
+		viper.BindPFlag(common.ProjectKeyFlag, cmd.Flags().Lookup(common.ProjectKeyFlag))
+		viper.BindPFlag(common.RepoSlugFlag, cmd.Flags().Lookup(common.RepoSlugFlag))
 
-		viper.BindPFlag(types.IncludeArchivedFlag, cmd.Flags().Lookup(types.IncludeArchivedFlag))
-		viper.BindPFlag(types.UpdateFlag, cmd.Flags().Lookup(types.UpdateFlag))
-		viper.BindPFlag(types.ForceFlag, cmd.Flags().Lookup(types.ForceFlag))
+		viper.BindPFlag(common.IncludeArchivedFlag, cmd.Flags().Lookup(common.IncludeArchivedFlag))
+		viper.BindPFlag(common.UpdateFlag, cmd.Flags().Lookup(common.UpdateFlag))
+		viper.BindPFlag(common.ForceFlag, cmd.Flags().Lookup(common.ForceFlag))
 	},
 	Use:   "clone [flags] [path]",
-	Short: "Clone repository from origin or all repositories in a project",
+	Short: "Clone repository from origin or all repositories in a permission",
 	Long:  "",
 	Args:  cobra.MinimumNArgs(0),
 	RunE:  clone,
 }
 
 func init() {
-	cloneCmd.Flags().BoolP(types.IncludeArchivedFlag, types.IncludeArchivedFlagShorthand, false, "Include archived repositories")
-	cloneCmd.Flags().BoolP(types.UpdateFlag, types.UpdateFlagShorthand, false, "Switch to default branch and pull from origin")
-	cloneCmd.Flags().BoolP(types.ForceFlag, types.ForceFlagShorthand, false, "Force sync of default branch")
+	cloneCmd.Flags().BoolP(common.IncludeArchivedFlag, common.IncludeArchivedFlagShorthand, false, "Include archived repositories")
+	cloneCmd.Flags().BoolP(common.UpdateFlag, common.UpdateFlagShorthand, false, "Switch to default branch and pull from origin")
+	cloneCmd.Flags().BoolP(common.ForceFlag, common.ForceFlagShorthand, false, "Force sync of default branch")
 }
 
 func clone(cmd *cobra.Command, args []string) error {
-	baseUrl := viper.GetString(types.BaseUrlFlag)
-	gitUrl := viper.GetString(types.GitUrlFlag)
-	projectKey := viper.GetString(types.ProjectKeyFlag)
-	repoSlug := viper.GetString(types.RepoSlugFlag)
-	token := viper.GetString(types.TokenFlag)
-	limit := viper.GetInt(types.LimitFlag)
+	baseUrl := viper.GetString(common.BaseUrlFlag)
+	gitUrl := viper.GetString(common.GitUrlFlag)
+	projectKey := viper.GetString(common.ProjectKeyFlag)
+	repoSlug := viper.GetString(common.RepoSlugFlag)
+	token := viper.GetString(common.TokenFlag)
+	limit := viper.GetInt(common.LimitFlag)
 
-	includeArchived := viper.GetBool(types.IncludeArchivedFlag)
-	update := viper.GetBool(types.UpdateFlag)
-	force := viper.GetBool(types.ForceFlag)
+	includeArchived := viper.GetBool(common.IncludeArchivedFlag)
+	update := viper.GetBool(common.UpdateFlag)
+	force := viper.GetBool(common.ForceFlag)
 
 	var basePath string
 	if len(args) >= 1 {
@@ -60,13 +60,13 @@ func clone(cmd *cobra.Command, args []string) error {
 		basePath = "."
 	}
 
-	repos := make(map[string]*repository.Repository)
+	repos := make(map[string]*types.Repository)
 	if repoSlug == "" {
-		projectRepos, err := repository.GetProjectRepositories(baseUrl, projectKey, token, limit)
+		projectRepos, err := bitbucket2.GetProjectRepositoriesMap(baseUrl, projectKey, limit, token)
 		cobra.CheckErr(err)
 		repos = projectRepos
 	} else {
-		repoInfo, err := repository.GetRepository(baseUrl, projectKey, repoSlug, token)
+		repoInfo, err := bitbucket2.GetRepository(baseUrl, projectKey, repoSlug, token)
 		cobra.CheckErr(err)
 		repos[repoSlug] = repoInfo
 	}
@@ -107,7 +107,7 @@ func clone(cmd *cobra.Command, args []string) error {
 				if !update {
 					pterm.Info.Println("🚀 Skipping already existing repository " + projectKey + "/" + slug)
 				} else {
-					defaultBranch, err := repository.GetDefaultBranch(baseUrl, projectKey, slug, token)
+					defaultBranch, err := bitbucket2.GetDefaultBranch(baseUrl, projectKey, slug, token)
 					if err != nil {
 						pterm.Error.Println("⚠️ Error fetching default branch for " + projectKey + "/" + slug)
 						progressBar.Increment()

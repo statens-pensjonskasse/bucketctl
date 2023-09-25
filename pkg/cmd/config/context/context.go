@@ -2,7 +2,6 @@ package context
 
 import (
 	"bucketctl/pkg/common"
-	"bucketctl/pkg/types"
 	"errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -23,12 +22,11 @@ var Cmd = &cobra.Command{
 }
 
 func init() {
-	Cmd.PersistentFlags().StringVarP(&context, types.ContextFlag, types.ContextFlagShorthand, "", "Context to use")
-	Cmd.MarkPersistentFlagRequired(types.ContextFlag)
+	Cmd.PersistentFlags().StringVarP(&context, common.ContextFlag, common.ContextFlagShorthand, "", "Context to use")
+	Cmd.MarkPersistentFlagRequired(common.ContextFlag)
 
-	Cmd.PersistentFlags().StringVarP(&key, types.ProjectKeyFlag, types.ProjectKeyFlagShorthand, "", "Project key")
-	Cmd.PersistentFlags().StringVarP(&repo, types.RepoSlugFlag, types.RepoSlugFlagShorthand, "", "Repository slug")
-	Cmd.PersistentFlags().Bool(types.IncludeReposFlag, false, "Include repository permissions when querying project permissions")
+	Cmd.PersistentFlags().StringVarP(&key, common.ProjectKeyFlag, common.ProjectKeyFlagShorthand, "", "Project key")
+	Cmd.PersistentFlags().StringVarP(&repo, common.RepoSlugFlag, common.RepoSlugFlagShorthand, "", "Repository slug")
 
 	Cmd.AddCommand(createCmd)
 	Cmd.AddCommand(deleteCmd)
@@ -68,8 +66,8 @@ func prettyFormatContext(contextMap map[string]string) [][]string {
 
 func addEntryIfChanged(cmd *cobra.Command, stringMap *map[string]interface{}, flag string) {
 	if cmd.Flags().Changed(flag) {
-		if flag == types.OutputFlag && viper.GetString(types.OutputFlag) != "" {
-			(*stringMap)[flag] = viper.GetString(types.OutputFlag)
+		if flag == common.OutputFlag && viper.GetString(common.OutputFlag) != "" {
+			(*stringMap)[flag] = viper.GetString(common.OutputFlag)
 			return
 		}
 		if _, err := cmd.Flags().GetString(flag); err == nil {
@@ -97,13 +95,12 @@ func removeEmptyEntries(stringMap *map[string]interface{}) {
 
 func addEntriesFromCommandLine(cmd *cobra.Command, config *map[string]interface{}) error {
 	flags := []string{
-		types.BaseUrlFlag,
-		types.LimitFlag,
-		types.TokenFlag,
-		types.OutputFlag,
-		types.ProjectKeyFlag,
-		types.RepoSlugFlag,
-		types.IncludeReposFlag,
+		common.BaseUrlFlag,
+		common.LimitFlag,
+		common.TokenFlag,
+		common.OutputFlag,
+		common.ProjectKeyFlag,
+		common.RepoSlugFlag,
 	}
 
 	for _, flag := range flags {

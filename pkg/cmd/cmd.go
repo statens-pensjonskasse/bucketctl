@@ -1,17 +1,14 @@
 package cmd
 
 import (
+	"bucketctl/pkg/cmd/apply"
 	"bucketctl/pkg/cmd/config"
+	"bucketctl/pkg/cmd/get"
 	"bucketctl/pkg/cmd/git"
-	"bucketctl/pkg/cmd/permission"
-	"bucketctl/pkg/cmd/project"
 	"bucketctl/pkg/cmd/pullRequest"
-	"bucketctl/pkg/cmd/repository"
-	"bucketctl/pkg/cmd/settings"
 	"bucketctl/pkg/cmd/version"
-	"bucketctl/pkg/cmd/webhook"
 	"bucketctl/pkg/common"
-	"bucketctl/pkg/types"
+	"bucketctl/pkg/printer"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -22,11 +19,7 @@ import (
 var (
 	cfgFile      string
 	context      string
-	baseUrl      string
-	gitUrl       string
-	userToken    string
-	limit        int
-	outputFormat common.OutputFormatType
+	outputFormat printer.OutputFormatType
 
 	rootCmd = &cobra.Command{
 		Use:   "bucketctl",
@@ -45,29 +38,27 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, types.ConfigFlag, "", "Base config file (default $HOME/.bucketctl/config.yaml")
-	rootCmd.PersistentFlags().StringVarP(&context, types.ContextFlag, types.ContextFlagShorthand, "", "Context to use for overriding base config")
-	rootCmd.PersistentFlags().StringVar(&baseUrl, types.BaseUrlFlag, "", "Base url for BitBucket instance")
-	rootCmd.PersistentFlags().StringVar(&gitUrl, types.GitUrlFlag, "", "Base url for Git-commands")
-	rootCmd.PersistentFlags().IntVarP(&limit, types.LimitFlag, types.LimitFlagShorthand, 1000, "Max return values")
-	rootCmd.PersistentFlags().StringVarP(&userToken, types.TokenFlag, types.TokenFlagShorthand, "", "Http access token")
-	rootCmd.PersistentFlags().VarP(&outputFormat, types.OutputFlag, types.OutputFlagShorthand, "Output format. One of: pretty, yaml, json")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, common.ConfigFlag, "", "Base config file (default $HOME/.bucketctl/config.yaml")
+	rootCmd.PersistentFlags().StringVarP(&context, common.ContextFlag, common.ContextFlagShorthand, "", "Context to use for overriding base config")
+	rootCmd.PersistentFlags().String(common.BaseUrlFlag, "", "Base url for BitBucket instance")
+	rootCmd.PersistentFlags().String(common.GitUrlFlag, "", "Base url for Git-commands")
+	rootCmd.PersistentFlags().IntP(common.LimitFlag, common.LimitFlagShorthand, 1000, "Max return values")
+	rootCmd.PersistentFlags().StringP(common.TokenFlag, common.TokenFlagShorthand, "", "Http access token")
+	rootCmd.PersistentFlags().VarP(&outputFormat, common.OutputFlag, common.OutputFlagShorthand, "Output format. One of: pretty, yaml, json")
 
-	viper.BindPFlag(types.BaseUrlFlag, rootCmd.PersistentFlags().Lookup(types.BaseUrlFlag))
-	viper.BindPFlag(types.GitUrlFlag, rootCmd.PersistentFlags().Lookup(types.GitUrlFlag))
-	viper.BindPFlag(types.LimitFlag, rootCmd.PersistentFlags().Lookup(types.LimitFlag))
-	viper.BindPFlag(types.TokenFlag, rootCmd.PersistentFlags().Lookup(types.TokenFlag))
-	viper.BindPFlag(types.OutputFlag, rootCmd.PersistentFlags().Lookup(types.OutputFlag))
+	viper.BindPFlag(common.BaseUrlFlag, rootCmd.PersistentFlags().Lookup(common.BaseUrlFlag))
+	viper.BindPFlag(common.GitUrlFlag, rootCmd.PersistentFlags().Lookup(common.GitUrlFlag))
+	viper.BindPFlag(common.LimitFlag, rootCmd.PersistentFlags().Lookup(common.LimitFlag))
+	viper.BindPFlag(common.TokenFlag, rootCmd.PersistentFlags().Lookup(common.TokenFlag))
+	viper.BindPFlag(common.OutputFlag, rootCmd.PersistentFlags().Lookup(common.OutputFlag))
+
+	rootCmd.AddCommand(apply.Cmd)
+	rootCmd.AddCommand(get.Cmd)
 
 	rootCmd.AddCommand(git.Cmd)
 	rootCmd.AddCommand(config.Cmd)
-	rootCmd.AddCommand(permission.Cmd)
-	rootCmd.AddCommand(project.Cmd)
 	rootCmd.AddCommand(pullRequest.Cmd)
-	rootCmd.AddCommand(repository.Cmd)
-	rootCmd.AddCommand(settings.Cmd)
 	rootCmd.AddCommand(version.Cmd)
-	rootCmd.AddCommand(webhook.Cmd)
 }
 
 func initConfig() {
