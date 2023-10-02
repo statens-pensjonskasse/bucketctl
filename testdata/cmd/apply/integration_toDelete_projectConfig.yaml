@@ -1,7 +1,7 @@
 kind: ProjectConfig
 apiVersion: bucketctl.spk.no/v1alpha1
 metadata:
-  name: desired_project_config
+  name: to_delete_project_config
 spec:
   projectKey: TEST
   access:

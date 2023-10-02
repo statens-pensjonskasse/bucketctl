@@ -42,16 +42,16 @@ for å heller bruke kunne konteksten `-x infra` enn å skrive `--project INFRA -
 Hent alle prosjekter
 
 ```shell
-bucketctl permission list 
+bucketctl get projects
 ```
 
 Hent alle repositories under `PROJ`-prosjektet
 
 ```shell
-bucketctl repo list -p PROJ
+bucketctl get repos -p PROJ
 ```
 
-For å klone alle repositories i et prosjekt kan kommandoen
+For å klone alle repositories i et prosjekt
 
 ```shell
 bucketctl git clone -p PROJ
@@ -65,36 +65,23 @@ Alle repositories blir da klonet inn under `PROJ`-mappa hvis ingen andre mapper 
 For å synkronisere hovedbranchen i alle repositories i et prosjekt som ligger i mappa `prosjekt` kjøres kommandoen
 
 ```shell
-bucketctl git clone -p PROJ --update prosjekt
+bucketctl git clone -p PROJ --update
 ```
 
-### Tilgangsstyring
+### Prosjektkonfigurasjon
 
-Hent alle tilganger for `PROJ`-prosjektet med alle repos og skriv det til en `.yaml` fil
+`bucketctl` kan brukes til å endre prosjektkonfigurasjon
+
+Sjekk gjeldende konfigurasjon for et prosjekt med
 
 ```shell
-bucketctl permission list -p PROJ --include-repos -o yaml > PROJ.yaml
+bucketctl get project-config -p PROJ
 ```
 
-Hent abosolutt alle tilganger i Bitbucket og i `.json`-format
+Etter å ha endret prosjektkonfigurasjonen kan forskjell fra gjeldende konfigurasjon sjekkes ved
 
 ```shell
-bucketctl permission all -o json --limit 9001
+bucketctl apply -f <PROJ>.yaml --dry-run
 ```
 
-Sett tilganger ut fra en fil (`.json` eller `.yaml`)
-
-```shell
-bucketctl permission apply -f permissions.yaml --include-repos
-```
-
-**NB:** Tilganger til repositories fra fil vil kun bli brukt når `--include-repos` angis.
-Repositories som ev. ikke er inkludert i lista vil miste all tilgangsstyring da denne er antatt satt på prosjektnivå.
-
-### Webhooks
-
-Hent webhooks for `bucketctl` repoet i `PROJ`-prosjektet
-
-```shell
-bucketctl webhook list -p PROJ -r bucketctl
-```
+Se [dokumentasjon](./docs/PROJECT_CONFIG.md) for flere detaljer.
