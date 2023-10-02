@@ -39,6 +39,15 @@ type RepositoryProperties struct {
 	Webhooks           *Webhooks           `json:"webhooks,omitempty" yaml:"webhooks,omitempty"`
 }
 
+func EmptyRepositoryProperties(repoSlug string) *RepositoryProperties {
+	return &RepositoryProperties{
+		RepoSlug:           repoSlug,
+		Permissions:        &Permissions{},
+		BranchRestrictions: &BranchRestrictions{},
+		Webhooks:           &Webhooks{},
+	}
+}
+
 func (a *ProjectConfig) Validate() error {
 	return nil
 }
@@ -50,7 +59,7 @@ type GroupedRepositories map[string]struct {
 
 // GroupRepositories Group *RepositoriesProperties by repoSlug
 func GroupRepositories(desired *RepositoriesProperties, actual *RepositoriesProperties) GroupedRepositories {
-	grouping := make(GroupedRepositories)
+	grouping := make(GroupedRepositories, len(*desired)+len(*actual))
 	if desired == nil {
 		desired = new(RepositoriesProperties)
 	}
@@ -67,6 +76,18 @@ func GroupRepositories(desired *RepositoriesProperties, actual *RepositoriesProp
 		g.Actual = a
 		grouping[a.RepoSlug] = g
 	}
+
+	// Initialise other half of group if nil with empty properties
+	for repoSlug, g := range grouping {
+		if g.Actual == nil {
+			g.Actual = EmptyRepositoryProperties(repoSlug)
+		}
+		if g.Desired == nil {
+			g.Desired = EmptyRepositoryProperties(repoSlug)
+		}
+		grouping[repoSlug] = g
+	}
+
 	return grouping
 }
 

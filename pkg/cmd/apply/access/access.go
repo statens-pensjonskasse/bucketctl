@@ -34,7 +34,7 @@ func SetAccess(baseUrl string, projectKey string, token string, toCreate *Projec
 func PrintAccessChanges(toCreate *ProjectConfigSpec, toUpdate *ProjectConfigSpec, toDelete *ProjectConfigSpec) {
 	printAccess(pterm.Green("⭐️ create"), toCreate)
 	printAccess(pterm.Blue("🔧 change"), toUpdate)
-	printAccess(pterm.Red("❌  remove"), toDelete)
+	printAccess(pterm.Red("🛑 remove"), toDelete)
 }
 
 func printAccess(action string, pcs *ProjectConfigSpec) {
