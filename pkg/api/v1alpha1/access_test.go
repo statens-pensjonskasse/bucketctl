@@ -229,12 +229,12 @@ func Test_group(t *testing.T) {
 	if grouped["AAA"].Desired == nil {
 		t.Errorf("Expected grouped permissions to contain desired permissions for repo %s", "AAA")
 	}
-	if grouped["AAA"].Actual != nil {
-		t.Errorf("Expected grouped permissions to not contain actual permissions for repo %s", "AAA")
+	if len(*grouped["AAA"].Actual.Permissions) != 0 {
+		t.Errorf("Expected grouped permissions to not contain any permissions for repo %s", "AAA")
 	}
 
-	if grouped["BBB"].Desired != nil {
-		t.Errorf("Expected grouped permissions to not contain desired permissions for repo %s", "BBB")
+	if len(*grouped["BBB"].Desired.Permissions) != 0 {
+		t.Errorf("Expected grouped permissions to not contain any permissions for repo %s", "BBB")
 	}
 	if grouped["BBB"].Actual == nil {
 		t.Errorf("Expected grouped permissions to contain actual permissions for repo %s", "BBB")

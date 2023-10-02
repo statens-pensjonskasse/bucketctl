@@ -1,0 +1,42 @@
+kind: ProjectConfig
+apiVersion: bucketctl.spk.no/v1alpha1
+metadata:
+  name: desired_project_config
+spec:
+  projectKey: TEST
+  access:
+    permissions:
+      - name: PROJECT_ADMIN
+        users:
+          - pompel
+  branchRestrictions:
+    - type: BRANCH
+      matchers:
+        - matching: main
+          restrictions:
+            - type: fast-forward-only
+            - type: no-deletes
+            - type: pull-request-only
+              exempt-users:
+                - pilt
+  webhooks:
+    - name: kaptein hook
+      events:
+        - repo:refs_changed
+      configuration:
+        createdBy: bucketctl
+      url: https://spk.no
+      active: true
+      scopeType: project
+      sslVerificationRequired: true
+  repositories:
+    - name: narnia
+      permissions:
+        - name: REPO_ADMIN
+          groups:
+            - pevensie
+    - name: midgard
+      permissions:
+        - name: REPO_READ
+          groups:
+            - palantir

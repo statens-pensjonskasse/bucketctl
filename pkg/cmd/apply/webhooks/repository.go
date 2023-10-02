@@ -15,13 +15,13 @@ func findRepositoriesWebhookChanges(desired *RepositoriesProperties, actual *Rep
 	toDelete = new(RepositoriesProperties)
 	for repoSlug, repo := range GroupRepositories(desired, actual) {
 		whToCreate, whToUpdate, whToDelete := FindWebhooksToChange(repo.Desired.Webhooks, repo.Actual.Webhooks)
-		if len(*whToCreate) > 0 {
+		if whToCreate != nil && len(*whToCreate) > 0 {
 			*toCreate = append(*toCreate, &RepositoryProperties{RepoSlug: repoSlug, Webhooks: whToCreate})
 		}
-		if len(*whToUpdate) > 0 {
+		if whToUpdate != nil && len(*whToUpdate) > 0 {
 			*toUpdate = append(*toUpdate, &RepositoryProperties{RepoSlug: repoSlug, Webhooks: whToUpdate})
 		}
-		if len(*whToDelete) > 0 {
+		if whToDelete != nil && len(*whToDelete) > 0 {
 			*toDelete = append(*toDelete, &RepositoryProperties{RepoSlug: repoSlug, Webhooks: whToDelete})
 		}
 	}

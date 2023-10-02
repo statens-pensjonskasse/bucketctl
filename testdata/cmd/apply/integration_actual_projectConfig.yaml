@@ -1,0 +1,54 @@
+kind: ProjectConfig
+apiVersion: bucketctl.spk.no/v1alpha1
+metadata:
+  name: actual_project_config
+spec:
+  projectKey: TEST
+  access:
+    public: false
+    defaultPermission: PROJECT_READ
+    permissions:
+      - name: PROJECT_READ
+        users:
+          - pompel
+          - pilt
+      - name: PROJECT_ADMIN
+        groups:
+          - vaktmesteren
+  branchRestrictions:
+    - type: BRANCH
+      matchers:
+        - matching: master
+          restrictions:
+            - type: fast-forward-only
+            - type: pull-request-only
+              exempt-users:
+                - ci
+  webhooks: [ ]
+  repositories:
+    - name: gorgon
+      permissions:
+        - name: REPO_ADMIN
+          users:
+            - pompel
+      branchRestrictions:
+        - type: MODEL_BRANCH
+          matchers:
+            - matching: production
+              restrictions:
+                - type: read-only
+    - name: narnia
+      permissions:
+        - name: REPO_ADMIN
+          users:
+            - aslan
+      webhooks:
+        - name: garderobeskap
+          events:
+            - repo:refs_changed
+          configuration:
+            createdBy: bucketctl
+          url: https://example.com
+          active: false
+          scopeType: repository
+          sslVerificationRequired: true

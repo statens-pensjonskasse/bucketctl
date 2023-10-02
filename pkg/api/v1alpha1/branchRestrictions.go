@@ -168,6 +168,9 @@ func toList[T any](asMap map[string]*T) []*T {
 }
 
 func (brs *BranchRestrictions) toMap() map[string]*BranchRestriction {
+	if brs == nil {
+		return make(map[string]*BranchRestriction)
+	}
 	asMap := make(map[string]*BranchRestriction, len(*brs))
 	for _, br := range *brs {
 		asMap[br.Type] = br
@@ -193,9 +196,12 @@ func (rs *Restrictions) toMap() map[string]*Restriction {
 
 func (brs *BranchRestrictions) findBranchRestrictionsDifference(cmp *BranchRestrictions) (difference *BranchRestrictions) {
 	baseMap := brs.toMap()
-	comparisonMap := cmp.toMap()
-
 	difference = new(BranchRestrictions)
+	if cmp == nil {
+		return difference
+	}
+
+	comparisonMap := cmp.toMap()
 	for brType, br := range baseMap {
 		if _, exists := comparisonMap[brType]; !exists {
 			*difference = append(*difference, br)
@@ -214,9 +220,12 @@ func (brs *BranchRestrictions) findBranchRestrictionsDifference(cmp *BranchRestr
 
 func (bms *BranchMatchers) findBranchMatchersDifference(cmp *BranchMatchers) (difference *BranchMatchers) {
 	baseMap := bms.toMap()
-	comparisonMap := cmp.toMap()
-
 	difference = new(BranchMatchers)
+	if cmp == nil {
+		return difference
+	}
+
+	comparisonMap := cmp.toMap()
 	for matching, bm := range baseMap {
 		if _, exists := comparisonMap[matching]; !exists {
 			*difference = append(*difference, bm)
@@ -235,9 +244,12 @@ func (bms *BranchMatchers) findBranchMatchersDifference(cmp *BranchMatchers) (di
 
 func (rs *Restrictions) findRestrictionsDifference(cmp *Restrictions) (difference *Restrictions) {
 	baseMap := rs.toMap()
-	comparisonMap := cmp.toMap()
-
 	difference = new(Restrictions)
+	if cmp == nil {
+		return difference
+	}
+
+	comparisonMap := cmp.toMap()
 	for rType, r := range baseMap {
 		if _, exists := comparisonMap[rType]; !exists {
 			*difference = append(*difference, r)

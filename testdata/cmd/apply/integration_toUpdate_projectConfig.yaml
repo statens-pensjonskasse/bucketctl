@@ -1,0 +1,24 @@
+kind: ProjectConfig
+apiVersion: bucketctl.spk.no/v1alpha1
+metadata:
+  name: desired_project_config
+spec:
+  projectKey: TEST
+  access:
+    public: true
+    defaultPermission: PROJECT_WRITE
+    permissions: [ ]
+  branchRestrictions: [ ]
+  webhooks: [ ]
+  repositories:
+    - name: narnia
+      webhooks:
+        - name: garderobeskap
+          events:
+            - repo:refs_changed
+          configuration:
+            createdBy: bucketctl
+          url: https://example.com
+          active: true
+          scopeType: repository
+          sslVerificationRequired: true
