@@ -24,8 +24,8 @@ type Restrictions []*Restriction
 type Restriction struct {
 	Id           int      `json:"-" yaml:"-"`
 	Type         string   `json:"type" yaml:"type"`
-	ExemptUsers  []string `json:"exempt-users,omitempty" yaml:"exempt-users,omitempty"`
-	ExemptGroups []string `json:"exempt-groups,omitempty" yaml:"exempt-groups,omitempty"`
+	ExemptUsers  []string `json:"exemptUsers,omitempty" yaml:"exemptUsers,omitempty"`
+	ExemptGroups []string `json:"exemptGroups,omitempty" yaml:"exemptGroups,omitempty"`
 }
 
 func FindBranchRestrictionsToChange(desired *BranchRestrictions, actual *BranchRestrictions) (toCreate *BranchRestrictions, toUpdate *BranchRestrictions, toDelete *BranchRestrictions) {

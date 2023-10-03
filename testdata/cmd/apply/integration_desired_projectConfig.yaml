@@ -19,7 +19,7 @@ spec:
             - type: fast-forward-only
             - type: no-deletes
             - type: pull-request-only
-              exempt-users:
+              exemptUsers:
                 - pilt
   webhooks:
     - name: kaptein hook
