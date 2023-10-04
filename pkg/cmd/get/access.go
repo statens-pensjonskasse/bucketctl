@@ -58,5 +58,10 @@ func FetchAccess(baseUrl string, projectKey string, limit int, token string) (*P
 		return nil, err
 	}
 
-	return &ProjectConfigSpec{ProjectKey: projectKey, Access: actualProjectAccess, Repositories: actualRepoAccess}, nil
+	return &ProjectConfigSpec{
+		ProjectKey:        projectKey,
+		Public:            actualProjectAccess.Public,
+		DefaultPermission: actualProjectAccess.DefaultPermission,
+		Permissions:       actualProjectAccess.Permissions,
+		Repositories:      actualRepoAccess}, nil
 }

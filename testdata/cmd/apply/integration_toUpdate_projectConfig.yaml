@@ -4,10 +4,9 @@ metadata:
   name: to_update_project_config
 spec:
   projectKey: TEST
-  access:
-    public: true
-    defaultPermission: PROJECT_WRITE
-    permissions: [ ]
+  public: true
+  defaultPermission: PROJECT_WRITE
+  permissions: [ ]
   branchRestrictions: [ ]
   webhooks: [ ]
   repositories:

@@ -4,11 +4,10 @@ metadata:
   name: to_create_project_config
 spec:
   projectKey: TEST
-  access:
-    permissions:
-      - name: PROJECT_ADMIN
-        users:
-          - pompel
+  permissions:
+    - name: PROJECT_ADMIN
+      users:
+        - pompel
   branchRestrictions:
     - type: BRANCH
       matchers:

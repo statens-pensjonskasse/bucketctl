@@ -4,17 +4,16 @@ metadata:
   name: actual_project_config
 spec:
   projectKey: TEST
-  access:
-    public: false
-    defaultPermission: PROJECT_READ
-    permissions:
-      - name: PROJECT_READ
-        users:
-          - pompel
-          - pilt
-      - name: PROJECT_ADMIN
-        groups:
-          - vaktmesteren
+  public: false
+  defaultPermission: PROJECT_READ
+  permissions:
+    - name: PROJECT_READ
+      users:
+        - pompel
+        - pilt
+    - name: PROJECT_ADMIN
+      groups:
+        - vaktmesteren
   branchRestrictions:
     - type: BRANCH
       matchers:

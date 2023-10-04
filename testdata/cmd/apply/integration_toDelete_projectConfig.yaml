@@ -4,15 +4,14 @@ metadata:
   name: to_delete_project_config
 spec:
   projectKey: TEST
-  access:
-    permissions:
-      - name: PROJECT_ADMIN
-        groups:
-          - vaktmesteren
-      - name: PROJECT_READ
-        users:
-          - pompel
-          - pilt
+  permissions:
+    - name: PROJECT_ADMIN
+      groups:
+        - vaktmesteren
+    - name: PROJECT_READ
+      users:
+        - pompel
+        - pilt
   branchRestrictions:
     - type: BRANCH
       matchers:

@@ -4,13 +4,12 @@ metadata:
   name: desired_project_config
 spec:
   projectKey: TEST
-  access:
-    public: true
-    defaultPermission: PROJECT_WRITE
-    permissions:
-      - name: PROJECT_ADMIN
-        users:
-          - pompel
+  public: true
+  defaultPermission: PROJECT_WRITE
+  permissions:
+    - name: PROJECT_ADMIN
+      users:
+        - pompel
   branchRestrictions:
     - type: BRANCH
       matchers:

@@ -2,12 +2,6 @@ package v1alpha1
 
 import "bucketctl/pkg/common"
 
-type ProjectAccess struct {
-	Public            *bool        `json:"public,omitempty" yaml:"public,omitempty"`
-	DefaultPermission *string      `json:"defaultPermission,omitempty" yaml:"defaultPermission,omitempty"`
-	Permissions       *Permissions `json:"permissions,omitempty" yaml:"permissions,omitempty"`
-}
-
 type Entities struct {
 	Groups []string `json:"groups,omitempty" yaml:"groups,omitempty"`
 	Users  []string `json:"users,omitempty" yaml:"users,omitempty"`
@@ -34,23 +28,14 @@ func FindPermissionsToChange(desired *Permissions, actual *Permissions) (toCreat
 	return toCreate, toDelete
 }
 
-func FindProjectAccessToUpdate(desired *ProjectAccess, actual *ProjectAccess) (toUpdate *ProjectAccess) {
-	toUpdate = &ProjectAccess{
-		Public:            updatePublicProperty(desired, actual),
-		DefaultPermission: updateDefaultProjectPermissionProperty(desired, actual),
-		Permissions:       new(Permissions),
-	}
-	return toUpdate
-}
-
-func updatePublicProperty(desired *ProjectAccess, actual *ProjectAccess) *bool {
+func UpdatePublicProperty(desired *ProjectConfigSpec, actual *ProjectConfigSpec) *bool {
 	if desired.Public != nil && actual.Public != nil && *desired.Public != *actual.Public {
 		return desired.Public
 	}
 	return nil
 }
 
-func updateDefaultProjectPermissionProperty(desired *ProjectAccess, actual *ProjectAccess) *string {
+func UpdateDefaultProjectPermissionProperty(desired *ProjectConfigSpec, actual *ProjectConfigSpec) *string {
 	if desired.DefaultPermission != nil && actual.DefaultPermission != nil && *desired.DefaultPermission != *actual.DefaultPermission {
 		return desired.DefaultPermission
 	}
@@ -139,40 +124,6 @@ func (ps *Permissions) getPermissionsDifference(B *Permissions) (difference *Per
 	}
 
 	return difference
-}
-
-func (pa *ProjectAccess) Equals(cmp *ProjectAccess) bool {
-	if pa == cmp {
-		return true
-	}
-	if cmp == nil {
-		return false
-	}
-	if pa.Public != nil && cmp.Public == nil {
-		return false
-	}
-	if pa.Public == nil && cmp.Public != nil {
-		return false
-	}
-	if pa.Public != nil && cmp.Public != nil && *pa.Public != *cmp.Public {
-		return false
-	}
-	if pa.DefaultPermission != nil && cmp.DefaultPermission == nil {
-		return false
-	}
-	if pa.DefaultPermission == nil && cmp.DefaultPermission != nil {
-		return false
-	}
-	if pa.DefaultPermission != nil && cmp.DefaultPermission != nil && *pa.DefaultPermission != *cmp.DefaultPermission {
-		return false
-	}
-	if pa.Permissions == nil && cmp.Permissions != nil {
-		return false
-	}
-	if pa.Permissions != nil && !pa.Permissions.Equals(cmp.Permissions) {
-		return false
-	}
-	return true
 }
 
 func (ps *Permissions) toMap() map[string]*Permission {

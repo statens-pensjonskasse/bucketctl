@@ -91,7 +91,7 @@ func getRepositoryUserPermissions(baseUrl string, projectKey string, repoSlug st
 	return getUserPermissions(url, token)
 }
 
-func GetProjectAccess(baseUrl string, projectKey string, limit int, token string) (*ProjectAccess, error) {
+func GetProjectAccess(baseUrl string, projectKey string, limit int, token string) (*ProjectConfigSpec, error) {
 	defaultPermission, err := getDefaultProjectPermission(baseUrl, projectKey, token)
 	if err != nil {
 		return nil, err
@@ -129,7 +129,8 @@ func GetProjectAccess(baseUrl string, projectKey string, limit int, token string
 
 	grantedPermissions := marshalPermissionsMapToList(grantedPermissionsMap)
 
-	projectAccess := &ProjectAccess{
+	projectAccess := &ProjectConfigSpec{
+		ProjectKey:        projectKey,
 		Public:            &isPublic,
 		DefaultPermission: &defaultPermission,
 		Permissions:       grantedPermissions,

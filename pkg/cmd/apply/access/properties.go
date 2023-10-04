@@ -10,7 +10,7 @@ import (
 	"strconv"
 )
 
-func setProjectAccessProperties(baseUrl string, projectKey string, token string, toUpdate *ProjectAccess) error {
+func setProjectAccessProperties(baseUrl string, projectKey string, token string, toUpdate *ProjectConfigSpec) error {
 	if toUpdate.Public != nil {
 		if err := setProjectPublicProperty(baseUrl, projectKey, *toUpdate.Public, token); err != nil {
 			return err

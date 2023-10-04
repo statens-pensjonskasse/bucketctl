@@ -8,20 +8,20 @@ import (
 
 func PrettyFormatAccess(projectConfig *ProjectConfig) [][]string {
 	projectKey := projectConfig.Spec.ProjectKey
-	projectAccess := projectConfig.Spec.Access
+	projectConfigSpec := projectConfig.Spec
 	projectRepositories := projectConfig.Spec.Repositories
 
 	var data [][]string
 	data = append(data, []string{"Project", "Repository", "Permission", "Groups", "Users"})
 
-	if projectAccess.Public != nil && *projectAccess.Public {
+	if projectConfigSpec.Public != nil && *projectConfigSpec.Public {
 		data = append(data, []string{projectKey, ALL, "PROJECT_READ", ALL, ALL})
 	}
-	if projectAccess.DefaultPermission != nil {
-		data = append(data, []string{projectKey, ALL, *projectAccess.DefaultPermission, AUTH, AUTH})
+	if projectConfigSpec.DefaultPermission != nil {
+		data = append(data, []string{projectKey, ALL, *projectConfigSpec.DefaultPermission, AUTH, AUTH})
 	}
 
-	formattedProjectPermissions := prettyFormatPermissions(projectKey, ALL, projectAccess.Permissions)
+	formattedProjectPermissions := prettyFormatPermissions(projectKey, ALL, projectConfigSpec.Permissions)
 	data = append(data, formattedProjectPermissions...)
 
 	formattedRepositoryPermissions := prettyFormatRepositoriesPermissions(projectKey, projectRepositories)

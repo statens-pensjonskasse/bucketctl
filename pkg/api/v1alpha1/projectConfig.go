@@ -24,7 +24,9 @@ type ProjectConfig struct {
 
 type ProjectConfigSpec struct {
 	ProjectKey         string                  `json:"projectKey" yaml:"projectKey"`
-	Access             *ProjectAccess          `json:"access,omitempty" yaml:"access,omitempty"`
+	Public             *bool                   `json:"public,omitempty" yaml:"public,omitempty"`
+	DefaultPermission  *string                 `json:"defaultPermission,omitempty" yaml:"defaultPermission,omitempty"`
+	Permissions        *Permissions            `json:"permissions,omitempty" yaml:"permissions,omitempty"`
 	BranchRestrictions *BranchRestrictions     `json:"branchRestrictions,omitempty" yaml:"branchRestrictions,omitempty"`
 	Webhooks           *Webhooks               `json:"webhooks,omitempty" yaml:"webhooks,omitempty"`
 	Repositories       *RepositoriesProperties `json:"repositories,omitempty" yaml:"repositories,omitempty"`
@@ -94,7 +96,9 @@ func GroupRepositories(desired *RepositoriesProperties, actual *RepositoriesProp
 func CombineProjectConfigSpecs(access *ProjectConfigSpec, branchRestrictions *ProjectConfigSpec, webhooks *ProjectConfigSpec) *ProjectConfigSpec {
 	return &ProjectConfigSpec{
 		ProjectKey:         access.ProjectKey,
-		Access:             access.Access,
+		Public:             access.Public,
+		DefaultPermission:  access.DefaultPermission,
+		Permissions:        access.Permissions,
 		BranchRestrictions: branchRestrictions.BranchRestrictions,
 		Webhooks:           webhooks.Webhooks,
 		Repositories:       CombineRepositoriesProperties(access.Repositories, branchRestrictions.Repositories, webhooks.Repositories),
@@ -163,10 +167,29 @@ func (pcs *ProjectConfigSpec) Equals(cmp *ProjectConfigSpec) bool {
 		return false
 	}
 
-	if pcs.Access == nil && cmp.Access != nil {
+	if pcs.Public != nil && cmp.Public == nil {
 		return false
 	}
-	if pcs.Access != nil && !pcs.Access.Equals(cmp.Access) {
+	if pcs.Public == nil && cmp.Public != nil {
+		return false
+	}
+	if pcs.Public != nil && cmp.Public != nil && *pcs.Public != *cmp.Public {
+		return false
+	}
+	if pcs.DefaultPermission != nil && cmp.DefaultPermission == nil {
+		return false
+	}
+	if pcs.DefaultPermission == nil && cmp.DefaultPermission != nil {
+		return false
+	}
+	if pcs.DefaultPermission != nil && cmp.DefaultPermission != nil && *pcs.DefaultPermission != *cmp.DefaultPermission {
+		return false
+	}
+
+	if pcs.Permissions == nil && cmp.Permissions != nil {
+		return false
+	}
+	if pcs.Permissions != nil && !pcs.Permissions.Equals(cmp.Permissions) {
 		return false
 	}
 

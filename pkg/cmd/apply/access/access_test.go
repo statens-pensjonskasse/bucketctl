@@ -2,7 +2,6 @@ package access
 
 import (
 	. "bucketctl/pkg/api/v1alpha1"
-	"bucketctl/pkg/printer"
 	"testing"
 )
 
@@ -27,50 +26,38 @@ func primitivePtr[T any](val T) *T {
 
 var (
 	noChanges = &ProjectConfigSpec{
-		ProjectKey: "A",
-		Access: &ProjectAccess{
-			Permissions: &Permissions{},
-		},
+		ProjectKey:   "A",
+		Permissions:  &Permissions{},
 		Repositories: &RepositoriesProperties{},
 	}
 	read = &ProjectConfigSpec{
-		ProjectKey: "A",
-		Access: &ProjectAccess{
-			Permissions: &Permissions{readPermission},
-		},
+		ProjectKey:   "A",
+		Permissions:  &Permissions{readPermission},
 		Repositories: &RepositoriesProperties{},
 	}
 	admin = &ProjectConfigSpec{
-		ProjectKey: "A",
-		Access: &ProjectAccess{
-			Permissions: &Permissions{adminPermission},
-		},
+		ProjectKey:   "A",
+		Permissions:  &Permissions{adminPermission},
 		Repositories: &RepositoriesProperties{},
 	}
 	readAndAdmin = &ProjectConfigSpec{
-		ProjectKey: "A",
-		Access: &ProjectAccess{
-			Permissions: &Permissions{readPermission, adminPermission},
-		},
+		ProjectKey:   "A",
+		Permissions:  &Permissions{readPermission, adminPermission},
 		Repositories: &RepositoriesProperties{},
 	}
 	publicDefaultRead = &ProjectConfigSpec{
-		ProjectKey: "A",
-		Access: &ProjectAccess{
-			Public:            primitivePtr(true),
-			DefaultPermission: primitivePtr("PROJECT_READ"),
-			Permissions:       &Permissions{},
-		},
-		Repositories: &RepositoriesProperties{},
+		ProjectKey:        "A",
+		Public:            primitivePtr(true),
+		DefaultPermission: primitivePtr("PROJECT_READ"),
+		Permissions:       &Permissions{},
+		Repositories:      &RepositoriesProperties{},
 	}
 	notPublicDefaultWrite = &ProjectConfigSpec{
-		ProjectKey: "A",
-		Access: &ProjectAccess{
-			Public:            primitivePtr(false),
-			DefaultPermission: primitivePtr("PROJECT_WRITE"),
-			Permissions:       &Permissions{},
-		},
-		Repositories: &RepositoriesProperties{},
+		ProjectKey:        "A",
+		Public:            primitivePtr(false),
+		DefaultPermission: primitivePtr("PROJECT_WRITE"),
+		Permissions:       &Permissions{},
+		Repositories:      &RepositoriesProperties{},
 	}
 )
 
@@ -123,8 +110,6 @@ func Test_FindAccessChanges(t *testing.T) {
 			}
 			if !gotToUpdate.Equals(tt.want.toUpdate) {
 				t.Errorf("%s - update got %v, want %v", tt.name, gotToUpdate, tt.want.toUpdate)
-				printer.PrintData(gotToUpdate, nil)
-				printer.PrintData(tt.want.toUpdate, nil)
 			}
 			if !gotToDelete.Equals(tt.want.toDelete) {
 				t.Errorf("%s - delete got %v, want %v", tt.name, gotToDelete, tt.want.toDelete)
