@@ -24,6 +24,8 @@ var Cmd = &cobra.Command{
 }
 
 func init() {
+	Cmd.MarkFlagRequired(common.BaseUrlFlag)
+	Cmd.MarkFlagRequired(common.TokenFlag)
 	Cmd.Flags().StringP(common.FilenameFlag, common.FilenameFlagShorthand, "", "")
 	Cmd.Flags().BoolP(common.DryRunFlag, common.DryRunFlagShorthand, false, "Dry run")
 }

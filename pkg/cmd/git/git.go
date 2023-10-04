@@ -24,6 +24,7 @@ var Cmd = &cobra.Command{
 }
 
 func init() {
+	Cmd.MarkFlagRequired(common.BaseUrlFlag)
 	Cmd.PersistentFlags().StringVarP(&key, common.ProjectKeyFlag, common.ProjectKeyFlagShorthand, "", "Project key")
 	Cmd.PersistentFlags().StringVarP(&repo, common.RepoSlugFlag, common.RepoSlugFlagShorthand, "", "Repository slug")
 
