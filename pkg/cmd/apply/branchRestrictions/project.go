@@ -31,6 +31,6 @@ func updateProjectBranchRestrictions(baseUrl string, projectKey string, token st
 }
 
 func deleteProjectBranchRestrictions(baseUrl string, projectKey string, token string, restrictions *BranchRestrictions) error {
-	url := fmt.Sprintf("%s/rest/branch-permissions/latest/projects/%s/restrictions/", baseUrl, projectKey)
+	url := fmt.Sprintf("%s/rest/branch-permissions/latest/projects/%s/restrictions", baseUrl, projectKey)
 	return deleteRestrictions(url, token, restrictions, "project '"+projectKey+"'")
 }

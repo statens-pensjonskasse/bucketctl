@@ -67,43 +67,47 @@ func printBranchRestriction(action string, pcs *ProjectConfigSpec) {
 }
 
 func createBranchRestrictions(url string, token string, branchRestrictions *BranchRestrictions, action string, scope string) error {
-	for _, br := range *branchRestrictions {
-		for _, bm := range *br.BranchMatchers {
-			for _, r := range *bm.Restrictions {
-				payload, err := json.Marshal(
-					&types.CreateRestriction{
-						Type: r.Type,
-						Matcher: &types.Matcher{
-							Id: bm.Matching,
-							Type: &types.MatcherType{
-								Id: br.Type,
+	if branchRestrictions != nil && len(*branchRestrictions) > 0 {
+		for _, br := range *branchRestrictions {
+			for _, bm := range *br.BranchMatchers {
+				for _, r := range *bm.Restrictions {
+					payload, err := json.Marshal(
+						&types.CreateRestriction{
+							Type: r.Type,
+							Matcher: &types.Matcher{
+								Id: bm.Matching,
+								Type: &types.MatcherType{
+									Id: br.Type,
+								},
 							},
-						},
-						Users:      r.ExemptUsers,
-						Groups:     r.ExemptGroups,
-						AccessKeys: nil,
-					})
-				if err != nil {
-					return err
+							Users:      r.ExemptUsers,
+							Groups:     r.ExemptGroups,
+							AccessKeys: nil,
+						})
+					if err != nil {
+						return err
+					}
+					if _, err := common.PostRequest(url, token, bytes.NewReader(payload), nil); err != nil {
+						return err
+					}
+					pterm.Printfln("%s %s restriction for %s (%s) in %s", action, r.Type, bm.Matching, br.Type, scope)
 				}
-				if _, err := common.PostRequest(url, token, bytes.NewReader(payload), nil); err != nil {
-					return err
-				}
-				pterm.Info.Printfln("%s %s restriction for %s (%s) in %s", action, r.Type, bm.Matching, br.Type, scope)
 			}
 		}
 	}
 	return nil
 }
 
-func deleteRestrictions(url string, token string, restrictions *BranchRestrictions, scope string) error {
-	for _, matcherRestriction := range *restrictions {
-		for _, branchRestriction := range *matcherRestriction.BranchMatchers {
-			for _, restriction := range *branchRestriction.Restrictions {
-				if _, err := common.DeleteRequest(url+strconv.Itoa(restriction.Id), token, nil); err != nil {
-					return err
+func deleteRestrictions(url string, token string, branchRestrictions *BranchRestrictions, scope string) error {
+	if branchRestrictions != nil && len(*branchRestrictions) > 0 {
+		for _, matcherRestriction := range *branchRestrictions {
+			for _, branchRestriction := range *matcherRestriction.BranchMatchers {
+				for _, restriction := range *branchRestriction.Restrictions {
+					if _, err := common.DeleteRequest(url+"/"+strconv.Itoa(restriction.Id), token, nil); err != nil {
+						return err
+					}
+					pterm.Printfln("%s %s restriction for %s (%s) in %s", pterm.Red("🗑️ Deleted"), restriction.Type, branchRestriction.Matching, matcherRestriction.Type, scope)
 				}
-				pterm.Info.Printfln("%s %s restriction for %s (%s) in %s", pterm.Red("🗑️ Deleted"), restriction.Type, branchRestriction.Matching, matcherRestriction.Type, scope)
 			}
 		}
 	}

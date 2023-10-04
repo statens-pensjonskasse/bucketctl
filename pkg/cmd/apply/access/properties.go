@@ -37,7 +37,7 @@ func setProjectDefaultPermission(baseUrl string, projectKey string, permission s
 			return err
 		}
 	}
-	pterm.Info.Printfln("%s default permission for project '%s' to '%s'", pterm.Blue("🖋️Changed"), projectKey, permission)
+	pterm.Printfln("%s default permission for project '%s' to '%s'", pterm.Blue("🖋️Changed"), projectKey, permission)
 	return nil
 }
 
@@ -51,7 +51,7 @@ func setProjectPublicProperty(baseUrl string, projectKey string, isPublic bool, 
 	} else {
 		action = pterm.Red("🔒 Closed")
 	}
-	pterm.Info.Printfln("%s public access for project '%s'", action, projectKey)
+	pterm.Printfln("%s public access for project '%s'", action, projectKey)
 	return nil
 }
 

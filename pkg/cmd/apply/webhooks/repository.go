@@ -66,7 +66,7 @@ func createRepositoryWebhook(baseUrl string, projectKey string, repoSlug string,
 	if _, err := common.PostRequest(url, token, bytes.NewReader(payload), nil); err != nil {
 		return err
 	}
-	pterm.Info.Printfln("%s webhook %s in repository %s/%s", pterm.Green("🪝 Created"), webhook.Name, projectKey, repoSlug)
+	pterm.Printfln("%s webhook %s in repository %s/%s", pterm.Green("🪝 Created"), webhook.Name, projectKey, repoSlug)
 	return nil
 }
 
@@ -88,7 +88,7 @@ func updateRepositoryWebhook(baseUrl string, projectKey string, repoSlug string,
 	if _, err := common.PutRequest(url, token, bytes.NewReader(payload), nil); err != nil {
 		return err
 	}
-	pterm.Info.Printfln("%s webhook %s in repository %s/%s", pterm.Blue("♻️ Updated"), webhook.Name, projectKey, repoSlug)
+	pterm.Printfln("%s webhook %s in repository %s/%s", pterm.Blue("♻️ Updated"), webhook.Name, projectKey, repoSlug)
 	return nil
 }
 
@@ -106,6 +106,6 @@ func deleteRepositoryWebhook(baseUrl string, projectKey string, repoSlug string,
 	if _, err := common.DeleteRequest(url, token, nil); err != nil {
 		return err
 	}
-	pterm.Info.Printfln("%s webhook %s in repository %s/%s", pterm.Red("️🗑️ Deleted"), webhook.Name, projectKey, repoSlug)
+	pterm.Printfln("%s webhook %s in repository %s/%s", pterm.Red("️🛑 Deleted"), webhook.Name, projectKey, repoSlug)
 	return nil
 }

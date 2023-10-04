@@ -40,7 +40,7 @@ func createProjectWebhook(baseUrl string, projectKey string, token string, webho
 	if _, err := common.PostRequest(url, token, bytes.NewReader(payload), nil); err != nil {
 		return err
 	}
-	pterm.Info.Printfln("%s webhook %s in project %s", pterm.Green("🪝 Created"), webhook.Name, projectKey)
+	pterm.Printfln("%s webhook %s in project %s", pterm.Green("🪝 Created"), webhook.Name, projectKey)
 	return nil
 }
 
@@ -62,7 +62,7 @@ func updateProjectWebhook(baseUrl string, projectKey string, token string, webho
 	if _, err := common.PutRequest(url, token, bytes.NewReader(payload), nil); err != nil {
 		return err
 	}
-	pterm.Info.Printfln("%s webhook %s in project %s", pterm.Blue("♻️ Updated"), webhook.Name, projectKey)
+	pterm.Printfln("%s webhook %s in project %s", pterm.Blue("♻️ Updated"), webhook.Name, projectKey)
 	return nil
 }
 
@@ -80,6 +80,6 @@ func deleteProjectWebhook(baseUrl string, projectKey string, token string, webho
 	if _, err := common.DeleteRequest(url, token, nil); err != nil {
 		return err
 	}
-	pterm.Info.Printfln("%s webhook %s in project %s", pterm.Red("🗑️ Deleted"), webhook.Name, projectKey)
+	pterm.Printfln("%s webhook %s in project %s", pterm.Red("🛑 Deleted"), webhook.Name, projectKey)
 	return nil
 }

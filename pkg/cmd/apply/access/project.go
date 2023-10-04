@@ -23,13 +23,13 @@ func removeProjectPermissions(baseUrl string, projectKey string, token string, p
 			if err := removeUserProjectPermissions(baseUrl, projectKey, token, user); err != nil {
 				return err
 			}
-			pterm.Info.Printfln("%s permissions for user '%s' in project '%s'", pterm.Red("🙅 Revoked"), user, projectKey)
+			pterm.Printfln("%s permissions for user '%s' in project '%s'", pterm.Red("🙅 Revoked"), user, projectKey)
 		}
 		for _, group := range permission.Entities.Groups {
 			if err := removeGroupProjectPermissions(baseUrl, projectKey, token, group); err != nil {
 				return err
 			}
-			pterm.Info.Printfln("%s permissions for group '%s' in project '%s'", pterm.Red("🚫 Revoked"), group, projectKey)
+			pterm.Printfln("%s permissions for group '%s' in project '%s'", pterm.Red("🚫 Revoked"), group, projectKey)
 		}
 	}
 	return nil
@@ -65,13 +65,13 @@ func grantProjectPermissions(baseUrl string, projectKey string, token string, pe
 			if err := grantUserProjectPermission(baseUrl, projectKey, token, user, permission.Name); err != nil {
 				return err
 			}
-			pterm.Info.Printfln("%s user '%s' permission '%s' for project %s", pterm.Green("🧑 Granted"), user, permission.Name, projectKey)
+			pterm.Printfln("%s user '%s' permission '%s' for project %s", pterm.Green("🧑 Granted"), user, permission.Name, projectKey)
 		}
 		for _, group := range permission.Entities.Groups {
 			if err := grantGroupProjectPermission(baseUrl, projectKey, token, group, permission.Name); err != nil {
 				return err
 			}
-			pterm.Info.Printfln("%s group '%s' permission '%s' for project %s", pterm.Green("👥 Granted"), group, permission.Name, projectKey)
+			pterm.Printfln("%s group '%s' permission '%s' for project %s", pterm.Green("👥 Granted"), group, permission.Name, projectKey)
 		}
 	}
 	return nil

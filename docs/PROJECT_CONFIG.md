@@ -7,22 +7,12 @@ metadata:
   name: <name>
 spec:
   projectKey: <PROJECT_KEY>
-  access:
-    public: <bool>
-    defaultPermission: <PROJECT_WRITE|PROJECT_READ>
-    permissions: <[]Permission>
+  public: <bool>
+  defaultPermission: <PROJECT_WRITE|PROJECT_READ>
+  permissions: <[]Permission>
   branchRestrictions: <[]BranchRestriction>
   webhooks: <[]Webhook>
   repositories: <[]Repository>
-```
-
-## Repository
-
-```yaml
-name: <string>
-permissions: <[]Permission>
-branchRestrictions: <[]BranchRestriction>
-webhooks: <[]Webhook>
 ```
 
 ## Permission
@@ -105,3 +95,13 @@ sslVerificationRequired: <bool>
 * pr:declined
 * pr:deleted
 * pr:from_ref_updated
+
+## Repository
+
+```yaml
+name: <string>
+permissions: <[]Permission>
+branchRestrictions: <[]BranchRestriction>
+webhooks: <[]Webhook>
+```
+

@@ -37,18 +37,20 @@ func setRepositoriesPermissions(baseUrl string, projectKey string, token string,
 }
 
 func removeRepositoryPermissions(baseUrl string, projectKey string, repoSlug string, token string, permissions *Permissions) error {
-	for _, permission := range *permissions {
-		for _, user := range permission.Entities.Users {
-			if err := removeUserRepositoryPermissions(baseUrl, projectKey, repoSlug, token, user); err != nil {
-				return err
+	if permissions != nil && len(*permissions) > 0 {
+		for _, permission := range *permissions {
+			for _, user := range permission.Entities.Users {
+				if err := removeUserRepositoryPermissions(baseUrl, projectKey, repoSlug, token, user); err != nil {
+					return err
+				}
+				pterm.Printfln("%s permissions for user '%s' in repository '%s/%s'", pterm.Red("🙅 Revoked"), user, projectKey, repoSlug)
 			}
-			pterm.Info.Printfln("%s permissions for user '%s' in repository '%s/%s'", pterm.Red("🙅 Revoked"), user, projectKey, repoSlug)
-		}
-		for _, group := range permission.Entities.Groups {
-			if err := removeGroupRepositoryPermissions(baseUrl, projectKey, repoSlug, token, group); err != nil {
-				return err
+			for _, group := range permission.Entities.Groups {
+				if err := removeGroupRepositoryPermissions(baseUrl, projectKey, repoSlug, token, group); err != nil {
+					return err
+				}
+				pterm.Printfln("%s permissions for group '%s' in repository '%s/%s'", pterm.Red("🚫 Revoked"), group, projectKey, repoSlug)
 			}
-			pterm.Info.Printfln("%s permissions for group '%s' in repository '%s/%s'", pterm.Red("🚫 Revoked"), group, projectKey, repoSlug)
 		}
 	}
 	return nil
@@ -79,18 +81,20 @@ func removeGroupRepositoryPermissions(baseUrl string, projectKey string, repoSlu
 }
 
 func grantRepositoryPermissions(baseUrl string, projectKey string, repoSlug string, token string, permissions *Permissions) error {
-	for _, permission := range *permissions {
-		for _, user := range permission.Entities.Users {
-			if err := grantUserRepositoryPermission(baseUrl, projectKey, repoSlug, token, user, permission.Name); err != nil {
-				return err
+	if permissions != nil && len(*permissions) > 0 {
+		for _, permission := range *permissions {
+			for _, user := range permission.Entities.Users {
+				if err := grantUserRepositoryPermission(baseUrl, projectKey, repoSlug, token, user, permission.Name); err != nil {
+					return err
+				}
+				pterm.Printfln("%s user '%s' permission '%s' in repository '%s/%s'", pterm.Green("🧑 Granted"), user, permission.Name, projectKey, repoSlug)
 			}
-			pterm.Info.Printfln("%s user '%s' permission '%s' in repository '%s/%s'", pterm.Green("🧑 Granted"), user, permission.Name, projectKey, repoSlug)
-		}
-		for _, group := range permission.Entities.Groups {
-			if err := grantGroupRepositoryPermission(baseUrl, projectKey, repoSlug, token, group, permission.Name); err != nil {
-				return err
+			for _, group := range permission.Entities.Groups {
+				if err := grantGroupRepositoryPermission(baseUrl, projectKey, repoSlug, token, group, permission.Name); err != nil {
+					return err
+				}
+				pterm.Printfln("%s group '%s' permission '%s' in repository '%s/%s'", pterm.Green("👥 Granted"), group, permission.Name, projectKey, repoSlug)
 			}
-			pterm.Info.Printfln("%s group '%s' permission '%s' in repository '%s/%s'", pterm.Green("👥 Granted"), group, permission.Name, projectKey, repoSlug)
 		}
 	}
 	return nil
