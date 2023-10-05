@@ -1,15 +1,22 @@
 @Library('jenkins-pipeline-library@latest_develop')
 import no.spk.jenkins.pipeline.ci.config.CIPipelineConfig
 
+String BUILD_IMAGE='old-dockerhub.spk.no:5000/jenkins-slave-docker/master'
+
 ciPipeline {
     config = CIPipelineConfig.get()
             .useMake(
-                buildImage: 'old-dockerhub.spk.no:5000/base-golang/golang',
-                build: 'build',
-                test: 'coverage'
+                buildImage: BUILD_IMAGE,
+                build: 'build-ci',
+                test: 'test-ci',
+                publish: 'publish-ci',
+                buildContainerArgs: '-e DOCKER_HOST=${DOCKER_HOST}'
             )
             .withSonarQube()
             .withVersionStrategy(strategy: 'semver')
             .withGitTaggingStrategy(semantic: 'main')
+            .withPublish(fromBranches: 'feature/, hotfix/')
+            .withRelease(fromBranch: 'main')
             .withSlackNotifications(channels: 'parsec-ci')
+            .withLog(level: 'all')
 }
