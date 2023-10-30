@@ -24,6 +24,7 @@ const (
 	ForceFlagShorthand                  = "F"
 	FilenameFlag                        = "file"
 	FilenameFlagShorthand               = "f"
+	CompareWithFileFlag                 = "compare-with-file"
 	DryRunFlag                          = "dry-run"
 	DryRunFlagShorthand                 = "D"
 	PullRequestTitleFlag                = "title"

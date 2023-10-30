@@ -1,5 +1,5 @@
 # Siden vi mangler brannmuråpninger for å laste ned helm og kustomize direkte tar vi de fra et image som allerede har dem
-FROM quay.io/argoproj/argocd:latest as tools
+FROM quay.io/argoproj/argocd:latest AS tools
 FROM old-dockerhub.spk.no:5000/base-os/rockylinux9-minimal
 
 COPY --from=tools /usr/local/bin/helm /usr/local/bin/
@@ -7,7 +7,8 @@ COPY --from=tools /usr/local/bin/kustomize /usr/local/bin/
 COPY ./bin/bucketctl /usr/local/bin/
 
 RUN microdnf install -y \
-    git &&\
+    git \
+    make &&\
     microdnf clean all
 
 RUN adduser app

@@ -1,5 +1,7 @@
 GO_IMAGE=old-dockerhub.spk.no:5000/base-golang/golang
-CREATED_IMAGE=old-dockerhub.spk.no:5000/bucketctl
+
+IMAGE_NAME=bucketctl
+CREATED_IMAGE=old-dockerhub.spk.no:5000/$(IMAGE_NAME)
 
 help:
 	@echo "Targets:"
@@ -9,7 +11,7 @@ build: ## Bygger bin/bucketctl
 	go build -o bin/bucketctl main.go
 
 build-image: ## Bygg image med utils
-	docker build . --pull --tag bucketctl
+	docker build --platform linux/amd64 . --pull --tag $(IMAGE_NAME)
 
 test: ## Kjører tester
 	go test ./...
@@ -31,11 +33,12 @@ test-ci: ## Test i CI-pipeline
 	docker run --volumes-from js-docker -w $$WORKSPACE $(GO_IMAGE) go test ./... -coverprofile=bin/coverage.out
 
 publish-ci: build-image ## Publiser util-image fra CI-pipeline
-	@NORMALISED_BRANCH=$(shell echo $$BRANCH_NAME | sed "s/[\/\s,:;|]/-/g") &&\
-	if [[ $$NORMALISED_BRANCH == "main" ]]; then \
-		docker tag bucketctl "$(CREATED_IMAGE):latest" &&\
+	@NORMALISED_BRANCH=$(shell echo $$BRANCH_NAME | sed "s/[\/,:;|_]/-/g") && \
+	if [ "$${NORMALISED_BRANCH}" = "main" ]; then \
+		echo ">> pusher $(CREATED_IMAGE):latest" && \
+		docker tag $(IMAGE_NAME) "$(CREATED_IMAGE):latest" && \
 		docker push "$(CREATED_IMAGE):latest"; \
-	else \
-		docker tag bucketctl "$(CREATED_IMAGE):$$NORMALISED_BRANCH" &&\
-		docker push "$(CREATED_IMAGE):$$NORMALISED_BRANCH"; \
-	fi
+	fi; \
+	echo ">> pusher $(CREATED_IMAGE):$$NORMALISED_BRANCH" && \
+	docker tag $(IMAGE_NAME) "$(CREATED_IMAGE):$$NORMALISED_BRANCH" && \
+	docker push "$(CREATED_IMAGE):$$NORMALISED_BRANCH"

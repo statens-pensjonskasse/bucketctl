@@ -16,6 +16,7 @@ var Cmd = &cobra.Command{
 	PreRun: func(cmd *cobra.Command, args []string) {
 		cmd.MarkFlagRequired(common.FilenameFlag)
 		viper.BindPFlag(common.FilenameFlag, cmd.Flags().Lookup(common.FilenameFlag))
+		viper.BindPFlag(common.CompareWithFileFlag, cmd.Flags().Lookup(common.CompareWithFileFlag))
 		viper.BindPFlag(common.DryRunFlag, cmd.Flags().Lookup(common.DryRunFlag))
 	},
 	Use:   "apply",
@@ -27,6 +28,7 @@ func init() {
 	Cmd.MarkFlagRequired(common.BaseUrlFlag)
 	Cmd.MarkFlagRequired(common.TokenFlag)
 	Cmd.Flags().StringP(common.FilenameFlag, common.FilenameFlagShorthand, "", "")
+	Cmd.Flags().String(common.CompareWithFileFlag, "", "Compare with file, implicitly dry-run")
 	Cmd.Flags().BoolP(common.DryRunFlag, common.DryRunFlagShorthand, false, "Dry run")
 }
 
@@ -36,16 +38,26 @@ func applyProjectConfig(cmd *cobra.Command, args []string) {
 	token := viper.GetString(common.TokenFlag)
 
 	file := viper.GetString(common.FilenameFlag)
-	dryRun := viper.GetBool(common.DryRunFlag)
+
+	compareFile := viper.GetString(common.CompareWithFileFlag)
 
 	desired, err := readProjectConfig(file)
 	cobra.CheckErr(err)
 
-	actual, err := getActualProjectConfig(baseUrl, desired.Spec.ProjectKey, limit, token)
-	cobra.CheckErr(err)
+	var actual *ProjectConfigSpec
+	if len(compareFile) > 0 {
+		viper.Set(common.DryRunFlag, true)
+		comparison, err := readProjectConfig(compareFile)
+		cobra.CheckErr(err)
+		actual = &comparison.Spec
+	} else {
+		actual, err = get.FetchProjectConfigSpec(baseUrl, desired.Spec.ProjectKey, limit, token)
+		cobra.CheckErr(err)
+	}
 
 	toCreate, toUpdate, toDelete := findProjectConfigChanges(&desired.Spec, actual)
 
+	dryRun := viper.GetBool(common.DryRunFlag)
 	if dryRun {
 		printChanges(toCreate, toUpdate, toDelete)
 	} else {
@@ -78,23 +90,6 @@ func setProjectConfig(baseUrl string, projectKey string, token string, toCreate 
 	}
 
 	return nil
-}
-
-func getActualProjectConfig(baseUrl string, projectKey string, limit int, token string) (*ProjectConfigSpec, error) {
-	actualAccess, err := get.FetchAccess(baseUrl, projectKey, limit, token)
-	if err != nil {
-		return nil, err
-	}
-	actualBranchRestrictions, err := get.FetchBranchRestrictions(baseUrl, projectKey, limit, token)
-	if err != nil {
-		return nil, err
-	}
-	actualWebhooks, err := get.FetchWebhooks(baseUrl, projectKey, limit, token)
-	if err != nil {
-		return nil, err
-	}
-
-	return CombineProjectConfigSpecs(actualAccess, actualBranchRestrictions, actualWebhooks), nil
 }
 
 func readProjectConfig(file string) (*ProjectConfig, error) {

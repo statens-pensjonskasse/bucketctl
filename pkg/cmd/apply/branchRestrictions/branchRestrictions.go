@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"github.com/pterm/pterm"
 	"strconv"
+	"strings"
 )
 
 func FindBranchRestrictionChanges(desired *ProjectConfigSpec, actual *ProjectConfigSpec) (toCreate *ProjectConfigSpec, toUpdate *ProjectConfigSpec, toDelete *ProjectConfigSpec) {
@@ -44,8 +45,11 @@ func printBranchRestriction(action string, pcs *ProjectConfigSpec) {
 		for _, br := range *pcs.BranchRestrictions {
 			for _, bm := range *br.BranchMatchers {
 				for _, r := range *bm.Restrictions {
-					pterm.Printfln("%s %s (%s) %s restriction in project %s",
-						action, pterm.Bold.Sprint(bm.Matching), pterm.Bold.Sprint(br.Type), pterm.Bold.Sprint(r.Type), pcs.ProjectKey)
+					pterm.Printfln("%s %s (%s) %s (%s) restriction in project %s",
+						action,
+						pterm.Bold.Sprint(br.Type), pterm.Bold.Sprint(bm.Matching),
+						pterm.Bold.Sprint(r.Type), formatRestrictionExemptions(r),
+						pcs.ProjectKey)
 				}
 			}
 		}
@@ -56,14 +60,39 @@ func printBranchRestriction(action string, pcs *ProjectConfigSpec) {
 				for _, br := range *repo.BranchRestrictions {
 					for _, bm := range *br.BranchMatchers {
 						for _, r := range *bm.Restrictions {
-							pterm.Printfln("%s %s (%s) %s restriction in repository %s/%s",
-								action, pterm.Bold.Sprint(r.Type), pterm.Bold.Sprint(bm.Matching), pterm.Bold.Sprint(br.Type), pcs.ProjectKey, repo.RepoSlug)
+							pterm.Printfln("%s %s (%s) %s (%s) restriction in repository %s/%s",
+								action,
+								pterm.Bold.Sprint(br.Type), pterm.Bold.Sprint(bm.Matching),
+								pterm.Bold.Sprint(r.Type), formatRestrictionExemptions(r),
+								pcs.ProjectKey, repo.RepoSlug)
 						}
 					}
 				}
 			}
 		}
 	}
+}
+
+func formatRestrictionExemptions(r *Restriction) string {
+	var exemptions = ""
+	if r.ExemptUsers != nil && len(r.ExemptUsers) > 0 {
+		exemptions += "users: "
+		for _, u := range r.ExemptUsers {
+			exemptions += u + ", "
+		}
+	}
+	if r.ExemptGroups != nil && len(r.ExemptGroups) > 0 {
+		exemptions += "groups: "
+		for _, g := range r.ExemptGroups {
+			exemptions += g + ", "
+		}
+	}
+	exemptions = strings.TrimSuffix(exemptions, ", ")
+	if len(exemptions) == 0 {
+		exemptions += "NONE"
+	}
+
+	return "Exemptions: " + exemptions
 }
 
 func createBranchRestrictions(url string, token string, branchRestrictions *BranchRestrictions, action string, scope string) error {
