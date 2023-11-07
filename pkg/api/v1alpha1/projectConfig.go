@@ -112,12 +112,10 @@ func CombineRepositoriesProperties(
 	repositoriesPropertiesMap := make(map[string]*RepositoryProperties, len(*repoPermissions))
 
 	// All the different RepositoriesProperties should contain the same repositories
-	// We use the first to initialise the map
-
+	// We use the first to initialise the map, but we can't be 100% sure that's all the repositories
 	if repoPermissions != nil {
 		for _, r := range *repoPermissions {
-			repositoriesPropertiesMap[r.RepoSlug] = new(RepositoryProperties)
-			repositoriesPropertiesMap[r.RepoSlug].RepoSlug = r.RepoSlug
+			repositoriesPropertiesMap[r.RepoSlug] = &RepositoryProperties{RepoSlug: r.RepoSlug}
 			if len(*r.Permissions) > 0 {
 				repositoriesPropertiesMap[r.RepoSlug].Permissions = r.Permissions
 			}
@@ -126,6 +124,9 @@ func CombineRepositoriesProperties(
 	if repoBranchRestrictions != nil {
 		for _, r := range *repoBranchRestrictions {
 			if len(*r.BranchRestrictions) > 0 {
+				if repositoriesPropertiesMap[r.RepoSlug] == nil {
+					repositoriesPropertiesMap[r.RepoSlug] = &RepositoryProperties{RepoSlug: r.RepoSlug}
+				}
 				repositoriesPropertiesMap[r.RepoSlug].BranchRestrictions = r.BranchRestrictions
 			}
 		}
@@ -133,6 +134,9 @@ func CombineRepositoriesProperties(
 	if repoWebhooks != nil {
 		for _, r := range *repoWebhooks {
 			if len(*r.Webhooks) > 0 {
+				if repositoriesPropertiesMap[r.RepoSlug] == nil {
+					repositoriesPropertiesMap[r.RepoSlug] = &RepositoryProperties{RepoSlug: r.RepoSlug}
+				}
 				repositoriesPropertiesMap[r.RepoSlug].Webhooks = r.Webhooks
 			}
 		}
