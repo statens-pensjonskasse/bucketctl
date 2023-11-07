@@ -1,5 +1,7 @@
 package v1alpha1
 
+import "bucketctl/pkg/common"
+
 const (
 	ApiVersion        string = "bucketctl.spk.no/v1alpha1"
 	ProjectConfigKind string = "ProjectConfig"
@@ -143,8 +145,8 @@ func CombineRepositoriesProperties(
 	}
 
 	repositoriesProperties := new(RepositoriesProperties)
-	for _, v := range repositoriesPropertiesMap {
-		*repositoriesProperties = append(*repositoriesProperties, v)
+	for _, repoSlug := range common.GetLexicallySortedKeys(repositoriesPropertiesMap) {
+		*repositoriesProperties = append(*repositoriesProperties, repositoriesPropertiesMap[repoSlug])
 	}
 
 	return repositoriesProperties
