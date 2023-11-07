@@ -105,44 +105,35 @@ func CombineProjectConfigSpecs(access *ProjectConfigSpec, branchRestrictions *Pr
 	}
 }
 
-func CombineRepositoriesProperties(permissions *RepositoriesProperties, branchRestrictions *RepositoriesProperties, webhooks *RepositoriesProperties) *RepositoriesProperties {
-	repositoriesPropertiesMap := make(map[string]*RepositoryProperties)
-	if permissions != nil {
-		for _, r := range *permissions {
-			g := repositoriesPropertiesMap[r.RepoSlug]
-			if g == nil {
-				g = new(RepositoryProperties)
-			}
+func CombineRepositoriesProperties(
+	repoPermissions *RepositoriesProperties,
+	repoBranchRestrictions *RepositoriesProperties,
+	repoWebhooks *RepositoriesProperties) *RepositoriesProperties {
+	repositoriesPropertiesMap := make(map[string]*RepositoryProperties, len(*repoPermissions))
+
+	// All the different RepositoriesProperties should contain the same repositories
+	// We use the first to initialise the map
+
+	if repoPermissions != nil {
+		for _, r := range *repoPermissions {
+			repositoriesPropertiesMap[r.RepoSlug] = new(RepositoryProperties)
+			repositoriesPropertiesMap[r.RepoSlug].RepoSlug = r.RepoSlug
 			if len(*r.Permissions) > 0 {
-				g.RepoSlug = r.RepoSlug
-				g.Permissions = r.Permissions
-				repositoriesPropertiesMap[r.RepoSlug] = g
+				repositoriesPropertiesMap[r.RepoSlug].Permissions = r.Permissions
 			}
 		}
 	}
-	if branchRestrictions != nil {
-		for _, r := range *branchRestrictions {
-			g := repositoriesPropertiesMap[r.RepoSlug]
-			if g == nil {
-				g = new(RepositoryProperties)
-			}
+	if repoBranchRestrictions != nil {
+		for _, r := range *repoBranchRestrictions {
 			if len(*r.BranchRestrictions) > 0 {
-				g.RepoSlug = r.RepoSlug
-				g.BranchRestrictions = r.BranchRestrictions
-				repositoriesPropertiesMap[r.RepoSlug] = g
+				repositoriesPropertiesMap[r.RepoSlug].BranchRestrictions = r.BranchRestrictions
 			}
 		}
 	}
-	if webhooks != nil {
-		for _, r := range *webhooks {
-			g := repositoriesPropertiesMap[r.RepoSlug]
-			if g == nil {
-				g = new(RepositoryProperties)
-			}
+	if repoWebhooks != nil {
+		for _, r := range *repoWebhooks {
 			if len(*r.Webhooks) > 0 {
-				g.RepoSlug = r.RepoSlug
-				g.Webhooks = r.Webhooks
-				repositoriesPropertiesMap[r.RepoSlug] = g
+				repositoriesPropertiesMap[r.RepoSlug].Webhooks = r.Webhooks
 			}
 		}
 	}
