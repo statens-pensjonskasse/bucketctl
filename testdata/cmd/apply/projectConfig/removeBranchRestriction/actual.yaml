@@ -1,0 +1,44 @@
+kind: ProjectConfig
+apiVersion: bucketctl.spk.no/v1alpha1
+metadata:
+  name: INFRA
+spec:
+  projectKey: INFRA
+  branchRestrictions:
+    - type: BRANCH
+      matchers:
+        - matching: main
+          restrictions:
+            - type: fast-forward-only
+            - type: no-deletes
+            - type: pull-request-only
+              exemptUsers:
+                - ci
+        - matching: master
+          restrictions:
+            - type: fast-forward-only
+            - type: no-deletes
+            - type: pull-request-only
+              exemptUsers:
+                - ci
+  repositories:
+    - name: rpmctl
+      branchRestrictions:
+        - type: BRANCH
+          matchers:
+            - matching: refs/heads/master
+              restrictions:
+                - type: fast-forward-only
+                - type: no-deletes
+                - type: pull-request-only
+                  exemptUsers:
+                    - olav.karlsen@spk.no
+      webhooks:
+        - name: Jenkins
+          events:
+            - repo:refs_changed
+          configuration: { }
+          url: "http://jenkins.spk.no/git/notifyCommit?url=https://git.spk.no/scm/infra/rpmctl.git"
+          active: true
+          scopeType: repository
+          sslVerificationRequired: true

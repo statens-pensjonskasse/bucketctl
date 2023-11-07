@@ -204,6 +204,13 @@ func (pcs *ProjectConfigSpec) Equals(cmp *ProjectConfigSpec) bool {
 		return false
 	}
 
+	if pcs.Repositories == nil && cmp.Repositories != nil {
+		return false
+	}
+	if pcs.Repositories != nil && !pcs.Repositories.Equals(cmp.Repositories) {
+		return false
+	}
+
 	return true
 }
 

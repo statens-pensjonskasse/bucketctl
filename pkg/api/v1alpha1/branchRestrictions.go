@@ -29,6 +29,13 @@ type Restriction struct {
 }
 
 func FindBranchRestrictionsToChange(desired *BranchRestrictions, actual *BranchRestrictions) (toCreate *BranchRestrictions, toUpdate *BranchRestrictions, toDelete *BranchRestrictions) {
+	if desired == nil {
+		desired = new(BranchRestrictions)
+	}
+	if actual == nil {
+		actual = new(BranchRestrictions)
+	}
+
 	creationCandidates := desired.findBranchRestrictionsDifference(actual).toMap()
 	deletionCandidates := actual.findBranchRestrictionsDifference(desired).toMap()
 

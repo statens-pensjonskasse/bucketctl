@@ -1,0 +1,21 @@
+kind: ProjectConfig
+apiVersion: bucketctl.spk.no/v1alpha1
+metadata:
+  name: INFRA
+spec:
+  projectKey: INFRA
+  permissions: [ ]
+  branchRestrictions: [ ]
+  webhooks: [ ]
+  repositories:
+    - name: rpmctl
+      branchRestrictions:
+        - type: BRANCH
+          matchers:
+            - matching: refs/heads/master
+              restrictions:
+                - type: fast-forward-only
+                - type: no-deletes
+                - type: pull-request-only
+                  exemptUsers:
+                    - olav.karlsen@spk.no

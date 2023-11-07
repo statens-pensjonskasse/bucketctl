@@ -21,7 +21,7 @@ func Test_readProjectConfig(t *testing.T) {
 		},
 		{
 			name:    "read successfully",
-			args:    args{file: "../../../testdata/cmd/apply/integration_desired_projectConfig.yaml"},
+			args:    args{file: "../../../testdata/cmd/apply/projectConfig/integration/desired.yaml"},
 			wantErr: false,
 		},
 	}
@@ -61,23 +61,23 @@ func Test_findProjectConfigChanges(t *testing.T) {
 		toDelete *ProjectConfigSpec
 	}
 
-	desired, err := readProjectConfig("../../../testdata/cmd/apply/integration_desired_projectConfig.yaml")
+	desired, err := readProjectConfig("../../../testdata/cmd/apply/projectConfig/integration/desired.yaml")
 	if err != nil {
 		t.Errorf("Error reading testdata")
 	}
-	actual, err := readProjectConfig("../../../testdata/cmd/apply/integration_actual_projectConfig.yaml")
+	actual, err := readProjectConfig("../../../testdata/cmd/apply/projectConfig/integration/actual.yaml")
 	if err != nil {
 		t.Errorf("Error reading testdata")
 	}
-	toCreate, err := readProjectConfig("../../../testdata/cmd/apply/integration_toCreate_projectConfig.yaml")
+	toCreate, err := readProjectConfig("../../../testdata/cmd/apply/projectConfig/integration/toCreate.yaml")
 	if err != nil {
 		t.Errorf("Error reading testdata")
 	}
-	toUpdate, err := readProjectConfig("../../../testdata/cmd/apply/integration_toUpdate_projectConfig.yaml")
+	toUpdate, err := readProjectConfig("../../../testdata/cmd/apply/projectConfig/integration/toUpdate.yaml")
 	if err != nil {
 		t.Errorf("Error reading testdata")
 	}
-	toDelete, err := readProjectConfig("../../../testdata/cmd/apply/integration_toDelete_projectConfig.yaml")
+	toDelete, err := readProjectConfig("../../../testdata/cmd/apply/projectConfig/integration/toDelete.yaml")
 	if err != nil {
 		t.Errorf("Error reading testdata")
 	}
@@ -91,6 +91,66 @@ func Test_findProjectConfigChanges(t *testing.T) {
 			name: "integration test",
 			args: args{&desired.Spec, &actual.Spec},
 			want: want{&toCreate.Spec, &toUpdate.Spec, &toDelete.Spec},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotToCreate, gotToUpdate, gotToDelete := findProjectConfigChanges(tt.args.desired, tt.args.actual)
+			if !gotToCreate.Equals(tt.want.toCreate) {
+				t.Errorf("findProjectConfigChanges() gotToCreate = %v, want %v", gotToCreate, tt.want.toCreate)
+			}
+			if !gotToUpdate.Equals(tt.want.toUpdate) {
+				t.Errorf("findProjectConfigChanges() gotToUpdate = %v, want %v", gotToUpdate, tt.want.toUpdate)
+			}
+			if !gotToDelete.Equals(tt.want.toDelete) {
+				t.Errorf("findProjectConfigChanges() gotToDelete = %v, want %v", gotToDelete, tt.want.toDelete)
+			}
+		})
+	}
+}
+
+func Test_removeBranchRestriction(t *testing.T) {
+	type args struct {
+		desired *ProjectConfigSpec
+		actual  *ProjectConfigSpec
+	}
+	type want struct {
+		toCreate *ProjectConfigSpec
+		toUpdate *ProjectConfigSpec
+		toDelete *ProjectConfigSpec
+	}
+
+	desired, err := readProjectConfig("../../../testdata/cmd/apply/projectConfig/removeBranchRestriction/desired.yaml")
+	if err != nil {
+		t.Errorf("Error reading testdata")
+	}
+	actual, err := readProjectConfig("../../../testdata/cmd/apply/projectConfig/removeBranchRestriction/actual.yaml")
+	if err != nil {
+		t.Errorf("Error reading testdata")
+	}
+	toDelete, err := readProjectConfig("../../../testdata/cmd/apply/projectConfig/removeBranchRestriction/toDelete.yaml")
+	if err != nil {
+		t.Errorf("Error reading testdata")
+	}
+
+	noChange := &ProjectConfigSpec{
+		ProjectKey:         "INFRA",
+		Permissions:        new(Permissions),
+		BranchRestrictions: new(BranchRestrictions),
+		Webhooks:           new(Webhooks),
+		Repositories:       new(RepositoriesProperties),
+	}
+
+	tests := []struct {
+		name string
+		args args
+		want want
+	}{
+		{
+			name: "integration test",
+			args: args{&desired.Spec, &actual.Spec},
+			want: want{noChange, noChange, &toDelete.Spec},
 		},
 	}
 

@@ -52,10 +52,17 @@ func ToBitbucketWebhook(webhook *Webhook) *types.Webhook {
 }
 
 func FindWebhooksToChange(desired *Webhooks, actual *Webhooks) (toCreate *Webhooks, toUpdate *Webhooks, toDelete *Webhooks) {
+	if desired == nil {
+		desired = new(Webhooks)
+	}
+	if actual == nil {
+		actual = new(Webhooks)
+	}
+
 	toCreate = new(Webhooks)
 	toUpdate = new(Webhooks)
 	toDelete = new(Webhooks)
-	if actual == nil || len(*actual) == 0 {
+	if len(*actual) == 0 {
 		// Vi har ingen aktuelle webhooks å ta av og må opprette alle nye
 		toCreate = desired
 		return toCreate, toUpdate, toDelete
