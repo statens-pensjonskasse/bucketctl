@@ -30,18 +30,24 @@ func findRepositoriesWebhookChanges(desired *RepositoriesProperties, actual *Rep
 
 func setRepositoriesWebhooks(baseUrl string, projectKey string, token string, toCreate *RepositoriesProperties, toUpdate *RepositoriesProperties, toDelete *RepositoriesProperties) error {
 	for _, r := range *toDelete {
-		if err := deleteRepositoryWebhooks(baseUrl, projectKey, r.RepoSlug, token, r.Webhooks); err != nil {
-			return err
+		if r.Webhooks != nil {
+			if err := deleteRepositoryWebhooks(baseUrl, projectKey, r.RepoSlug, token, r.Webhooks); err != nil {
+				return err
+			}
 		}
 	}
 	for _, r := range *toUpdate {
-		if err := updateRepositoryWebhooks(baseUrl, projectKey, r.RepoSlug, token, r.Webhooks); err != nil {
-			return err
+		if r.Webhooks != nil {
+			if err := updateRepositoryWebhooks(baseUrl, projectKey, r.RepoSlug, token, r.Webhooks); err != nil {
+				return err
+			}
 		}
 	}
 	for _, r := range *toCreate {
-		if err := createRepositoryWebhooks(baseUrl, projectKey, r.RepoSlug, token, r.Webhooks); err != nil {
-			return err
+		if r.Webhooks != nil {
+			if err := createRepositoryWebhooks(baseUrl, projectKey, r.RepoSlug, token, r.Webhooks); err != nil {
+				return err
+			}
 		}
 	}
 
