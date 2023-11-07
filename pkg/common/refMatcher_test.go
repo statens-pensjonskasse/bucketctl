@@ -16,16 +16,16 @@ const (
 var (
 	branchModel = &types2.BranchModel{
 		Production: &types2.Branch{
-			Id:        "refs/heads/main",
-			DisplayId: "main",
-			Type:      "BRANCH",
-			IsDefault: false,
+			Id:         "refs/heads/main",
+			DisplayId:  "main",
+			Type:       "BRANCH",
+			UseDefault: false,
 		},
 		Development: &types2.Branch{
-			Id:        "refs/heads/develop",
-			DisplayId: "develop",
-			Type:      "BRANCH",
-			IsDefault: true,
+			Id:         "refs/heads/develop",
+			DisplayId:  "develop",
+			Type:       "BRANCH",
+			UseDefault: true,
 		},
 		Types: []*types2.BranchType{
 			{

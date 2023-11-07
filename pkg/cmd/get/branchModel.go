@@ -1,0 +1,62 @@
+package get
+
+import (
+	"bucketctl/pkg/api/bitbucket"
+	. "bucketctl/pkg/api/v1alpha1"
+	"bucketctl/pkg/common"
+	"bucketctl/pkg/printer"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+)
+
+var listBranchModelCmd = &cobra.Command{
+	PreRun: func(cmd *cobra.Command, args []string) {
+		if viper.GetString(common.ProjectKeyFlag) == "" {
+			cmd.MarkFlagRequired(common.ProjectKeyFlag)
+		}
+		viper.BindPFlag(common.ProjectKeyFlag, cmd.Flags().Lookup(common.ProjectKeyFlag))
+		viper.BindPFlag(common.RepoSlugFlag, cmd.Flags().Lookup(common.RepoSlugFlag))
+	},
+	Use:     "branch-model",
+	Short:   "List branch model for given project or repository",
+	Aliases: []string{"bm", "branchmodel"},
+	Run:     listBranchModel,
+}
+
+func listBranchModel(cmd *cobra.Command, args []string) {
+	baseUrl := viper.GetString(common.BaseUrlFlag)
+	projectKey := viper.GetString(common.ProjectKeyFlag)
+	repoSlug := viper.GetString(common.RepoSlugFlag)
+	limit := viper.GetInt(common.LimitFlag)
+	token := viper.GetString(common.TokenFlag)
+
+	projectConfig := ProjectConfigV1alpha1()
+	projectConfig.Metadata.Name = projectKey
+
+	if repoSlug == "" {
+		branchModels, err := FetchBranchModels(baseUrl, projectKey, limit, token)
+		cobra.CheckErr(err)
+		projectConfig.Spec = *branchModels
+
+	} else {
+		repoBranchModel, err := bitbucket.GetRepositoryBranchModelConfiguration(baseUrl, projectKey, repoSlug, token)
+		cobra.CheckErr(err)
+		projectConfig.Spec.ProjectKey = projectKey
+		projectConfig.Spec.Repositories = &RepositoriesProperties{&RepositoryProperties{RepoSlug: repoSlug, BranchModel: repoBranchModel}}
+	}
+
+	cobra.CheckErr(printer.PrintData(projectConfig, nil))
+}
+
+func FetchBranchModels(baseUrl string, projectKey string, limit int, token string) (*ProjectConfigSpec, error) {
+	projectBranchModel, err := bitbucket.GetProjectBranchModelConfiguration(baseUrl, projectKey, token)
+	if err != nil {
+		return nil, err
+	}
+	repositoriesProperties, err := bitbucket.GetRepositoriesBranchModel(baseUrl, projectKey, limit, token)
+	if err != nil {
+		return nil, err
+	}
+
+	return &ProjectConfigSpec{ProjectKey: projectKey, BranchModel: projectBranchModel, Repositories: repositoriesProperties}, nil
+}

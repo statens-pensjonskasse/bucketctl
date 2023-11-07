@@ -23,11 +23,6 @@ type RestrictionResponse struct {
 	Values []*Restriction `json:"values"`
 }
 
-type Scope struct {
-	ResourceId int    `json:"resourceId" yaml:"resourceId"`
-	Type       string `json:"type" yaml:"type"`
-}
-
 type Matcher struct {
 	Id        string       `json:"id" yaml:"id"`
 	DisplayID string       `json:"displayID" yaml:"displayID"`

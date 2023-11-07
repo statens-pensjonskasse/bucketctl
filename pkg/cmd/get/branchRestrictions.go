@@ -18,7 +18,7 @@ var listBranchRestrictionsCmd = &cobra.Command{
 		viper.BindPFlag(common.RepoSlugFlag, cmd.Flags().Lookup(common.RepoSlugFlag))
 	},
 	Use:     "branch-restrictions",
-	Short:   "List settings for given permission or repository",
+	Short:   "List settings for given project or repository",
 	Aliases: []string{"br", "restrictions"},
 	Run:     listBranchRestrictions,
 }
@@ -44,8 +44,7 @@ func listBranchRestrictions(cmd *cobra.Command, args []string) {
 		projectConfig.Spec.Repositories = &RepositoriesProperties{&RepositoryProperties{RepoSlug: repoSlug, BranchRestrictions: repoBranchRestrictions}}
 	}
 
-	err := printer.PrintData(projectConfig, printer.PrettyFormatProjectsSettings)
-	cobra.CheckErr(err)
+	cobra.CheckErr(printer.PrintData(projectConfig, printer.PrettyFormatProjectsSettings))
 }
 
 func FetchBranchRestrictions(baseUrl string, projectKey string, limit int, token string) (*ProjectConfigSpec, error) {

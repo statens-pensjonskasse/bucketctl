@@ -18,3 +18,8 @@ type Href struct {
 	Href string `json:"href,omitempty" yaml:"href,omitempty"`
 	Name string `json:"name,omitempty" yaml:"name,omitempty"`
 }
+
+type Scope struct {
+	ResourceId int    `json:"resourceId" yaml:"resourceId"`
+	Type       string `json:"type" yaml:"type"`
+}

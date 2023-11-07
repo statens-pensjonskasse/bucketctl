@@ -29,6 +29,7 @@ type ProjectConfigSpec struct {
 	Public             *bool                   `json:"public,omitempty" yaml:"public,omitempty"`
 	DefaultPermission  *string                 `json:"defaultPermission,omitempty" yaml:"defaultPermission,omitempty"`
 	Permissions        *Permissions            `json:"permissions,omitempty" yaml:"permissions,omitempty"`
+	BranchModel        *BranchModel            `json:"branchModel,omitempty" yaml:"branchModel,omitempty"`
 	BranchRestrictions *BranchRestrictions     `json:"branchRestrictions,omitempty" yaml:"branchRestrictions,omitempty"`
 	Webhooks           *Webhooks               `json:"webhooks,omitempty" yaml:"webhooks,omitempty"`
 	Repositories       *RepositoriesProperties `json:"repositories,omitempty" yaml:"repositories,omitempty"`
@@ -39,6 +40,7 @@ type RepositoriesProperties []*RepositoryProperties
 type RepositoryProperties struct {
 	RepoSlug           string              `json:"name" yaml:"name"`
 	Permissions        *Permissions        `json:"permissions,omitempty" yaml:"permissions,omitempty"`
+	BranchModel        *BranchModel        `json:"branchModel,omitempty" yaml:"branchModel,omitempty"`
 	BranchRestrictions *BranchRestrictions `json:"branchRestrictions,omitempty" yaml:"branchRestrictions,omitempty"`
 	Webhooks           *Webhooks           `json:"webhooks,omitempty" yaml:"webhooks,omitempty"`
 }
@@ -47,6 +49,7 @@ func EmptyRepositoryProperties(repoSlug string) *RepositoryProperties {
 	return &RepositoryProperties{
 		RepoSlug:           repoSlug,
 		Permissions:        &Permissions{},
+		BranchModel:        &BranchModel{},
 		BranchRestrictions: &BranchRestrictions{},
 		Webhooks:           &Webhooks{},
 	}
