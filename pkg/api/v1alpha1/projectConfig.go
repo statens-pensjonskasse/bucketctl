@@ -63,13 +63,13 @@ type GroupedRepositories map[string]struct {
 
 // GroupRepositories Group *RepositoriesProperties by repoSlug
 func GroupRepositories(desired *RepositoriesProperties, actual *RepositoriesProperties) GroupedRepositories {
-	grouping := make(GroupedRepositories, len(*desired)+len(*actual))
 	if desired == nil {
 		desired = new(RepositoriesProperties)
 	}
 	if actual == nil {
 		actual = new(RepositoriesProperties)
 	}
+	grouping := make(GroupedRepositories, len(*desired)+len(*actual))
 	for _, d := range *desired {
 		g := grouping[d.RepoSlug]
 		g.Desired = d
