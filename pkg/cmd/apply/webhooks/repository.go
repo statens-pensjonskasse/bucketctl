@@ -49,9 +49,11 @@ func setRepositoriesWebhooks(baseUrl string, projectKey string, token string, to
 }
 
 func createRepositoryWebhooks(baseUrl string, projectKey string, repoSlug string, token string, webhooks *Webhooks) error {
-	for _, w := range *webhooks {
-		if err := createRepositoryWebhook(baseUrl, projectKey, repoSlug, token, w); err != nil {
-			return err
+	if webhooks != nil && len(*webhooks) > 0 {
+		for _, w := range *webhooks {
+			if err := createRepositoryWebhook(baseUrl, projectKey, repoSlug, token, w); err != nil {
+				return err
+			}
 		}
 	}
 	return nil
@@ -71,9 +73,11 @@ func createRepositoryWebhook(baseUrl string, projectKey string, repoSlug string,
 }
 
 func updateRepositoryWebhooks(baseUrl string, projectKey string, repoSlug string, token string, webhooks *Webhooks) error {
-	for _, w := range *webhooks {
-		if err := updateRepositoryWebhook(baseUrl, projectKey, repoSlug, token, w); err != nil {
-			return err
+	if webhooks != nil && len(*webhooks) > 0 {
+		for _, w := range *webhooks {
+			if err := updateRepositoryWebhook(baseUrl, projectKey, repoSlug, token, w); err != nil {
+				return err
+			}
 		}
 	}
 	return nil
@@ -93,9 +97,11 @@ func updateRepositoryWebhook(baseUrl string, projectKey string, repoSlug string,
 }
 
 func deleteRepositoryWebhooks(baseUrl string, projectKey string, repoSlug string, token string, webhooks *Webhooks) error {
-	for _, w := range *webhooks {
-		if err := deleteRepositoryWebhook(baseUrl, projectKey, repoSlug, token, w); err != nil {
-			return err
+	if webhooks != nil && len(*webhooks) > 0 {
+		for _, w := range *webhooks {
+			if err := deleteRepositoryWebhook(baseUrl, projectKey, repoSlug, token, w); err != nil {
+				return err
+			}
 		}
 	}
 	return nil

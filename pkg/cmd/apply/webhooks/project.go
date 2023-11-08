@@ -23,9 +23,11 @@ func setProjectWebhooks(baseUrl string, projectKey string, token string, toCreat
 }
 
 func createProjectWebhooks(baseUrl string, projectKey string, token string, webhooks *Webhooks) error {
-	for _, w := range *webhooks {
-		if err := createProjectWebhook(baseUrl, projectKey, token, w); err != nil {
-			return err
+	if webhooks != nil && len(*webhooks) > 0 {
+		for _, w := range *webhooks {
+			if err := createProjectWebhook(baseUrl, projectKey, token, w); err != nil {
+				return err
+			}
 		}
 	}
 	return nil
@@ -45,9 +47,11 @@ func createProjectWebhook(baseUrl string, projectKey string, token string, webho
 }
 
 func updateProjectWebhooks(baseUrl string, projectKey string, token string, webhooks *Webhooks) error {
-	for _, w := range *webhooks {
-		if err := updateProjectWebhook(baseUrl, projectKey, token, w); err != nil {
-			return err
+	if webhooks != nil && len(*webhooks) > 0 {
+		for _, w := range *webhooks {
+			if err := updateProjectWebhook(baseUrl, projectKey, token, w); err != nil {
+				return err
+			}
 		}
 	}
 	return nil
@@ -67,9 +71,11 @@ func updateProjectWebhook(baseUrl string, projectKey string, token string, webho
 }
 
 func deleteProjectWebhooks(baseUrl string, projectKey string, token string, webhooks *Webhooks) error {
-	for _, w := range *webhooks {
-		if err := deleteProjectWebhook(baseUrl, projectKey, token, w); err != nil {
-			return err
+	if webhooks != nil && len(*webhooks) > 0 {
+		for _, w := range *webhooks {
+			if err := deleteProjectWebhook(baseUrl, projectKey, token, w); err != nil {
+				return err
+			}
 		}
 	}
 	return nil
