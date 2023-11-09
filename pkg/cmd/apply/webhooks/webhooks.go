@@ -28,28 +28,31 @@ func SetWebhooks(baseUrl string, projectKey string, token string, toCreate *Proj
 	return nil
 }
 
-func PrintWebhookChanges(toCreate *ProjectConfigSpec, toUpdate *ProjectConfigSpec, toDelete *ProjectConfigSpec) {
-	printWebhook(pterm.Green("🪝 create"), toCreate)
-	printWebhook(pterm.Blue("🎣 update"), toUpdate)
-	printWebhook(pterm.Red("🛑 delete"), toDelete)
+func GetChangesAsText(toCreate *ProjectConfigSpec, toUpdate *ProjectConfigSpec, toDelete *ProjectConfigSpec) (changes []string) {
+	changes = append(changes, changesToText(pterm.Green("🪝 create"), toCreate)...)
+	changes = append(changes, changesToText(pterm.Blue("🎣 update"), toUpdate)...)
+	changes = append(changes, changesToText(pterm.Red("🛑 delete"), toDelete)...)
+	return changes
 }
 
-func printWebhook(action string, pcs *ProjectConfigSpec) {
+func changesToText(action string, pcs *ProjectConfigSpec) (changes []string) {
 	if pcs.Webhooks != nil {
 		for _, wh := range *pcs.Webhooks {
-			pterm.Printfln("%s %s webhook in project %s",
-				action, pterm.Bold.Sprint(wh.Name), pcs.ProjectKey)
+			changes = append(changes,
+				pterm.Sprintf("%s %s webhook in project %s",
+					action, pterm.Bold.Sprint(wh.Name), pcs.ProjectKey))
 		}
 	}
 	if pcs.Repositories != nil {
 		for _, repo := range *pcs.Repositories {
 			if repo.Webhooks != nil {
 				for _, wh := range *repo.Webhooks {
-					pterm.Printfln("%s %s webhook in repository %s/%s",
-						action, pterm.Bold.Sprint(wh.Name), pcs.ProjectKey, repo.RepoSlug)
+					changes = append(changes,
+						pterm.Sprintf("%s %s webhook in repository %s/%s",
+							action, pterm.Bold.Sprint(wh.Name), pcs.ProjectKey, repo.RepoSlug))
 				}
 			}
 		}
 	}
-
+	return changes
 }

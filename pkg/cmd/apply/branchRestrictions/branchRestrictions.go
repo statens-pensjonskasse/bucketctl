@@ -34,22 +34,24 @@ func SetBranchRestrictions(baseUrl string, projectKey string, token string, toCr
 	return nil
 }
 
-func PrintBranchRestrictionChanges(toCreate *ProjectConfigSpec, toUpdate *ProjectConfigSpec, toDelete *ProjectConfigSpec) {
-	printBranchRestriction(pterm.Green("🪵 create"), toCreate)
-	printBranchRestriction(pterm.Blue("🌳 update"), toUpdate)
-	printBranchRestriction(pterm.Red("🔥 delete"), toDelete)
+func GetChangesAsText(toCreate *ProjectConfigSpec, toUpdate *ProjectConfigSpec, toDelete *ProjectConfigSpec) (changes []string) {
+	changes = append(changes, changesToText(pterm.Green("🪵 create"), toCreate)...)
+	changes = append(changes, changesToText(pterm.Blue("🌳 update"), toUpdate)...)
+	changes = append(changes, changesToText(pterm.Red("🔥 delete"), toDelete)...)
+	return changes
 }
 
-func printBranchRestriction(action string, pcs *ProjectConfigSpec) {
+func changesToText(action string, pcs *ProjectConfigSpec) (changes []string) {
 	if pcs.BranchRestrictions != nil && len(*pcs.BranchRestrictions) > 0 {
 		for _, br := range *pcs.BranchRestrictions {
 			for _, bm := range *br.BranchMatchers {
 				for _, r := range *bm.Restrictions {
-					pterm.Printfln("%s %s (%s) %s (%s) restriction in project %s",
-						action,
-						pterm.Bold.Sprint(br.Type), pterm.Bold.Sprint(bm.Matching),
-						pterm.Bold.Sprint(r.Type), formatRestrictionExemptions(r),
-						pcs.ProjectKey)
+					changes = append(changes,
+						pterm.Sprintf("%s %s (%s) %s (%s) restriction in project %s",
+							action,
+							pterm.Bold.Sprint(br.Type), pterm.Bold.Sprint(bm.Matching),
+							pterm.Bold.Sprint(r.Type), formatRestrictionExemptions(r),
+							pcs.ProjectKey))
 				}
 			}
 		}
@@ -60,17 +62,19 @@ func printBranchRestriction(action string, pcs *ProjectConfigSpec) {
 				for _, br := range *repo.BranchRestrictions {
 					for _, bm := range *br.BranchMatchers {
 						for _, r := range *bm.Restrictions {
-							pterm.Printfln("%s %s (%s) %s (%s) restriction in repository %s/%s",
-								action,
-								pterm.Bold.Sprint(br.Type), pterm.Bold.Sprint(bm.Matching),
-								pterm.Bold.Sprint(r.Type), formatRestrictionExemptions(r),
-								pcs.ProjectKey, repo.RepoSlug)
+							changes = append(changes,
+								pterm.Sprintf("%s %s (%s) %s (%s) restriction in repository %s/%s",
+									action,
+									pterm.Bold.Sprint(br.Type), pterm.Bold.Sprint(bm.Matching),
+									pterm.Bold.Sprint(r.Type), formatRestrictionExemptions(r),
+									pcs.ProjectKey, repo.RepoSlug))
 						}
 					}
 				}
 			}
 		}
 	}
+	return changes
 }
 
 func formatRestrictionExemptions(r *Restriction) string {

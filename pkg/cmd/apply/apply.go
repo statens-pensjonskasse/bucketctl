@@ -105,11 +105,23 @@ func readProjectConfig(file string) (*ProjectConfig, error) {
 }
 
 func printChanges(toCreate *ProjectConfigSpec, toUpdate *ProjectConfigSpec, toDelete *ProjectConfigSpec) {
-	pterm.Println("--- Planned changes ---")
-	pterm.Println("Access:")
-	access.PrintAccessChanges(toCreate, toUpdate, toDelete)
-	pterm.Println("Branch restrictions:")
-	branchRestrictions.PrintBranchRestrictionChanges(toCreate, toUpdate, toDelete)
-	pterm.Println("Webhooks:")
-	webhooks.PrintWebhookChanges(toCreate, toUpdate, toDelete)
+	accessChanges := access.GetChangesAsText(toCreate, toUpdate, toDelete)
+	branchRestrictionChanges := branchRestrictions.GetChangesAsText(toCreate, toUpdate, toDelete)
+	webhookChanges := webhooks.GetChangesAsText(toCreate, toUpdate, toDelete)
+
+	printIfNotEmpty(accessChanges)
+	printIfNotEmpty(branchRestrictionChanges)
+	printIfNotEmpty(webhookChanges)
+
+	if len(accessChanges)+len(branchRestrictionChanges)+len(webhookChanges) == 0 {
+		pterm.Printfln("No changes in project %s", pterm.Bold.Sprint(toCreate.ProjectKey))
+	}
+}
+
+func printIfNotEmpty(changes []string) {
+	if changes != nil && len(changes) > 0 {
+		for _, change := range changes {
+			pterm.Printfln(change)
+		}
+	}
 }

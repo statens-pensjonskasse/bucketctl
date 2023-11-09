@@ -41,30 +41,35 @@ func SetAccess(baseUrl string, projectKey string, token string, toCreate *Projec
 	return nil
 }
 
-func PrintAccessChanges(toCreate *ProjectConfigSpec, toUpdate *ProjectConfigSpec, toDelete *ProjectConfigSpec) {
-	printAccess(pterm.Green("⭐️ create"), toCreate)
-	printAccess(pterm.Blue("🔧 change"), toUpdate)
-	printAccess(pterm.Red("🛑 remove"), toDelete)
+func GetChangesAsText(toCreate *ProjectConfigSpec, toUpdate *ProjectConfigSpec, toDelete *ProjectConfigSpec) (changes []string) {
+	changes = append(changes, changesToText(pterm.Green("⭐️ create"), toCreate)...)
+	changes = append(changes, changesToText(pterm.Blue("🔧 change"), toUpdate)...)
+	changes = append(changes, changesToText(pterm.Red("🛑 remove"), toDelete)...)
+	return changes
 }
 
-func printAccess(action string, pcs *ProjectConfigSpec) {
+func changesToText(action string, pcs *ProjectConfigSpec) (changes []string) {
 	if pcs.Public != nil {
-		pterm.Printfln("%s public access to %s in project %s",
-			action, pterm.Bold.Sprint(strconv.FormatBool(*pcs.Public)), pcs.ProjectKey)
+		changes = append(changes,
+			pterm.Sprintf("%s public access to %s in project %s",
+				action, pterm.Bold.Sprint(strconv.FormatBool(*pcs.Public)), pcs.ProjectKey))
 	}
 	if pcs.DefaultPermission != nil {
-		pterm.Printfln("%s default permission to %s in project %s",
-			action, pterm.Bold.Sprint(*pcs.DefaultPermission), pcs.ProjectKey)
+		changes = append(changes,
+			pterm.Sprintf("%s default permission to %s in project %s",
+				action, pterm.Bold.Sprint(*pcs.DefaultPermission), pcs.ProjectKey))
 	}
 	if pcs.Permissions != nil {
 		for _, p := range *pcs.Permissions {
 			for _, u := range p.Entities.Users {
-				pterm.Printfln("%s %s permission for user %s in project %s",
-					action, pterm.Bold.Sprint(p.Name), pterm.Bold.Sprint(u), pcs.ProjectKey)
+				changes = append(changes,
+					pterm.Sprintf("%s %s permission for user %s in project %s",
+						action, pterm.Bold.Sprint(p.Name), pterm.Bold.Sprint(u), pcs.ProjectKey))
 			}
 			for _, g := range p.Entities.Groups {
-				pterm.Printfln("%s %s permission for group %s in project %s",
-					action, pterm.Bold.Sprint(p.Name), pterm.Bold.Sprint(g), pcs.ProjectKey)
+				changes = append(changes,
+					pterm.Sprintf("%s %s permission for group %s in project %s",
+						action, pterm.Bold.Sprint(p.Name), pterm.Bold.Sprint(g), pcs.ProjectKey))
 			}
 		}
 	}
@@ -73,15 +78,18 @@ func printAccess(action string, pcs *ProjectConfigSpec) {
 			if repo.Permissions != nil {
 				for _, p := range *repo.Permissions {
 					for _, u := range p.Entities.Users {
-						pterm.Printfln("%s %s permission for user %s in repository %s/%s",
-							action, pterm.Bold.Sprint(p.Name), pterm.Bold.Sprint(u), pcs.ProjectKey, repo.RepoSlug)
+						changes = append(changes,
+							pterm.Sprintf("%s %s permission for user %s in repository %s/%s",
+								action, pterm.Bold.Sprint(p.Name), pterm.Bold.Sprint(u), pcs.ProjectKey, repo.RepoSlug))
 					}
 					for _, g := range p.Entities.Groups {
-						pterm.Printfln("%s %s permission for group %s in repository %s/%s",
-							action, pterm.Bold.Sprint(p.Name), pterm.Bold.Sprint(g), pcs.ProjectKey, repo.RepoSlug)
+						changes = append(changes,
+							pterm.Sprintf("%s %s permission for group %s in repository %s/%s",
+								action, pterm.Bold.Sprint(p.Name), pterm.Bold.Sprint(g), pcs.ProjectKey, repo.RepoSlug))
 					}
 				}
 			}
 		}
 	}
+	return changes
 }
