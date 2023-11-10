@@ -5,7 +5,7 @@ go 1.21
 require (
 	github.com/go-git/go-git/v5 v5.10.0
 	github.com/pterm/pterm v0.12.57
-	github.com/spf13/cobra v1.7.0
+	github.com/spf13/cobra v1.8.0
 	github.com/spf13/viper v1.17.0
 	github.com/vibrantbyte/go-antpath v1.1.1
 	golang.org/x/term v0.14.0
