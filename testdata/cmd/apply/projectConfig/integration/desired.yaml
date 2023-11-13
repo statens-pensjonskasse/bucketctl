@@ -10,6 +10,14 @@ spec:
     - name: PROJECT_ADMIN
       users:
         - pompel
+  branchingModel:
+    development:
+      useDefault: true
+    types:
+      - name: feature
+        prefix: feature/
+      - name: hotfix
+        prefix: hotfix/
   branchRestrictions:
     - type: BRANCH
       matchers:
@@ -41,6 +49,9 @@ spec:
         - name: REPO_ADMIN
           groups:
             - pevensie
+      branchingModel:
+        development:
+          refId: woop
       webhooks:
         - name: garderobeskap
           events:

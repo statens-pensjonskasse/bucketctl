@@ -17,7 +17,7 @@ var listBranchRestrictionsCmd = &cobra.Command{
 		viper.BindPFlag(common.ProjectKeyFlag, cmd.Flags().Lookup(common.ProjectKeyFlag))
 		viper.BindPFlag(common.RepoSlugFlag, cmd.Flags().Lookup(common.RepoSlugFlag))
 	},
-	Use:     "branch-restrictions",
+	Use:     "branchRestrictions",
 	Short:   "List settings for given project or repository",
 	Aliases: []string{"br", "restrictions"},
 	Run:     listBranchRestrictions,

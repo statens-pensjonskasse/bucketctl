@@ -44,7 +44,15 @@ func FetchProjectConfigSpec(baseUrl string, projectKey string, limit int, token 
 	if err != nil {
 		return nil, err
 	}
+	actualBranchModels, err := FetchBranchingModels(baseUrl, projectKey, limit, token)
+	if err != nil {
+		return nil, err
+	}
 	actualBranchRestrictions, err := FetchBranchRestrictions(baseUrl, projectKey, limit, token)
+	if err != nil {
+		return nil, err
+	}
+	actualDefaultBranches, err := FetchDefaultBranches(baseUrl, projectKey, limit, token)
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +61,7 @@ func FetchProjectConfigSpec(baseUrl string, projectKey string, limit int, token 
 		return nil, err
 	}
 
-	projectConfigSpec := CombineProjectConfigSpecs(actualAccess, actualBranchRestrictions, actualWebhooks)
+	projectConfigSpec := CombineProjectConfigSpecs(actualAccess, actualBranchModels, actualBranchRestrictions, actualDefaultBranches, actualWebhooks)
 	projectConfigSpec.ProjectKey = projectKey
 	return projectConfigSpec, nil
 }

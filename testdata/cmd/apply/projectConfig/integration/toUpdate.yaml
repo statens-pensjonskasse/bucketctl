@@ -7,6 +7,14 @@ spec:
   public: true
   defaultPermission: PROJECT_WRITE
   permissions: [ ]
+  branchingModel:
+    development:
+      useDefault: true
+    types:
+      - name: feature
+        prefix: feature/
+      - name: hotfix
+        prefix: hotfix/
   branchRestrictions: [ ]
   webhooks: [ ]
   repositories:

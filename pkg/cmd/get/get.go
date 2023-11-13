@@ -16,8 +16,9 @@ func init() {
 	Cmd.PersistentFlags().StringP(common.RepoSlugFlag, common.RepoSlugFlagShorthand, "", "Repository slug. Leave empty to query permission permissions.")
 
 	Cmd.AddCommand(listAccessCmd)
-	Cmd.AddCommand(listBranchModelCmd)
+	Cmd.AddCommand(listBranchingModelsCmd)
 	Cmd.AddCommand(listBranchRestrictionsCmd)
+	Cmd.AddCommand(listDefaultBranchCmd)
 	Cmd.AddCommand(listWebhooksCmd)
 
 	Cmd.AddCommand(listProjectsCmd)

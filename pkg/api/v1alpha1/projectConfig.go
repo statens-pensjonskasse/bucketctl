@@ -1,6 +1,9 @@
 package v1alpha1
 
-import "bucketctl/pkg/common"
+import (
+	"bucketctl/pkg/common"
+	"github.com/pterm/pterm"
+)
 
 const (
 	ApiVersion        string = "bucketctl.spk.no/v1alpha1"
@@ -28,9 +31,9 @@ type ProjectConfigSpec struct {
 	ProjectKey         string                  `json:"projectKey" yaml:"projectKey"`
 	Public             *bool                   `json:"public,omitempty" yaml:"public,omitempty"`
 	DefaultPermission  *string                 `json:"defaultPermission,omitempty" yaml:"defaultPermission,omitempty"`
-	Permissions        *Permissions            `json:"permissions,omitempty" yaml:"permissions,omitempty"`
-	BranchModel        *BranchModel            `json:"branchModel,omitempty" yaml:"branchModel,omitempty"`
+	BranchingModel     *BranchingModel         `json:"branchingModel,omitempty" yaml:"branchingModel,omitempty"`
 	BranchRestrictions *BranchRestrictions     `json:"branchRestrictions,omitempty" yaml:"branchRestrictions,omitempty"`
+	Permissions        *Permissions            `json:"permissions,omitempty" yaml:"permissions,omitempty"`
 	Webhooks           *Webhooks               `json:"webhooks,omitempty" yaml:"webhooks,omitempty"`
 	Repositories       *RepositoriesProperties `json:"repositories,omitempty" yaml:"repositories,omitempty"`
 }
@@ -39,9 +42,10 @@ type RepositoriesProperties []*RepositoryProperties
 
 type RepositoryProperties struct {
 	RepoSlug           string              `json:"name" yaml:"name"`
-	Permissions        *Permissions        `json:"permissions,omitempty" yaml:"permissions,omitempty"`
-	BranchModel        *BranchModel        `json:"branchModel,omitempty" yaml:"branchModel,omitempty"`
+	DefaultBranch      *string             `json:"defaultBranch,omitempty" yaml:"defaultBranch,omitempty"`
+	BranchingModel     *BranchingModel     `json:"branchingModel,omitempty" yaml:"branchingModel,omitempty"`
 	BranchRestrictions *BranchRestrictions `json:"branchRestrictions,omitempty" yaml:"branchRestrictions,omitempty"`
+	Permissions        *Permissions        `json:"permissions,omitempty" yaml:"permissions,omitempty"`
 	Webhooks           *Webhooks           `json:"webhooks,omitempty" yaml:"webhooks,omitempty"`
 }
 
@@ -49,7 +53,7 @@ func EmptyRepositoryProperties(repoSlug string) *RepositoryProperties {
 	return &RepositoryProperties{
 		RepoSlug:           repoSlug,
 		Permissions:        &Permissions{},
-		BranchModel:        &BranchModel{},
+		BranchingModel:     &BranchingModel{},
 		BranchRestrictions: &BranchRestrictions{},
 		Webhooks:           &Webhooks{},
 	}
@@ -98,21 +102,51 @@ func GroupRepositories(desired *RepositoriesProperties, actual *RepositoriesProp
 	return grouping
 }
 
-func CombineProjectConfigSpecs(access *ProjectConfigSpec, branchRestrictions *ProjectConfigSpec, webhooks *ProjectConfigSpec) *ProjectConfigSpec {
+func CombineProjectConfigSpecs(
+	access *ProjectConfigSpec,
+	branchingModels *ProjectConfigSpec,
+	branchRestrictions *ProjectConfigSpec,
+	defaultBranches *ProjectConfigSpec,
+	webhooks *ProjectConfigSpec) *ProjectConfigSpec {
+
+	if access == nil {
+		access = new(ProjectConfigSpec)
+	}
+	if branchingModels == nil {
+		branchingModels = new(ProjectConfigSpec)
+	}
+	if branchRestrictions == nil {
+		branchRestrictions = new(ProjectConfigSpec)
+	}
+	if defaultBranches == nil {
+		defaultBranches = new(ProjectConfigSpec)
+	}
+	if webhooks == nil {
+		webhooks = new(ProjectConfigSpec)
+	}
+
 	return &ProjectConfigSpec{
 		ProjectKey:         access.ProjectKey,
 		Public:             access.Public,
 		DefaultPermission:  access.DefaultPermission,
 		Permissions:        access.Permissions,
+		BranchingModel:     branchingModels.BranchingModel,
 		BranchRestrictions: branchRestrictions.BranchRestrictions,
 		Webhooks:           webhooks.Webhooks,
-		Repositories:       CombineRepositoriesProperties(access.Repositories, branchRestrictions.Repositories, webhooks.Repositories),
+		Repositories: CombineRepositoriesProperties(
+			access.Repositories,
+			branchingModels.Repositories,
+			branchRestrictions.Repositories,
+			defaultBranches.Repositories,
+			webhooks.Repositories),
 	}
 }
 
 func CombineRepositoriesProperties(
 	repoPermissions *RepositoriesProperties,
+	repoBranchModels *RepositoriesProperties,
 	repoBranchRestrictions *RepositoriesProperties,
+	repoDefaultBranches *RepositoriesProperties,
 	repoWebhooks *RepositoriesProperties) *RepositoriesProperties {
 	repositoriesPropertiesMap := make(map[string]*RepositoryProperties, len(*repoPermissions))
 
@@ -126,6 +160,16 @@ func CombineRepositoriesProperties(
 			}
 		}
 	}
+	if repoBranchModels != nil {
+		for _, r := range *repoBranchModels {
+			if r.BranchingModel != nil {
+				if repositoriesPropertiesMap[r.RepoSlug] == nil {
+					repositoriesPropertiesMap[r.RepoSlug] = &RepositoryProperties{RepoSlug: r.RepoSlug}
+				}
+				repositoriesPropertiesMap[r.RepoSlug].BranchingModel = r.BranchingModel
+			}
+		}
+	}
 	if repoBranchRestrictions != nil {
 		for _, r := range *repoBranchRestrictions {
 			if len(*r.BranchRestrictions) > 0 {
@@ -133,6 +177,16 @@ func CombineRepositoriesProperties(
 					repositoriesPropertiesMap[r.RepoSlug] = &RepositoryProperties{RepoSlug: r.RepoSlug}
 				}
 				repositoriesPropertiesMap[r.RepoSlug].BranchRestrictions = r.BranchRestrictions
+			}
+		}
+	}
+	if repoDefaultBranches != nil {
+		for _, r := range *repoDefaultBranches {
+			if r.DefaultBranch != nil {
+				if repositoriesPropertiesMap[r.RepoSlug] == nil {
+					repositoriesPropertiesMap[r.RepoSlug] = &RepositoryProperties{RepoSlug: r.RepoSlug}
+				}
+				repositoriesPropertiesMap[r.RepoSlug].DefaultBranch = r.DefaultBranch
 			}
 		}
 	}
@@ -190,6 +244,13 @@ func (pcs *ProjectConfigSpec) Equals(cmp *ProjectConfigSpec) bool {
 		return false
 	}
 	if pcs.Permissions != nil && !pcs.Permissions.Equals(cmp.Permissions) {
+		return false
+	}
+
+	if pcs.BranchingModel == nil && cmp.BranchingModel != nil {
+		return false
+	}
+	if pcs.BranchingModel != nil && !pcs.BranchingModel.Equals(cmp.BranchingModel) {
 		return false
 	}
 
@@ -257,10 +318,22 @@ func (rp *RepositoryProperties) Equals(cmp *RepositoryProperties) bool {
 		return false
 	}
 
+	if rp.DefaultBranch != cmp.DefaultBranch {
+		return false
+	}
+
 	if rp.Permissions == nil && cmp.Permissions != nil {
 		return false
 	}
 	if rp.Permissions != nil && !rp.Permissions.Equals(cmp.Permissions) {
+		return false
+	}
+
+	if rp.BranchingModel == nil && cmp.BranchingModel != nil {
+		return false
+	}
+	if rp.BranchingModel != nil && !rp.BranchingModel.Equals(cmp.BranchingModel) {
+		pterm.Error.Println("HEI!")
 		return false
 	}
 

@@ -14,6 +14,20 @@ spec:
     - name: PROJECT_ADMIN
       groups:
         - vaktmesteren
+  branchingModel:
+    development:
+      refId: develop
+    production:
+      refId: master
+    types:
+      - name: bugfix
+        prefix: bugfix/
+      - name: feature
+        prefix: feature/
+      - name: hotfix
+        prefix: hotfix/
+      - name: release
+        prefix: release/
   branchRestrictions:
     - type: BRANCH
       matchers:
@@ -30,6 +44,11 @@ spec:
         - name: REPO_ADMIN
           users:
             - pompel
+      branchingModel:
+        development:
+          useDefault: true
+        production:
+          refId: master
       branchRestrictions:
         - type: MODEL_BRANCH
           matchers:

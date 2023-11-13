@@ -33,6 +33,11 @@ spec:
         - name: REPO_ADMIN
           users:
             - pompel
+      branchingModel:
+        development:
+          useDefault: true
+        production:
+          refId: master
       branchRestrictions:
         - type: MODEL_BRANCH
           matchers:

@@ -14,7 +14,7 @@ const (
 	ModelCategory = "MODEL_CATEGORY"
 )
 
-func RefMatcher(matcher *types2.Matcher, branchModel *types2.BranchModel, ref string) bool {
+func RefMatcher(matcher *types2.Matcher, branchModel *types2.BranchingModel, ref string) bool {
 	matcherTypeId := matcher.Type.Id
 
 	switch matcherTypeId {
@@ -66,7 +66,7 @@ func patternMatcher(matcher *types2.Matcher, ref string) bool {
 	return false
 }
 
-func modelBranchMatcher(matcher *types2.Matcher, branchModel *types2.BranchModel, ref string) bool {
+func modelBranchMatcher(matcher *types2.Matcher, branchModel *types2.BranchingModel, ref string) bool {
 	switch matcher.Id {
 	case "production":
 		if ref == branchModel.Production.Id {
@@ -80,7 +80,7 @@ func modelBranchMatcher(matcher *types2.Matcher, branchModel *types2.BranchModel
 	return false
 }
 
-func modelCategoryMatcher(matcher *types2.Matcher, branchModel *types2.BranchModel, ref string) bool {
+func modelCategoryMatcher(matcher *types2.Matcher, branchModel *types2.BranchingModel, ref string) bool {
 	// Branch is fetched in the form "refs/heads/<branch>", e.g. "refs/heads/feature/myAwesomeFeature"
 	branch := strings.TrimPrefix(ref, "refs/heads/")
 

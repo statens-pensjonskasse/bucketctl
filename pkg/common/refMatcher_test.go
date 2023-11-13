@@ -14,7 +14,7 @@ const (
 )
 
 var (
-	branchModel = &types2.BranchModel{
+	branchModel = &types2.BranchingModel{
 		Production: &types2.Branch{
 			Id:         "refs/heads/main",
 			DisplayId:  "main",

@@ -29,13 +29,16 @@ spec:
       scopeType: project
       sslVerificationRequired: true
   repositories:
-    - name: narnia
-      permissions:
-        - name: REPO_ADMIN
-          groups:
-            - pevensie
     - name: midgard
       permissions:
         - name: REPO_READ
           groups:
             - palantir
+    - name: narnia
+      branchingModel:
+        development:
+          refId: woop
+      permissions:
+        - name: REPO_ADMIN
+          groups:
+            - pevensie

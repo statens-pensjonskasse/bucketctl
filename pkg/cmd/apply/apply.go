@@ -4,6 +4,8 @@ import (
 	. "bucketctl/pkg/api/v1alpha1"
 	"bucketctl/pkg/cmd/apply/access"
 	"bucketctl/pkg/cmd/apply/branchRestrictions"
+	"bucketctl/pkg/cmd/apply/branchingModel"
+	"bucketctl/pkg/cmd/apply/defaultBranch"
 	"bucketctl/pkg/cmd/apply/webhooks"
 	"bucketctl/pkg/cmd/get"
 	"bucketctl/pkg/common"
@@ -68,18 +70,23 @@ func applyProjectConfig(cmd *cobra.Command, args []string) {
 
 func findProjectConfigChanges(desired *ProjectConfigSpec, actual *ProjectConfigSpec) (toCreate *ProjectConfigSpec, toUpdate *ProjectConfigSpec, toDelete *ProjectConfigSpec) {
 	accessToCreate, accessToUpdate, accessToDelete := access.FindAccessChanges(desired, actual)
+	bmToCreate, bmToUpdate, bmToDelete := branchingModel.FindBranchingModelChanges(desired, actual)
 	brToCreate, brToUpdate, brToDelete := branchRestrictions.FindBranchRestrictionChanges(desired, actual)
+	defaultBranchesToUpdate := defaultBranch.FindDefaultBranchChanges(desired, actual)
 	whToCreate, whToUpdate, whToDelete := webhooks.FindWebhooksChanges(desired, actual)
 
-	toCreate = CombineProjectConfigSpecs(accessToCreate, brToCreate, whToCreate)
-	toUpdate = CombineProjectConfigSpecs(accessToUpdate, brToUpdate, whToUpdate)
-	toDelete = CombineProjectConfigSpecs(accessToDelete, brToDelete, whToDelete)
+	toCreate = CombineProjectConfigSpecs(accessToCreate, bmToCreate, brToCreate, nil, whToCreate)
+	toUpdate = CombineProjectConfigSpecs(accessToUpdate, bmToUpdate, brToUpdate, defaultBranchesToUpdate, whToUpdate)
+	toDelete = CombineProjectConfigSpecs(accessToDelete, bmToDelete, brToDelete, nil, whToDelete)
 
 	return toCreate, toUpdate, toDelete
 }
 
 func setProjectConfig(baseUrl string, projectKey string, token string, toCreate *ProjectConfigSpec, toUpdate *ProjectConfigSpec, toDelete *ProjectConfigSpec) error {
 	if err := access.SetAccess(baseUrl, projectKey, token, toCreate, toUpdate, toDelete); err != nil {
+		return err
+	}
+	if err := branchingModel.SetBranchingModels(baseUrl, projectKey, token, toCreate, toUpdate, toDelete); err != nil {
 		return err
 	}
 	if err := branchRestrictions.SetBranchRestrictions(baseUrl, projectKey, token, toCreate, toUpdate, toDelete); err != nil {
@@ -106,14 +113,16 @@ func readProjectConfig(file string) (*ProjectConfig, error) {
 
 func printChanges(toCreate *ProjectConfigSpec, toUpdate *ProjectConfigSpec, toDelete *ProjectConfigSpec) {
 	accessChanges := access.GetChangesAsText(toCreate, toUpdate, toDelete)
+	branchingModelChanges := branchingModel.GetChangesAsText(toCreate, toUpdate, toDelete)
 	branchRestrictionChanges := branchRestrictions.GetChangesAsText(toCreate, toUpdate, toDelete)
 	webhookChanges := webhooks.GetChangesAsText(toCreate, toUpdate, toDelete)
 
 	printIfNotEmpty(accessChanges)
+	printIfNotEmpty(branchingModelChanges)
 	printIfNotEmpty(branchRestrictionChanges)
 	printIfNotEmpty(webhookChanges)
 
-	if len(accessChanges)+len(branchRestrictionChanges)+len(webhookChanges) == 0 {
+	if len(accessChanges)+len(branchingModelChanges)+len(branchRestrictionChanges)+len(webhookChanges) == 0 {
 		pterm.Printfln("No changes in project %s", pterm.Bold.Sprint(toCreate.ProjectKey))
 	}
 }

@@ -65,7 +65,7 @@ func createPullRequest(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	branchModel, err := bitbucket.GetBranchModel(baseUrl, projectKey, repoSlug, token)
+	branchModel, err := bitbucket.GetBranchingModel(baseUrl, projectKey, repoSlug, token)
 	cobra.CheckErr(err)
 	fromRef, err := getFromRef()
 	cobra.CheckErr(err)
@@ -190,7 +190,7 @@ func getDescription(baseUrl string, projectKey string, repoSlug string, token st
 	return combinedMessages, nil
 }
 
-func getDefaultReviewerSlugsForSourceAndTargetRefs(defaultReviewers []*types.DefaultReviewers, branchModel *types.BranchModel, sourceRef string, targetRef string) []string {
+func getDefaultReviewerSlugsForSourceAndTargetRefs(defaultReviewers []*types.DefaultReviewers, branchModel *types.BranchingModel, sourceRef string, targetRef string) []string {
 	var usernames []string
 	if defaultReviewers == nil || len(defaultReviewers) == 0 {
 		return usernames

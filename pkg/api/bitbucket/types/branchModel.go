@@ -1,6 +1,6 @@
 package types
 
-type BranchModel struct {
+type BranchingModel struct {
 	Development *Branch       `json:"development" yaml:"development"`
 	Production  *Branch       `json:"production,omitempty" yaml:"production,omitempty"`
 	Types       []*BranchType `json:"types,omitempty" yaml:"types,omitempty"`

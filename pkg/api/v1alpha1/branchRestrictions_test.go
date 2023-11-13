@@ -309,12 +309,6 @@ var (
 		Type:           brA.Type,
 		BranchMatchers: &BranchMatchers{bmBrB},
 	}
-
-	//bmBrADiff = &BranchMatcher{
-	//	Matching:    bmB.Matching,
-	//	Restrictions: &Restrictions{rADiffExemptions},
-	//}
-
 	brBbmArADiff = &BranchRestriction{
 		Type:           brB.Type,
 		BranchMatchers: &BranchMatchers{bmArADiff},
