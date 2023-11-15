@@ -40,6 +40,7 @@ spec:
   webhooks: [ ]
   repositories:
     - name: gorgon
+      defaultBranch: mester
       permissions:
         - name: REPO_ADMIN
           users:

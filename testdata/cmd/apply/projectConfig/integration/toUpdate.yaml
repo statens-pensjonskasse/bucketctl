@@ -18,6 +18,8 @@ spec:
   branchRestrictions: [ ]
   webhooks: [ ]
   repositories:
+    - name: gorgon
+      defaultBranch: vaktmester
     - name: narnia
       webhooks:
         - name: garderobeskap

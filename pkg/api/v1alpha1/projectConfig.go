@@ -2,7 +2,6 @@ package v1alpha1
 
 import (
 	"bucketctl/pkg/common"
-	"github.com/pterm/pterm"
 )
 
 const (
@@ -31,9 +30,9 @@ type ProjectConfigSpec struct {
 	ProjectKey         string                  `json:"projectKey" yaml:"projectKey"`
 	Public             *bool                   `json:"public,omitempty" yaml:"public,omitempty"`
 	DefaultPermission  *string                 `json:"defaultPermission,omitempty" yaml:"defaultPermission,omitempty"`
+	Permissions        *Permissions            `json:"permissions,omitempty" yaml:"permissions,omitempty"`
 	BranchingModel     *BranchingModel         `json:"branchingModel,omitempty" yaml:"branchingModel,omitempty"`
 	BranchRestrictions *BranchRestrictions     `json:"branchRestrictions,omitempty" yaml:"branchRestrictions,omitempty"`
-	Permissions        *Permissions            `json:"permissions,omitempty" yaml:"permissions,omitempty"`
 	Webhooks           *Webhooks               `json:"webhooks,omitempty" yaml:"webhooks,omitempty"`
 	Repositories       *RepositoriesProperties `json:"repositories,omitempty" yaml:"repositories,omitempty"`
 }
@@ -43,9 +42,9 @@ type RepositoriesProperties []*RepositoryProperties
 type RepositoryProperties struct {
 	RepoSlug           string              `json:"name" yaml:"name"`
 	DefaultBranch      *string             `json:"defaultBranch,omitempty" yaml:"defaultBranch,omitempty"`
+	Permissions        *Permissions        `json:"permissions,omitempty" yaml:"permissions,omitempty"`
 	BranchingModel     *BranchingModel     `json:"branchingModel,omitempty" yaml:"branchingModel,omitempty"`
 	BranchRestrictions *BranchRestrictions `json:"branchRestrictions,omitempty" yaml:"branchRestrictions,omitempty"`
-	Permissions        *Permissions        `json:"permissions,omitempty" yaml:"permissions,omitempty"`
 	Webhooks           *Webhooks           `json:"webhooks,omitempty" yaml:"webhooks,omitempty"`
 }
 
@@ -318,7 +317,13 @@ func (rp *RepositoryProperties) Equals(cmp *RepositoryProperties) bool {
 		return false
 	}
 
-	if rp.DefaultBranch != cmp.DefaultBranch {
+	if rp.DefaultBranch == nil && cmp.DefaultBranch != nil {
+		return false
+	}
+	if rp.DefaultBranch != nil && cmp.DefaultBranch == nil {
+		return false
+	}
+	if rp.DefaultBranch != nil && cmp.DefaultBranch != nil && *rp.DefaultBranch != *cmp.DefaultBranch {
 		return false
 	}
 
@@ -333,7 +338,6 @@ func (rp *RepositoryProperties) Equals(cmp *RepositoryProperties) bool {
 		return false
 	}
 	if rp.BranchingModel != nil && !rp.BranchingModel.Equals(cmp.BranchingModel) {
-		pterm.Error.Println("HEI!")
 		return false
 	}
 

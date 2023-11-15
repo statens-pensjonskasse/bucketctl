@@ -113,6 +113,9 @@ func createBranchingModel(url string, token string, branchingModel *BranchingMod
 
 func branchingModelBranchAsString(branch *types.Branch) string {
 	branchingModelBranch := "N/A"
+	if branch == nil {
+		return branchingModelBranch
+	}
 	if branch.RefId != nil {
 		branchingModelBranch = *branch.RefId
 	}

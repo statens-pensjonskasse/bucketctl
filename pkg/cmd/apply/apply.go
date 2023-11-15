@@ -92,6 +92,9 @@ func setProjectConfig(baseUrl string, projectKey string, token string, toCreate 
 	if err := branchRestrictions.SetBranchRestrictions(baseUrl, projectKey, token, toCreate, toUpdate, toDelete); err != nil {
 		return err
 	}
+	if err := defaultBranch.SetDefaultBranches(baseUrl, projectKey, token, toUpdate); err != nil {
+		return err
+	}
 	if err := webhooks.SetWebhooks(baseUrl, projectKey, token, toCreate, toUpdate, toDelete); err != nil {
 		return err
 	}
@@ -112,25 +115,19 @@ func readProjectConfig(file string) (*ProjectConfig, error) {
 }
 
 func printChanges(toCreate *ProjectConfigSpec, toUpdate *ProjectConfigSpec, toDelete *ProjectConfigSpec) {
-	accessChanges := access.GetChangesAsText(toCreate, toUpdate, toDelete)
-	branchingModelChanges := branchingModel.GetChangesAsText(toCreate, toUpdate, toDelete)
-	branchRestrictionChanges := branchRestrictions.GetChangesAsText(toCreate, toUpdate, toDelete)
-	webhookChanges := webhooks.GetChangesAsText(toCreate, toUpdate, toDelete)
+	var changes []string
+	changes = append(changes, access.GetChangesAsText(toCreate, toUpdate, toDelete)...)
+	changes = append(changes, branchingModel.GetChangesAsText(toCreate, toUpdate, toDelete)...)
+	changes = append(changes, branchRestrictions.GetChangesAsText(toCreate, toUpdate, toDelete)...)
+	changes = append(changes, defaultBranch.GetChangesAsText(toUpdate)...)
+	changes = append(changes, webhooks.GetChangesAsText(toCreate, toUpdate, toDelete)...)
 
-	printIfNotEmpty(accessChanges)
-	printIfNotEmpty(branchingModelChanges)
-	printIfNotEmpty(branchRestrictionChanges)
-	printIfNotEmpty(webhookChanges)
-
-	if len(accessChanges)+len(branchingModelChanges)+len(branchRestrictionChanges)+len(webhookChanges) == 0 {
-		pterm.Printfln("No changes in project %s", pterm.Bold.Sprint(toCreate.ProjectKey))
-	}
-}
-
-func printIfNotEmpty(changes []string) {
 	if changes != nil && len(changes) > 0 {
 		for _, change := range changes {
 			pterm.Printfln(change)
 		}
+	} else {
+		pterm.Printfln("No changes in project %s", pterm.Bold.Sprint(toCreate.ProjectKey))
 	}
+
 }

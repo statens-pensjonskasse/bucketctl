@@ -22,6 +22,7 @@ type Webhook struct {
 type Webhooks []*Webhook
 
 func FromBitbucketWebhook(bitbucketWebhook *types.Webhook) *Webhook {
+	sort.Strings(bitbucketWebhook.Events)
 	return &Webhook{
 		Id:                      bitbucketWebhook.Id,
 		Name:                    bitbucketWebhook.Name,

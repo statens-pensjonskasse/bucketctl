@@ -39,6 +39,8 @@ spec:
       scopeType: project
       sslVerificationRequired: true
   repositories:
+    - name: gorgon
+      defaultBranch: vaktmester
     - name: midgard
       permissions:
         - name: REPO_READ
