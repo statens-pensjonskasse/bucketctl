@@ -75,9 +75,33 @@ func findProjectConfigChanges(desired *ProjectConfigSpec, actual *ProjectConfigS
 	defaultBranchesToUpdate := defaultBranch.FindDefaultBranchChanges(desired, actual)
 	whToCreate, whToUpdate, whToDelete := webhooks.FindWebhooksChanges(desired, actual)
 
-	toCreate = CombineProjectConfigSpecs(accessToCreate, bmToCreate, brToCreate, nil, whToCreate)
-	toUpdate = CombineProjectConfigSpecs(accessToUpdate, bmToUpdate, brToUpdate, defaultBranchesToUpdate, whToUpdate)
-	toDelete = CombineProjectConfigSpecs(accessToDelete, bmToDelete, brToDelete, nil, whToDelete)
+	uncombinedToCreate := &UncombinedProjectConfigSpecs{
+		Access:             accessToCreate,
+		BranchingModels:    bmToCreate,
+		BranchRestrictions: brToCreate,
+		DefaultBranches:    nil,
+		Webhooks:           whToCreate,
+	}
+
+	uncombinedToUpdate := &UncombinedProjectConfigSpecs{
+		Access:             accessToUpdate,
+		BranchingModels:    bmToUpdate,
+		BranchRestrictions: brToUpdate,
+		DefaultBranches:    defaultBranchesToUpdate,
+		Webhooks:           whToUpdate,
+	}
+
+	uncombinedToDelete := &UncombinedProjectConfigSpecs{
+		Access:             accessToDelete,
+		BranchingModels:    bmToDelete,
+		BranchRestrictions: brToDelete,
+		DefaultBranches:    nil,
+		Webhooks:           whToDelete,
+	}
+
+	toCreate = CombineProjectConfigSpecs(uncombinedToCreate)
+	toUpdate = CombineProjectConfigSpecs(uncombinedToUpdate)
+	toDelete = CombineProjectConfigSpecs(uncombinedToDelete)
 
 	return toCreate, toUpdate, toDelete
 }

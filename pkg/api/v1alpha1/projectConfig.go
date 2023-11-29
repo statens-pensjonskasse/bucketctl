@@ -29,36 +29,111 @@ type ProjectConfig struct {
 type ProjectConfigSpec struct {
 	ProjectKey         string                  `json:"projectKey" yaml:"projectKey"`
 	Public             *bool                   `json:"public,omitempty" yaml:"public,omitempty"`
+	DefaultBranch      *string                 `json:"defaultBranch,omitempty" yaml:"defaultBranch,omitempty"`
 	DefaultPermission  *string                 `json:"defaultPermission,omitempty" yaml:"defaultPermission,omitempty"`
-	Permissions        *Permissions            `json:"permissions,omitempty" yaml:"permissions,omitempty"`
 	BranchingModel     *BranchingModel         `json:"branchingModel,omitempty" yaml:"branchingModel,omitempty"`
 	BranchRestrictions *BranchRestrictions     `json:"branchRestrictions,omitempty" yaml:"branchRestrictions,omitempty"`
+	Permissions        *Permissions            `json:"permissions,omitempty" yaml:"permissions,omitempty"`
 	Webhooks           *Webhooks               `json:"webhooks,omitempty" yaml:"webhooks,omitempty"`
 	Repositories       *RepositoriesProperties `json:"repositories,omitempty" yaml:"repositories,omitempty"`
 }
 
+type UncombinedProjectConfigSpecs struct {
+	Access             *ProjectConfigSpec
+	BranchingModels    *ProjectConfigSpec
+	BranchRestrictions *ProjectConfigSpec
+	DefaultBranches    *ProjectConfigSpec
+	Webhooks           *ProjectConfigSpec
+}
+
 type RepositoriesProperties []*RepositoryProperties
+
+type UncombinedRepositoriesProperties struct {
+	BranchingModels    *RepositoriesProperties
+	BranchRestrictions *RepositoriesProperties
+	DefaultBranches    *RepositoriesProperties
+	Permissions        *RepositoriesProperties
+	Webhooks           *RepositoriesProperties
+}
 
 type RepositoryProperties struct {
 	RepoSlug           string              `json:"name" yaml:"name"`
 	DefaultBranch      *string             `json:"defaultBranch,omitempty" yaml:"defaultBranch,omitempty"`
-	Permissions        *Permissions        `json:"permissions,omitempty" yaml:"permissions,omitempty"`
 	BranchingModel     *BranchingModel     `json:"branchingModel,omitempty" yaml:"branchingModel,omitempty"`
 	BranchRestrictions *BranchRestrictions `json:"branchRestrictions,omitempty" yaml:"branchRestrictions,omitempty"`
+	Permissions        *Permissions        `json:"permissions,omitempty" yaml:"permissions,omitempty"`
 	Webhooks           *Webhooks           `json:"webhooks,omitempty" yaml:"webhooks,omitempty"`
 }
 
 func EmptyRepositoryProperties(repoSlug string) *RepositoryProperties {
 	return &RepositoryProperties{
 		RepoSlug:           repoSlug,
-		Permissions:        &Permissions{},
 		BranchingModel:     &BranchingModel{},
 		BranchRestrictions: &BranchRestrictions{},
+		Permissions:        &Permissions{},
 		Webhooks:           &Webhooks{},
 	}
 }
 
-func (a *ProjectConfig) Validate() error {
+func (pcs *ProjectConfigSpec) Copy() *ProjectConfigSpec {
+	pcsCopy := &ProjectConfigSpec{
+		ProjectKey:        pcs.ProjectKey,
+		Public:            pcs.Public,
+		DefaultBranch:     pcs.DefaultBranch,
+		DefaultPermission: pcs.DefaultPermission,
+	}
+	if pcs.BranchingModel != nil {
+		pcsCopy.BranchingModel = pcs.BranchingModel.Copy()
+	}
+	if pcs.BranchRestrictions != nil {
+		pcsCopy.BranchRestrictions = pcs.BranchRestrictions.Copy()
+	}
+	if pcs.Permissions != nil {
+		pcsCopy.Permissions = pcs.Permissions.Copy()
+	}
+	if pcs.Webhooks != nil {
+		pcsCopy.Webhooks = pcs.Webhooks.Copy()
+	}
+	if pcs.Repositories != nil {
+		pcsCopy.Repositories = pcs.Repositories.Copy()
+	}
+
+	return pcsCopy
+}
+
+func (rps *RepositoriesProperties) Copy() *RepositoriesProperties {
+	rpsCopy := new(RepositoriesProperties)
+	for _, rp := range *rps {
+		*rpsCopy = append(*rpsCopy, rp.Copy())
+	}
+	return rpsCopy
+}
+
+func (rp *RepositoryProperties) Copy() *RepositoryProperties {
+	rpCopy := &RepositoryProperties{
+		RepoSlug: rp.RepoSlug,
+	}
+	if rp.DefaultBranch != nil {
+		(*rpCopy).DefaultBranch = (*rp).DefaultBranch
+	}
+	if rp.BranchingModel != nil {
+		rpCopy.BranchingModel = rp.BranchingModel.Copy()
+	}
+	if rp.BranchRestrictions != nil {
+		rpCopy.BranchRestrictions = rp.BranchRestrictions.Copy()
+	}
+	if rp.Permissions != nil {
+		rpCopy.Permissions = rp.Permissions.Copy()
+	}
+	if rp.Webhooks != nil {
+		rpCopy.Webhooks = rp.Webhooks.Copy()
+	}
+
+	return rpCopy
+}
+
+// Validate TODO: Actually write function
+func (pc *ProjectConfig) Validate() error {
 	return nil
 }
 
@@ -101,66 +176,58 @@ func GroupRepositories(desired *RepositoriesProperties, actual *RepositoriesProp
 	return grouping
 }
 
-func CombineProjectConfigSpecs(
-	access *ProjectConfigSpec,
-	branchingModels *ProjectConfigSpec,
-	branchRestrictions *ProjectConfigSpec,
-	defaultBranches *ProjectConfigSpec,
-	webhooks *ProjectConfigSpec) *ProjectConfigSpec {
+func CombineProjectConfigSpecs(specs *UncombinedProjectConfigSpecs) *ProjectConfigSpec {
 
-	if access == nil {
-		access = new(ProjectConfigSpec)
+	if specs.Access == nil {
+		specs.Access = new(ProjectConfigSpec)
 	}
-	if branchingModels == nil {
-		branchingModels = new(ProjectConfigSpec)
+	if specs.BranchingModels == nil {
+		specs.BranchingModels = new(ProjectConfigSpec)
 	}
-	if branchRestrictions == nil {
-		branchRestrictions = new(ProjectConfigSpec)
+	if specs.BranchRestrictions == nil {
+		specs.BranchRestrictions = new(ProjectConfigSpec)
 	}
-	if defaultBranches == nil {
-		defaultBranches = new(ProjectConfigSpec)
+	if specs.DefaultBranches == nil {
+		specs.DefaultBranches = new(ProjectConfigSpec)
 	}
-	if webhooks == nil {
-		webhooks = new(ProjectConfigSpec)
+	if specs.Webhooks == nil {
+		specs.Webhooks = new(ProjectConfigSpec)
 	}
 
 	return &ProjectConfigSpec{
-		ProjectKey:         access.ProjectKey,
-		Public:             access.Public,
-		DefaultPermission:  access.DefaultPermission,
-		Permissions:        access.Permissions,
-		BranchingModel:     branchingModels.BranchingModel,
-		BranchRestrictions: branchRestrictions.BranchRestrictions,
-		Webhooks:           webhooks.Webhooks,
-		Repositories: CombineRepositoriesProperties(
-			access.Repositories,
-			branchingModels.Repositories,
-			branchRestrictions.Repositories,
-			defaultBranches.Repositories,
-			webhooks.Repositories),
+		ProjectKey:         specs.Access.ProjectKey,
+		Public:             specs.Access.Public,
+		DefaultBranch:      specs.DefaultBranches.DefaultBranch,
+		DefaultPermission:  specs.Access.DefaultPermission,
+		BranchingModel:     specs.BranchingModels.BranchingModel,
+		BranchRestrictions: specs.BranchRestrictions.BranchRestrictions,
+		Permissions:        specs.Access.Permissions,
+		Webhooks:           specs.Webhooks.Webhooks,
+		Repositories: CombineRepositoriesProperties(&UncombinedRepositoriesProperties{
+			DefaultBranches:    specs.DefaultBranches.Repositories,
+			BranchingModels:    specs.BranchingModels.Repositories,
+			BranchRestrictions: specs.BranchRestrictions.Repositories,
+			Permissions:        specs.Access.Repositories,
+			Webhooks:           specs.Webhooks.Repositories,
+		}),
 	}
 }
 
-func CombineRepositoriesProperties(
-	repoPermissions *RepositoriesProperties,
-	repoBranchModels *RepositoriesProperties,
-	repoBranchRestrictions *RepositoriesProperties,
-	repoDefaultBranches *RepositoriesProperties,
-	repoWebhooks *RepositoriesProperties) *RepositoriesProperties {
-	repositoriesPropertiesMap := make(map[string]*RepositoryProperties, len(*repoPermissions))
+func CombineRepositoriesProperties(properties *UncombinedRepositoriesProperties) *RepositoriesProperties {
+	repositoriesPropertiesMap := make(map[string]*RepositoryProperties)
 
 	// All the different RepositoriesProperties should contain the same repositories
 	// We use the first to initialise the map, but we can't be 100% sure that's all the repositories
-	if repoPermissions != nil {
-		for _, r := range *repoPermissions {
+	if properties.Permissions != nil {
+		for _, r := range *properties.Permissions {
 			repositoriesPropertiesMap[r.RepoSlug] = &RepositoryProperties{RepoSlug: r.RepoSlug}
 			if len(*r.Permissions) > 0 {
 				repositoriesPropertiesMap[r.RepoSlug].Permissions = r.Permissions
 			}
 		}
 	}
-	if repoBranchModels != nil {
-		for _, r := range *repoBranchModels {
+	if properties.BranchingModels != nil {
+		for _, r := range *properties.BranchingModels {
 			if r.BranchingModel != nil {
 				if repositoriesPropertiesMap[r.RepoSlug] == nil {
 					repositoriesPropertiesMap[r.RepoSlug] = &RepositoryProperties{RepoSlug: r.RepoSlug}
@@ -169,8 +236,8 @@ func CombineRepositoriesProperties(
 			}
 		}
 	}
-	if repoBranchRestrictions != nil {
-		for _, r := range *repoBranchRestrictions {
+	if properties.BranchRestrictions != nil {
+		for _, r := range *properties.BranchRestrictions {
 			if len(*r.BranchRestrictions) > 0 {
 				if repositoriesPropertiesMap[r.RepoSlug] == nil {
 					repositoriesPropertiesMap[r.RepoSlug] = &RepositoryProperties{RepoSlug: r.RepoSlug}
@@ -179,8 +246,8 @@ func CombineRepositoriesProperties(
 			}
 		}
 	}
-	if repoDefaultBranches != nil {
-		for _, r := range *repoDefaultBranches {
+	if properties.DefaultBranches != nil {
+		for _, r := range *properties.DefaultBranches {
 			if r.DefaultBranch != nil {
 				if repositoriesPropertiesMap[r.RepoSlug] == nil {
 					repositoriesPropertiesMap[r.RepoSlug] = &RepositoryProperties{RepoSlug: r.RepoSlug}
@@ -189,8 +256,8 @@ func CombineRepositoriesProperties(
 			}
 		}
 	}
-	if repoWebhooks != nil {
-		for _, r := range *repoWebhooks {
+	if properties.Webhooks != nil {
+		for _, r := range *properties.Webhooks {
 			if len(*r.Webhooks) > 0 {
 				if repositoriesPropertiesMap[r.RepoSlug] == nil {
 					repositoriesPropertiesMap[r.RepoSlug] = &RepositoryProperties{RepoSlug: r.RepoSlug}
@@ -229,6 +296,17 @@ func (pcs *ProjectConfigSpec) Equals(cmp *ProjectConfigSpec) bool {
 	if pcs.Public != nil && cmp.Public != nil && *pcs.Public != *cmp.Public {
 		return false
 	}
+
+	if pcs.DefaultBranch != nil && cmp.DefaultBranch == nil {
+		return false
+	}
+	if pcs.DefaultBranch == nil && cmp.DefaultBranch != nil {
+		return false
+	}
+	if pcs.Public != nil && cmp.DefaultBranch != nil && *pcs.DefaultBranch != *cmp.DefaultBranch {
+		return false
+	}
+
 	if pcs.DefaultPermission != nil && cmp.DefaultPermission == nil {
 		return false
 	}

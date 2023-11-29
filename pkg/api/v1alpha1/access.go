@@ -60,15 +60,26 @@ func (e *Entities) ContainsGroup(group string) bool {
 	return false
 }
 
-func (ps *Permissions) Copy() (ACopy *Permissions) {
-	ACopy = new(Permissions)
-	for _, permission := range *ps {
-		permissionCopy := &Permission{Name: permission.Name, Entities: new(Entities)}
-		permissionCopy.Entities.Groups = append(permissionCopy.Entities.Groups, permission.Entities.Groups...)
-		permissionCopy.Entities.Users = append(permissionCopy.Entities.Users, permission.Entities.Users...)
-		*ACopy = append(*ACopy, permissionCopy)
+func (ps *Permissions) Copy() *Permissions {
+	psCopy := new(Permissions)
+	for _, p := range *ps {
+		*psCopy = append(*psCopy, p.Copy())
 	}
-	return ACopy
+	return psCopy
+}
+
+func (p *Permission) Copy() *Permission {
+	return &Permission{
+		Name:     p.Name,
+		Entities: p.Entities.Copy(),
+	}
+}
+
+func (e *Entities) Copy() *Entities {
+	eCopy := new(Entities)
+	eCopy.Groups = append(eCopy.Groups, e.Groups...)
+	eCopy.Users = append(eCopy.Users, e.Users...)
+	return eCopy
 }
 
 // getPermissionsDifference Find the relative complement of B in ps, ps\B (What's in B that is not in ps)

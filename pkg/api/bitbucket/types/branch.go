@@ -10,6 +10,18 @@ type Branch struct {
 	UseDefault      bool    `json:"useDefault,omitempty" yaml:"useDefault,omitempty"`
 }
 
+func (branch *Branch) Copy() *Branch {
+	return &Branch{
+		Id:              branch.Id,
+		RefId:           branch.RefId,
+		DisplayId:       branch.DisplayId,
+		Type:            branch.Type,
+		LatestCommit:    branch.LatestCommit,
+		LatestChangeset: branch.LatestChangeset,
+		UseDefault:      branch.UseDefault,
+	}
+}
+
 func (branch *Branch) Equals(cmp *Branch) bool {
 	if branch == cmp {
 		return true

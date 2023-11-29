@@ -171,6 +171,14 @@ func sortWebhooksByBestAvailableCandidate(similar []*similarWebhooks) {
 	})
 }
 
+func (whs *Webhooks) Copy() *Webhooks {
+	whsCopy := new(Webhooks)
+	for _, wh := range *whs {
+		*whsCopy = append(*whsCopy, wh.Copy())
+	}
+	return whsCopy
+}
+
 func (wh *Webhook) Copy() *Webhook {
 	copied := &Webhook{
 		Id:                      wh.Id,

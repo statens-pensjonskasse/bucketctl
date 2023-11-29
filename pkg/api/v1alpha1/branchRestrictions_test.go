@@ -1,6 +1,7 @@
 package v1alpha1
 
 import (
+	"reflect"
 	"testing"
 )
 
@@ -407,6 +408,172 @@ func TestFindBranchRestrictionsToChange(t *testing.T) {
 			}
 			if !gotToDelete.Equals(tt.wants.toDelete) {
 				t.Errorf("%s - delete got %v, want %v", tt.name, gotToDelete, tt.wants.toDelete)
+			}
+		})
+	}
+}
+
+func TestBranchRestrictions_Copy(t *testing.T) {
+	tests := []struct {
+		name string
+		brs  BranchRestrictions
+		want *BranchRestrictions
+	}{
+		{
+			name: "Copy empty",
+			brs:  BranchRestrictions{},
+			want: &BranchRestrictions{},
+		},
+		{
+			name: "Copy with single entry",
+			brs: BranchRestrictions{&BranchRestriction{
+				Type:           "test",
+				BranchMatchers: &BranchMatchers{},
+			}},
+			want: &BranchRestrictions{&BranchRestriction{
+				Type:           "test",
+				BranchMatchers: &BranchMatchers{},
+			}},
+		},
+		{
+			name: "Deep copy",
+			brs: BranchRestrictions{&BranchRestriction{
+				Type: "test",
+				BranchMatchers: &BranchMatchers{
+					&BranchMatcher{
+						Matching: "deep",
+						Restrictions: &Restrictions{
+							&Restriction{
+								Id:           0,
+								Type:         "type",
+								ExemptUsers:  nil,
+								ExemptGroups: nil,
+							},
+						},
+					},
+				},
+			}},
+			want: &BranchRestrictions{&BranchRestriction{
+				Type: "test",
+				BranchMatchers: &BranchMatchers{
+					&BranchMatcher{
+						Matching: "deep",
+						Restrictions: &Restrictions{
+							&Restriction{
+								Id:           0,
+								Type:         "type",
+								ExemptUsers:  nil,
+								ExemptGroups: nil,
+							},
+						},
+					},
+				},
+			}},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.brs.Copy(); !got.Equals(tt.want) {
+				t.Errorf("Copy() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_BranchMatchers_Copy(t *testing.T) {
+	tests := []struct {
+		name string
+		bms  BranchMatchers
+		want *BranchMatchers
+	}{
+		{
+			name: "Copy empty",
+			bms:  BranchMatchers{},
+			want: &BranchMatchers{},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.bms.Copy(); !got.Equals(tt.want) {
+				t.Errorf("Copy() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestRestriction_Copy(t *testing.T) {
+	type fields struct {
+		Id           int
+		Type         string
+		ExemptUsers  []string
+		ExemptGroups []string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   *Restriction
+	}{
+		{
+			name: "empty copy",
+			fields: fields{
+				Id:           0,
+				Type:         "",
+				ExemptUsers:  nil,
+				ExemptGroups: nil,
+			},
+			want: &Restriction{
+				Id:           0,
+				Type:         "",
+				ExemptUsers: nil,
+				ExemptGroups: nil,
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := &Restriction{
+				Id:           tt.fields.Id,
+				Type:         tt.fields.Type,
+				ExemptUsers:  tt.fields.ExemptUsers,
+				ExemptGroups: tt.fields.ExemptGroups,
+			}
+			if got := r.Copy(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Copy() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestRestrictions_Copy(t *testing.T) {
+	tests := []struct {
+		name string
+		rs   Restrictions
+		want *Restrictions
+	}{
+		{
+			name: "empty copy",
+			rs: Restrictions{
+				&Restriction{
+					Id:           0,
+					Type:         "",
+					ExemptUsers:  []string{""},
+					ExemptGroups: []string{""},
+				},
+			},
+			want:  &Restrictions{
+				&Restriction{
+					Id:           0,
+					Type:         "",
+					ExemptUsers:  []string{""},
+					ExemptGroups: []string{""},
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.rs.Copy(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Copy() = %+v, want %+v", got, tt.want)
 			}
 		})
 	}

@@ -18,6 +18,36 @@ type BranchingModelType struct {
 	Prefix string `json:"prefix,omitempty" yaml:"prefix,omitempty"`
 }
 
+func (bm *BranchingModel) Copy() *BranchingModel {
+	bmCopy := new(BranchingModel)
+	if bm.Development != nil {
+		bmCopy.Development = bm.Development.Copy()
+	}
+	if bm.Production != nil {
+		bmCopy.Production = bm.Production.Copy()
+	}
+	if bm.Types != nil {
+		bmCopy.Types = bm.Types.Copy()
+	}
+
+	return bmCopy
+}
+
+func (bmts *BranchingModelTypes) Copy() *BranchingModelTypes {
+	var bmtsCopy = &BranchingModelTypes{}
+	for _, bt := range *bmts {
+		*bmtsCopy = append(*bmtsCopy, bt.Copy())
+	}
+	return bmtsCopy
+}
+
+func (bmt *BranchingModelType) Copy() *BranchingModelType {
+	return &BranchingModelType{
+		Name:   bmt.Name,
+		Prefix: bmt.Prefix,
+	}
+}
+
 func FromBitbucketBranchModelTypes(bitbucketBranchTypes []*types.BranchType) *BranchingModelTypes {
 	activeBranchModelTypes := make(BranchingModelTypes, 0)
 	for _, t := range bitbucketBranchTypes {
@@ -92,18 +122,18 @@ func (bm *BranchingModel) Equals(cmp *BranchingModel) bool {
 	return true
 }
 
-func (bmTypes *BranchingModelTypes) Equals(cmp *BranchingModelTypes) bool {
-	if bmTypes == cmp {
+func (bmts *BranchingModelTypes) Equals(cmp *BranchingModelTypes) bool {
+	if bmts == cmp {
 		return true
 	}
 	if cmp == nil {
 		return false
 	}
-	if len(*bmTypes) != len(*cmp) {
+	if len(*bmts) != len(*cmp) {
 		return false
 	}
-	bmTypesMap := make(map[string]*BranchingModelType, len(*bmTypes))
-	for _, t := range *bmTypes {
+	bmTypesMap := make(map[string]*BranchingModelType, len(*bmts))
+	for _, t := range *bmts {
 		bmTypesMap[t.Name] = t
 	}
 	cmpTypesMap := make(map[string]*BranchingModelType, len(*cmp))
@@ -118,17 +148,17 @@ func (bmTypes *BranchingModelTypes) Equals(cmp *BranchingModelTypes) bool {
 	return true
 }
 
-func (bt *BranchingModelType) Equals(cmp *BranchingModelType) bool {
-	if bt == cmp {
+func (bmt *BranchingModelType) Equals(cmp *BranchingModelType) bool {
+	if bmt == cmp {
 		return true
 	}
 	if cmp == nil {
 		return false
 	}
-	if bt.Name != cmp.Name {
+	if bmt.Name != cmp.Name {
 		return false
 	}
-	if bt.Prefix != cmp.Prefix {
+	if bmt.Prefix != cmp.Prefix {
 		return false
 	}
 	return true

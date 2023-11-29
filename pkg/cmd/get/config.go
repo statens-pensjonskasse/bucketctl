@@ -40,11 +40,11 @@ func getProjectConfig(cmd *cobra.Command, args []string) {
 }
 
 func FetchProjectConfigSpec(baseUrl string, projectKey string, limit int, token string) (*ProjectConfigSpec, error) {
-	actualAccess, err := FetchAccess(baseUrl, projectKey, limit, token)
+	actualAccess, err := FetchPermissions(baseUrl, projectKey, limit, token)
 	if err != nil {
 		return nil, err
 	}
-	actualBranchModels, err := FetchBranchingModels(baseUrl, projectKey, limit, token)
+	actualBranchingModels, err := FetchBranchingModels(baseUrl, projectKey, limit, token)
 	if err != nil {
 		return nil, err
 	}
@@ -61,7 +61,13 @@ func FetchProjectConfigSpec(baseUrl string, projectKey string, limit int, token 
 		return nil, err
 	}
 
-	projectConfigSpec := CombineProjectConfigSpecs(actualAccess, actualBranchModels, actualBranchRestrictions, actualDefaultBranches, actualWebhooks)
+	projectConfigSpec := CombineProjectConfigSpecs(&UncombinedProjectConfigSpecs{
+		Access:             actualAccess,
+		DefaultBranches:    actualDefaultBranches,
+		BranchingModels:    actualBranchingModels,
+		BranchRestrictions: actualBranchRestrictions,
+		Webhooks:           actualWebhooks,
+	})
 	projectConfigSpec.ProjectKey = projectKey
 	return projectConfigSpec, nil
 }

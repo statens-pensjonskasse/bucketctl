@@ -34,7 +34,7 @@ func listAccess(cmd *cobra.Command, args []string) {
 	projectConfig.Metadata.Name = projectKey
 
 	if repoSlug == "" {
-		access, err := FetchAccess(baseUrl, projectKey, limit, token)
+		access, err := FetchPermissions(baseUrl, projectKey, limit, token)
 		cobra.CheckErr(err)
 		projectConfig.Spec = *access
 	} else {
@@ -48,7 +48,7 @@ func listAccess(cmd *cobra.Command, args []string) {
 	cobra.CheckErr(err)
 }
 
-func FetchAccess(baseUrl string, projectKey string, limit int, token string) (*ProjectConfigSpec, error) {
+func FetchPermissions(baseUrl string, projectKey string, limit int, token string) (*ProjectConfigSpec, error) {
 	actualProjectAccess, err := bitbucket.GetProjectAccess(baseUrl, projectKey, limit, token)
 	if err != nil {
 		return nil, err

@@ -51,5 +51,46 @@ func FetchDefaultBranches(baseUrl string, projectKey string, limit int, token st
 	if err != nil {
 		return nil, err
 	}
-	return &ProjectConfigSpec{ProjectKey: projectKey, Repositories: repositoriesProperties}, nil
+
+	mostCommonDefaultBranch := getMostCommonDefaultBranch(repositoriesProperties)
+	spec := &ProjectConfigSpec{ProjectKey: projectKey, DefaultBranch: &mostCommonDefaultBranch, Repositories: repositoriesProperties}
+
+	return FilterRepositoryDefaultBranchMatchingProjectDefaultBranch(spec), nil
+}
+
+func getMostCommonDefaultBranch(repositoriesProperties *RepositoriesProperties) string {
+	defaultBranch := "N/A"
+
+	if repositoriesProperties != nil {
+		defaultBranchMap := make(map[string]int)
+		for _, repo := range *repositoriesProperties {
+			if _, exist := defaultBranchMap[*repo.DefaultBranch]; !exist {
+				defaultBranchMap[*repo.DefaultBranch] = 0
+			}
+			defaultBranchMap[*repo.DefaultBranch]++
+		}
+
+		highestCount := 0
+		for _, branchName := range common.GetLexicallySortedKeys(defaultBranchMap) {
+			if count := defaultBranchMap[branchName]; count > highestCount {
+				defaultBranch = branchName
+				highestCount = count
+			}
+		}
+	}
+
+	return defaultBranch
+}
+
+func FilterRepositoryDefaultBranchMatchingProjectDefaultBranch(spec *ProjectConfigSpec) *ProjectConfigSpec {
+	specCopy := spec.Copy()
+
+	if spec.DefaultBranch != nil {
+		for _, repo := range *specCopy.Repositories {
+			if *repo.DefaultBranch == *spec.DefaultBranch {
+				repo.DefaultBranch = nil
+			}
+		}
+	}
+	return specCopy
 }

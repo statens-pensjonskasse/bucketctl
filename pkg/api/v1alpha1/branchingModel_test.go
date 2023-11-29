@@ -121,3 +121,131 @@ func Test_FindBranchingModelsToChange(t *testing.T) {
 		})
 	}
 }
+
+var (
+	bmt = &BranchingModelType{
+		Name:   "name",
+		Prefix: "prefix",
+	}
+	bmts = &BranchingModelTypes{bmt}
+	bm   = &BranchingModel{
+		Development: &types.Branch{UseDefault: true},
+		Production:  &types.Branch{Id: "main"},
+		Types:       bmts,
+	}
+)
+
+func Test_BranchingModelType_Copy(t *testing.T) {
+	tests := []struct {
+		name string
+		recv BranchingModelType
+		want *BranchingModelType
+	}{
+		{
+			name: "Copy empty",
+			recv: BranchingModelType{},
+			want: &BranchingModelType{},
+		},
+		{
+			name: "Copy",
+			recv: *bmt,
+			want: bmt,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.recv.Copy(); !got.Equals(tt.want) {
+				t.Errorf("Copy() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+
+	copyBranchingModelType := bmt.Copy()
+
+	// Change every value
+	copyBranchingModelType.Name = ""
+	copyBranchingModelType.Prefix = ""
+
+	if copyBranchingModelType.Name == bmt.Name {
+		t.Errorf("Name not copied")
+	}
+	if copyBranchingModelType.Prefix == bmt.Prefix {
+		t.Errorf("Prefix not copied")
+	}
+}
+
+func Test_BranchingModelTypes_Copy(t *testing.T) {
+	tests := []struct {
+		name string
+		recv BranchingModelTypes
+		want *BranchingModelTypes
+	}{
+		{
+			name: "Copy empty",
+			recv: BranchingModelTypes{},
+			want: &BranchingModelTypes{},
+		},
+		{
+			name: "Copy",
+			recv: *bmts,
+			want: bmts,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.recv.Copy(); !got.Equals(tt.want) {
+				t.Errorf("Copy() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+
+	bmtsCopy := bmts.Copy()
+	(*bmtsCopy)[0].Name = ""
+
+	if (*bmtsCopy)[0].Equals((*bmts)[0]) {
+		t.Errorf("BranchModelType not copied")
+	}
+}
+
+func Test_BranchingModel_Copy(t *testing.T) {
+	tests := []struct {
+		name string
+		recv BranchingModel
+		want *BranchingModel
+	}{
+		{
+			name: "Copy empty",
+			recv: BranchingModel{},
+			want: &BranchingModel{},
+		},
+		{
+			name: "Copy",
+			recv: *bm,
+			want: bm,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.recv.Copy(); !got.Equals(tt.want) {
+				t.Errorf("Copy() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+
+	bmCopy := bm.Copy()
+
+	bmCopy.Development.Type = "type"
+	bmCopy.Production = &types.Branch{}
+	bmCopy.Types = &BranchingModelTypes{}
+
+	if bmCopy.Development.Equals(bm.Development) {
+		t.Errorf("development not copied")
+	}
+	if bmCopy.Production.Equals(bm.Production) {
+		t.Errorf("production not copied")
+	}
+	if bmCopy.Types.Equals(bm.Types) {
+		t.Errorf("types not copied")
+	}
+
+}

@@ -28,6 +28,54 @@ type Restriction struct {
 	ExemptGroups []string `json:"exemptGroups,omitempty" yaml:"exemptGroups,omitempty"`
 }
 
+func (rs *Restrictions) Copy() *Restrictions {
+	rsCopy := new(Restrictions)
+	for _, r := range *rs {
+		*rsCopy = append(*rsCopy, r.Copy())
+	}
+	return rsCopy
+}
+
+func (r *Restriction) Copy() *Restriction {
+	rCopy := &Restriction{
+		Id:   r.Id,
+		Type: r.Type,
+	}
+	rCopy.ExemptGroups = append(rCopy.ExemptGroups, r.ExemptGroups...)
+	rCopy.ExemptUsers = append(rCopy.ExemptUsers, r.ExemptUsers...)
+	return rCopy
+}
+
+func (bm *BranchMatcher) Copy() *BranchMatcher {
+	return &BranchMatcher{
+		Matching:     bm.Matching,
+		Restrictions: bm.Restrictions.Copy(),
+	}
+}
+
+func (bms *BranchMatchers) Copy() *BranchMatchers {
+	bmsCopy := new(BranchMatchers)
+	for _, bm := range *bms {
+		*bmsCopy = append(*bmsCopy, bm.Copy())
+	}
+	return bmsCopy
+}
+
+func (br *BranchRestriction) Copy() *BranchRestriction {
+	return &BranchRestriction{
+		Type:           br.Type,
+		BranchMatchers: br.BranchMatchers.Copy(),
+	}
+}
+
+func (brs *BranchRestrictions) Copy() *BranchRestrictions {
+	brsCopy := new(BranchRestrictions)
+	for _, br := range *brs {
+		*brsCopy = append(*brsCopy, br.Copy())
+	}
+	return brsCopy
+}
+
 func FindBranchRestrictionsToChange(desired *BranchRestrictions, actual *BranchRestrictions) (toCreate *BranchRestrictions, toUpdate *BranchRestrictions, toDelete *BranchRestrictions) {
 	if desired == nil {
 		desired = new(BranchRestrictions)

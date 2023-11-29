@@ -6,11 +6,7 @@ import (
 )
 
 func FindDefaultBranchChanges(desired *ProjectConfigSpec, actual *ProjectConfigSpec) (toUpdate *ProjectConfigSpec) {
-	repoDefaultBranchesToChange := FindDefaultBranchesToChange(desired.Repositories, actual.Repositories)
-
-	toUpdate = &ProjectConfigSpec{ProjectKey: desired.ProjectKey, Repositories: repoDefaultBranchesToChange}
-
-	return toUpdate
+	return FindDefaultBranchesToChange(desired, actual)
 }
 
 func SetDefaultBranches(baseUrl string, projectKey string, token string, toUpdate *ProjectConfigSpec) error {

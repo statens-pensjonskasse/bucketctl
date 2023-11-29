@@ -173,6 +173,9 @@ func Test_Webhook_Copy(t *testing.T) {
 	if !reflect.DeepEqual(webhookA, webhookACopy) {
 		t.Errorf("Forventet at kopiert webhook skal være lik original")
 	}
+	if !webhookA.Equals(webhookACopy) {
+		t.Errorf("Forventet at kopiert webhook skal være lik original")
+	}
 }
 
 func Test_Webhook_Equivalent(t *testing.T) {

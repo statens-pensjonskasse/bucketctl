@@ -40,7 +40,7 @@ func Test_Copy(t *testing.T) {
 	if cpy == orig {
 		t.Errorf("Expected a pointer to a new object")
 	}
-	if !reflect.DeepEqual(cpy, orig) {
+	if !cpy.Equals(orig) {
 		t.Errorf("Expected a copy of all values")
 	}
 
@@ -301,6 +301,31 @@ func Test_FindPermissionsToChange(t *testing.T) {
 			}
 			if !toDelete.Equals(tt.want.toDelete) {
 				t.Errorf("%s got delete %v, want %v", tt.name, toDelete, tt.want.toDelete)
+			}
+		})
+	}
+}
+
+func TestEntities_Copy(t *testing.T) {
+	tests := []struct {
+		name   string
+		fields Entities
+		want   *Entities
+	}{
+		{
+			name:   "Copy empty",
+			fields: Entities{},
+			want:   &Entities{},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			e := &Entities{
+				Groups: tt.fields.Groups,
+				Users:  tt.fields.Users,
+			}
+			if got := e.Copy(); !got.Equals(tt.want) {
+				t.Errorf("Copy() = %v, want %v", got, tt.want)
 			}
 		})
 	}
