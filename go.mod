@@ -3,8 +3,8 @@ module bucketctl
 go 1.18
 
 require (
-	github.com/go-git/go-git/v5 v5.10.1
-	github.com/pterm/pterm v0.12.66
+	github.com/go-git/go-git/v5 v5.10.0
+	github.com/pterm/pterm v0.12.57
 	github.com/spf13/cobra v1.8.0
 	github.com/spf13/viper v1.16.0
 	github.com/vibrantbyte/go-antpath v1.1.1
@@ -15,10 +15,10 @@ require (
 require (
 	atomicgo.dev/cursor v0.2.0 // indirect
 	atomicgo.dev/keyboard v0.2.9 // indirect
-	atomicgo.dev/schedule v0.1.0 // indirect
 	dario.cat/mergo v1.0.0 // indirect
 	github.com/Microsoft/go-winio v0.6.1 // indirect
 	github.com/ProtonMail/go-crypto v0.0.0-20230828082145-3c4c8a2d2371 // indirect
+	github.com/acomagu/bufpipe v1.0.4 // indirect
 	github.com/cloudflare/circl v1.3.3 // indirect
 	github.com/containerd/console v1.0.3 // indirect
 	github.com/cyphar/filepath-securejoin v0.2.4 // indirect
