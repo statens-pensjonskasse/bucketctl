@@ -17,6 +17,6 @@ ciPipeline {
             .withGitTaggingStrategy(semantic: 'main')
             .withPublish(fromBranches: 'feature/, hotfix/')
             .withRelease(fromBranch: 'main')
-            .withSlackNotifications(channels: 'parsec-ci')
+            .withSlackNotifications(channels: 'applikasjonsplattform-ci')
             .withLog(level: 'all')
 }
