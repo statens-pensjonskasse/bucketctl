@@ -35,6 +35,9 @@ func GetProjectRepositoriesMap(baseUrl string, projectKey string, limit int, tok
 
 	repositories := make(map[string]*types2.Repository)
 	for _, r := range repositoriesList {
+		if r.Archived {
+			continue
+		}
 		repositories[r.Slug] = &types2.Repository{
 			Id:            r.Id,
 			Name:          r.Name,
