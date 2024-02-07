@@ -8,7 +8,7 @@ metadata:
 spec:
   projectKey: <PROJECT_KEY>
   public: <bool>
-  defaultPermission: <PROJECT_WRITE|PROJECT_READ>
+  defaultPermission: <PROJECT_WRITE|PROJECT_READ|REPO_CREATE>
   permissions: <[]Permission>
   branchRestrictions: <[]BranchRestriction>
   webhooks: <[]Webhook>

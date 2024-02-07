@@ -47,10 +47,10 @@ func changesToText(action string, pcs *ProjectConfigSpec) (changes []string) {
 			for _, bm := range *br.BranchMatchers {
 				for _, r := range *bm.Restrictions {
 					changes = append(changes,
-						pterm.Sprintf("%s %s (%s) %s (%s) restriction in project %s",
+						pterm.Sprintf("%s restriction %s (%s) %s (%s) in project %s",
 							action,
-							pterm.Bold.Sprint(br.Type), pterm.Bold.Sprint(bm.Matching),
-							pterm.Bold.Sprint(r.Type), formatRestrictionExemptions(r),
+							br.Type, bm.Matching,
+							r.Type, formatRestrictionExemptions(r),
 							pcs.ProjectKey))
 				}
 			}
@@ -63,10 +63,10 @@ func changesToText(action string, pcs *ProjectConfigSpec) (changes []string) {
 					for _, bm := range *br.BranchMatchers {
 						for _, r := range *bm.Restrictions {
 							changes = append(changes,
-								pterm.Sprintf("%s %s (%s) %s (%s) restriction in repository %s/%s",
+								pterm.Sprintf("%s restriction %s (%s) %s (%s) in repository %s/%s",
 									action,
-									pterm.Bold.Sprint(br.Type), pterm.Bold.Sprint(bm.Matching),
-									pterm.Bold.Sprint(r.Type), formatRestrictionExemptions(r),
+									br.Type, bm.Matching,
+									r.Type, formatRestrictionExemptions(r),
 									pcs.ProjectKey, repo.RepoSlug))
 						}
 					}
