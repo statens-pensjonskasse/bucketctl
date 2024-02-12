@@ -69,10 +69,16 @@ func patternMatcher(matcher *types2.Matcher, ref string) bool {
 func modelBranchMatcher(matcher *types2.Matcher, branchModel *types2.BranchingModel, ref string) bool {
 	switch matcher.Id {
 	case "production":
+		if branchModel.Production == nil {
+			return false
+		}
 		if ref == branchModel.Production.Id {
 			return true
 		}
 	case "development":
+		if branchModel.Development == nil {
+			return false
+		}
 		if ref == branchModel.Development.Id {
 			return true
 		}
