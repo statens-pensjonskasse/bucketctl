@@ -4,6 +4,7 @@ import (
 	"bucketctl/pkg/api/bitbucket/types"
 	. "bucketctl/pkg/api/v1alpha1"
 	"bucketctl/pkg/common"
+	"bucketctl/pkg/logger"
 	"bytes"
 	"encoding/json"
 	"github.com/pterm/pterm"
@@ -123,7 +124,7 @@ func createBranchRestrictions(url string, token string, branchRestrictions *Bran
 					if _, err := common.PostRequest(url, token, bytes.NewReader(payload), nil); err != nil {
 						return err
 					}
-					pterm.Printfln("%s %s restriction for %s (%s) in %s", action, r.Type, bm.Matching, br.Type, scope)
+					logger.Log("%s %s restriction for %s (%s) in %s", action, r.Type, bm.Matching, br.Type, scope)
 				}
 			}
 		}
@@ -139,7 +140,7 @@ func deleteRestrictions(url string, token string, branchRestrictions *BranchRest
 					if _, err := common.DeleteRequest(url+"/"+strconv.Itoa(restriction.Id), token, nil); err != nil {
 						return err
 					}
-					pterm.Printfln("%s %s restriction for %s (%s) in %s", pterm.Red("🗑️ Deleted"), restriction.Type, branchRestriction.Matching, matcherRestriction.Type, scope)
+					logger.Log("%s %s restriction for %s (%s) in %s", pterm.Red("🗑️ Deleted"), restriction.Type, branchRestriction.Matching, matcherRestriction.Type, scope)
 				}
 			}
 		}

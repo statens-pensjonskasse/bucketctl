@@ -4,6 +4,7 @@ import (
 	bitbucket2 "bucketctl/pkg/api/bitbucket"
 	"bucketctl/pkg/api/bitbucket/types"
 	"bucketctl/pkg/common"
+	"bucketctl/pkg/logger"
 	"errors"
 	"fmt"
 	"github.com/go-git/go-git/v5"
@@ -105,29 +106,29 @@ func clone(cmd *cobra.Command, args []string) error {
 
 			if errors.Is(err, git.ErrRepositoryAlreadyExists) {
 				if !update {
-					pterm.Info.Println("🚀 Skipping already existing repository " + projectKey + "/" + slug)
+					logger.Log("🚀 Skipping already existing repository " + projectKey + "/" + slug)
 				} else {
 					defaultBranch, err := bitbucket2.GetDefaultBranch(baseUrl, projectKey, slug, token)
 					if err != nil {
-						pterm.Error.Println("⚠️ Error fetching default branch for " + projectKey + "/" + slug)
+						logger.Err("⚠️ Error fetching default branch for " + projectKey + "/" + slug)
 						progressBar.Increment()
 						continue
 					}
 					if err := syncRefWithRemote(repoPath, defaultBranch.Id, force); err == nil {
-						pterm.Info.Println("🔝 Synced " + projectKey + "/" + slug + "/" + defaultBranch.DisplayId + " with origin")
+						logger.Log("🔝 Synced " + projectKey + "/" + slug + "/" + defaultBranch.DisplayId + " with origin")
 					} else if errors.Is(err, git.NoErrAlreadyUpToDate) {
-						pterm.Info.Println("👍 Branch " + projectKey + "/" + slug + "/" + defaultBranch.DisplayId + " already up to date")
+						logger.Log("👍 Branch " + projectKey + "/" + slug + "/" + defaultBranch.DisplayId + " already up to date")
 					} else {
-						pterm.Warning.Println(err.Error() + ": " + projectKey + "/" + slug + "/" + defaultBranch.DisplayId)
+						logger.Warn(err.Error() + ": " + projectKey + "/" + slug + "/" + defaultBranch.DisplayId)
 					}
 				}
 			} else if errors.Is(err, transport.ErrEmptyRemoteRepository) {
-				pterm.Warning.Println(err.Error() + ": " + projectKey + "/" + slug)
+				logger.Warn(err.Error() + ": " + projectKey + "/" + slug)
 			} else {
-				pterm.Error.Println(err)
+				logger.Err(err.Error())
 			}
 		} else {
-			pterm.Info.Println("⭐️ Cloned " + projectKey + "/" + slug)
+			logger.Log("⭐️ Cloned " + projectKey + "/" + slug)
 		}
 		progressBar.Increment()
 	}

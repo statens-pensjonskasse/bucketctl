@@ -8,6 +8,7 @@ const (
 	BaseUrlFlag                         = "base-url"
 	LimitFlag                           = "limit"
 	LimitFlagShorthand                  = "l"
+	LogFormatFlag                       = "log-format"
 	TokenFlag                           = "token"
 	TokenFlagShorthand                  = "t"
 	OutputFlag                          = "output"

@@ -4,6 +4,7 @@ import (
 	"bucketctl/pkg/api/bitbucket/types"
 	. "bucketctl/pkg/api/v1alpha1"
 	"bucketctl/pkg/common"
+	"bucketctl/pkg/logger"
 	"bytes"
 	"encoding/json"
 	"github.com/pterm/pterm"
@@ -106,7 +107,7 @@ func createBranchingModel(url string, token string, branchingModel *BranchingMod
 			return err
 		}
 
-		pterm.Printfln("%s branching model (dev: %s, prod: %s) for %s", action, branchingModelBranchAsString(developmentBranch), branchingModelBranchAsString(productionBranch), scope)
+		logger.Log("%s branching model (dev: %s, prod: %s) for %s", action, branchingModelBranchAsString(developmentBranch), branchingModelBranchAsString(productionBranch), scope)
 	}
 	return nil
 }
@@ -131,7 +132,7 @@ func deleteBranchingModel(url string, token string, branchingModel *BranchingMod
 		if _, err := common.DeleteRequest(url, token, nil); err != nil {
 			return err
 		}
-		pterm.Printfln("%s branching model for %s", pterm.Red("🍂 Deleted"), scope)
+		logger.Log("%s branching model for %s", pterm.Red("🍂 Deleted"), scope)
 	}
 	return nil
 }

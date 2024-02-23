@@ -3,6 +3,7 @@ package access
 import (
 	. "bucketctl/pkg/api/v1alpha1"
 	"bucketctl/pkg/common"
+	"bucketctl/pkg/logger"
 	"fmt"
 	"github.com/pterm/pterm"
 )
@@ -43,13 +44,13 @@ func removeRepositoryPermissions(baseUrl string, projectKey string, repoSlug str
 				if err := removeUserRepositoryPermissions(baseUrl, projectKey, repoSlug, token, user); err != nil {
 					return err
 				}
-				pterm.Printfln("%s permissions for user '%s' in repository '%s/%s'", pterm.Red("🙅 Revoked"), user, projectKey, repoSlug)
+				logger.Log("%s permissions for user '%s' in repository '%s/%s'", pterm.Red("🙅 Revoked"), user, projectKey, repoSlug)
 			}
 			for _, group := range permission.Entities.Groups {
 				if err := removeGroupRepositoryPermissions(baseUrl, projectKey, repoSlug, token, group); err != nil {
 					return err
 				}
-				pterm.Printfln("%s permissions for group '%s' in repository '%s/%s'", pterm.Red("🚫 Revoked"), group, projectKey, repoSlug)
+				logger.Log("%s permissions for group '%s' in repository '%s/%s'", pterm.Red("🚫 Revoked"), group, projectKey, repoSlug)
 			}
 		}
 	}
@@ -87,13 +88,13 @@ func grantRepositoryPermissions(baseUrl string, projectKey string, repoSlug stri
 				if err := grantUserRepositoryPermission(baseUrl, projectKey, repoSlug, token, user, permission.Name); err != nil {
 					return err
 				}
-				pterm.Printfln("%s user '%s' permission '%s' in repository '%s/%s'", pterm.Green("🧑 Granted"), user, permission.Name, projectKey, repoSlug)
+				logger.Log("%s user '%s' permission '%s' in repository '%s/%s'", pterm.Green("🧑 Granted"), user, permission.Name, projectKey, repoSlug)
 			}
 			for _, group := range permission.Entities.Groups {
 				if err := grantGroupRepositoryPermission(baseUrl, projectKey, repoSlug, token, group, permission.Name); err != nil {
 					return err
 				}
-				pterm.Printfln("%s group '%s' permission '%s' in repository '%s/%s'", pterm.Green("👥 Granted"), group, permission.Name, projectKey, repoSlug)
+				logger.Log("%s group '%s' permission '%s' in repository '%s/%s'", pterm.Green("👥 Granted"), group, permission.Name, projectKey, repoSlug)
 			}
 		}
 	}

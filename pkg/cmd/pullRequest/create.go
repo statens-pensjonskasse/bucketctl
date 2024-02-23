@@ -4,10 +4,10 @@ import (
 	"bucketctl/pkg/api/bitbucket"
 	"bucketctl/pkg/api/bitbucket/types"
 	"bucketctl/pkg/common"
+	"bucketctl/pkg/logger"
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"io"
@@ -131,8 +131,7 @@ func createPullRequest(cmd *cobra.Command, args []string) error {
 		cobra.CheckErr(err)
 	}
 
-	pterm.Info.Println("🧑‍💻New pull request created. Go to", prReply.Links.Self[0].Href, "for details")
-
+	logger.Log("🧑‍💻New pull request created. Go to %s for details", prReply.Links.Self[0].Href)
 	return err
 }
 

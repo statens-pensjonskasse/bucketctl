@@ -8,8 +8,8 @@ import (
 	"bucketctl/pkg/cmd/pullRequest"
 	"bucketctl/pkg/cmd/version"
 	"bucketctl/pkg/common"
+	"bucketctl/pkg/logger"
 	"bucketctl/pkg/printer"
-	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"os"
@@ -20,6 +20,7 @@ var (
 	cfgFile      string
 	context      string
 	outputFormat printer.OutputFormatType
+	logFormat    = logger.LogFormatPretty
 
 	rootCmd = &cobra.Command{
 		Use:   "bucketctl",
@@ -30,7 +31,7 @@ var (
 
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
-		pterm.Error.Println(err.Error())
+		logger.Err(err.Error())
 		os.Exit(1)
 	}
 }
@@ -45,12 +46,14 @@ func init() {
 	rootCmd.PersistentFlags().IntP(common.LimitFlag, common.LimitFlagShorthand, 1000, "Max return values")
 	rootCmd.PersistentFlags().StringP(common.TokenFlag, common.TokenFlagShorthand, "", "Http access token")
 	rootCmd.PersistentFlags().VarP(&outputFormat, common.OutputFlag, common.OutputFlagShorthand, "Output format. One of: pretty, yaml, json")
+	rootCmd.PersistentFlags().Var(&logFormat, common.LogFormatFlag, "Log format. One of: pretty, plain")
 
 	viper.BindPFlag(common.BaseUrlFlag, rootCmd.PersistentFlags().Lookup(common.BaseUrlFlag))
 	viper.BindPFlag(common.GitUrlFlag, rootCmd.PersistentFlags().Lookup(common.GitUrlFlag))
 	viper.BindPFlag(common.LimitFlag, rootCmd.PersistentFlags().Lookup(common.LimitFlag))
 	viper.BindPFlag(common.TokenFlag, rootCmd.PersistentFlags().Lookup(common.TokenFlag))
 	viper.BindPFlag(common.OutputFlag, rootCmd.PersistentFlags().Lookup(common.OutputFlag))
+	viper.BindPFlag(common.LogFormatFlag, rootCmd.PersistentFlags().Lookup(common.LogFormatFlag))
 
 	rootCmd.AddCommand(apply.Cmd)
 	rootCmd.AddCommand(get.Cmd)

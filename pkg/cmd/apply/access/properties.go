@@ -5,6 +5,7 @@ import (
 	"bucketctl/pkg/api/bitbucket/types"
 	. "bucketctl/pkg/api/v1alpha1"
 	"bucketctl/pkg/common"
+	"bucketctl/pkg/logger"
 	"fmt"
 	"github.com/pterm/pterm"
 	"strconv"
@@ -37,7 +38,7 @@ func setProjectDefaultPermission(baseUrl string, projectKey string, permission s
 			return err
 		}
 	}
-	pterm.Printfln("%s default permission for project '%s' to '%s'", pterm.Blue("🖋️Changed"), projectKey, permission)
+	logger.Log("%s default permission for project '%s' to '%s'", pterm.Blue("🖋️Changed"), projectKey, permission)
 	return nil
 }
 
@@ -51,7 +52,7 @@ func setProjectPublicProperty(baseUrl string, projectKey string, isPublic bool, 
 	} else {
 		action = pterm.Red("🔒 Closed")
 	}
-	pterm.Printfln("%s public access for project '%s'", action, projectKey)
+	logger.Log("%s public access for project '%s'", action, projectKey)
 	return nil
 }
 

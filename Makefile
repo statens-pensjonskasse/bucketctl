@@ -8,7 +8,7 @@ help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
 build: ## Bygger bin/bucketctl
-	go build -o bin/bucketctl main.go
+	CGO_ENABLED=0 go build -o bin/bucketctl main.go
 
 build-image: ## Bygg image med utils
 	docker build --platform linux/amd64 . --pull --tag $(IMAGE_NAME)

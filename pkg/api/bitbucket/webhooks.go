@@ -4,9 +4,9 @@ import (
 	"bucketctl/pkg/api/bitbucket/types"
 	. "bucketctl/pkg/api/v1alpha1"
 	"bucketctl/pkg/common"
+	"bucketctl/pkg/logger"
 	"encoding/json"
 	"fmt"
-	"github.com/pterm/pterm"
 	"io"
 )
 
@@ -54,7 +54,7 @@ func getWebhooks(url string, token string) (*Webhooks, error) {
 	}
 
 	if !webhooksResponse.IsLastPage {
-		pterm.Warning.Println("Not all webhooks fetched, try with a higher limit")
+		logger.Warn("Not all webhooks fetched, try with a higher limit")
 	}
 
 	webhooks := new(Webhooks)

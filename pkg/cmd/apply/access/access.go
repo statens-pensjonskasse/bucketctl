@@ -52,24 +52,24 @@ func changesToText(action string, pcs *ProjectConfigSpec) (changes []string) {
 	if pcs.Public != nil {
 		changes = append(changes,
 			pterm.Sprintf("%s public access to %s in project %s",
-				action, pterm.Bold.Sprint(strconv.FormatBool(*pcs.Public)), pcs.ProjectKey))
+				action, strconv.FormatBool(*pcs.Public), pcs.ProjectKey))
 	}
 	if pcs.DefaultPermission != nil {
 		changes = append(changes,
 			pterm.Sprintf("%s default permission to %s in project %s",
-				action, pterm.Bold.Sprint(*pcs.DefaultPermission), pcs.ProjectKey))
+				action, *pcs.DefaultPermission, pcs.ProjectKey))
 	}
 	if pcs.Permissions != nil {
 		for _, p := range *pcs.Permissions {
 			for _, u := range p.Entities.Users {
 				changes = append(changes,
 					pterm.Sprintf("%s %s permission for user %s in project %s",
-						action, pterm.Bold.Sprint(p.Name), pterm.Bold.Sprint(u), pcs.ProjectKey))
+						action, p.Name, u, pcs.ProjectKey))
 			}
 			for _, g := range p.Entities.Groups {
 				changes = append(changes,
 					pterm.Sprintf("%s %s permission for group %s in project %s",
-						action, pterm.Bold.Sprint(p.Name), pterm.Bold.Sprint(g), pcs.ProjectKey))
+						action, p.Name, g, pcs.ProjectKey))
 			}
 		}
 	}
@@ -80,12 +80,12 @@ func changesToText(action string, pcs *ProjectConfigSpec) (changes []string) {
 					for _, u := range p.Entities.Users {
 						changes = append(changes,
 							pterm.Sprintf("%s %s permission for user %s in repository %s/%s",
-								action, pterm.Bold.Sprint(p.Name), pterm.Bold.Sprint(u), pcs.ProjectKey, repo.RepoSlug))
+								action, p.Name, u, pcs.ProjectKey, repo.RepoSlug))
 					}
 					for _, g := range p.Entities.Groups {
 						changes = append(changes,
 							pterm.Sprintf("%s %s permission for group %s in repository %s/%s",
-								action, pterm.Bold.Sprint(p.Name), pterm.Bold.Sprint(g), pcs.ProjectKey, repo.RepoSlug))
+								action, p.Name, g, pcs.ProjectKey, repo.RepoSlug))
 					}
 				}
 			}

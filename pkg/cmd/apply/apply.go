@@ -9,7 +9,7 @@ import (
 	"bucketctl/pkg/cmd/apply/webhooks"
 	"bucketctl/pkg/cmd/get"
 	"bucketctl/pkg/common"
-	"github.com/pterm/pterm"
+	"bucketctl/pkg/logger"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -148,10 +148,10 @@ func printChanges(toCreate *ProjectConfigSpec, toUpdate *ProjectConfigSpec, toDe
 
 	if changes != nil && len(changes) > 0 {
 		for _, change := range changes {
-			pterm.Printfln(change)
+			logger.Log(change)
 		}
 	} else {
-		pterm.Printfln("No changes in project %s", pterm.Bold.Sprint(toCreate.ProjectKey))
+		logger.Log("No changes in project %s", toCreate.ProjectKey)
 	}
 
 }

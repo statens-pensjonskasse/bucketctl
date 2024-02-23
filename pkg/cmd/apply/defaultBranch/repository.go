@@ -4,6 +4,7 @@ import (
 	"bucketctl/pkg/api/bitbucket/types"
 	. "bucketctl/pkg/api/v1alpha1"
 	"bucketctl/pkg/common"
+	"bucketctl/pkg/logger"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -36,7 +37,7 @@ func updateDefaultBranch(url string, token string, defaultBranch *string, scope 
 			return err
 		}
 
-		pterm.Printfln("%s default branch to %s in %s", pterm.Blue("🍃 Updated"), *defaultBranch, scope)
+		logger.Log("%s default branch to %s in %s", pterm.Blue("🍃 Updated"), *defaultBranch, scope)
 	}
 	return nil
 }

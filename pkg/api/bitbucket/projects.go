@@ -3,10 +3,10 @@ package bitbucket
 import (
 	"bucketctl/pkg/api/bitbucket/types"
 	"bucketctl/pkg/common"
+	"bucketctl/pkg/logger"
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/pterm/pterm"
 	"io"
 )
 
@@ -24,7 +24,7 @@ func GetProjects(baseUrl string, limit int, token string) (map[string]*types.Pro
 	}
 
 	if !projectsResponse.IsLastPage {
-		pterm.Warning.Println("Not all projects fetched, try with a higher limit")
+		logger.Warn("Not all projects fetched, try with a higher limit")
 	}
 
 	projects := make(map[string]*types.Project)

@@ -4,9 +4,9 @@ import (
 	"bucketctl/pkg/api/bitbucket/types"
 	. "bucketctl/pkg/api/v1alpha1"
 	"bucketctl/pkg/common"
+	"bucketctl/pkg/logger"
 	"encoding/json"
 	"fmt"
-	"github.com/pterm/pterm"
 )
 
 func isProjectPublic(baseUrl string, projectKey string, token string) (bool, error) {
@@ -47,7 +47,7 @@ func getGroupPermissions(url string, token string) ([]*types.GroupPermission, er
 	}
 
 	if !groups.IsLastPage {
-		pterm.Warning.Println("Not all Group permissions fetched, try with a higher limit")
+		logger.Warn("Not all Group permissions fetched, try with a higher limit")
 	}
 
 	return groups.Values, nil
@@ -75,7 +75,7 @@ func getUserPermissions(url string, token string) ([]*types.UserPermission, erro
 	}
 
 	if !users.IsLastPage {
-		pterm.Warning.Println("Not all User permissions fetched, try with a higher limit")
+		logger.Warn("Not all User permissions fetched, try with a higher limit")
 	}
 
 	return users.Values, nil

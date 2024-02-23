@@ -3,6 +3,7 @@ package access
 import (
 	. "bucketctl/pkg/api/v1alpha1"
 	"bucketctl/pkg/common"
+	"bucketctl/pkg/logger"
 	"fmt"
 	"github.com/pterm/pterm"
 )
@@ -23,13 +24,13 @@ func removeProjectPermissions(baseUrl string, projectKey string, token string, p
 			if err := removeUserProjectPermissions(baseUrl, projectKey, token, user); err != nil {
 				return err
 			}
-			pterm.Printfln("%s permissions for user '%s' in project '%s'", pterm.Red("🙅 Revoked"), user, projectKey)
+			logger.Log("%s permissions for user '%s' in project '%s'", pterm.Red("🙅 Revoked"), user, projectKey)
 		}
 		for _, group := range permission.Entities.Groups {
 			if err := removeGroupProjectPermissions(baseUrl, projectKey, token, group); err != nil {
 				return err
 			}
-			pterm.Printfln("%s permissions for group '%s' in project '%s'", pterm.Red("🚫 Revoked"), group, projectKey)
+			logger.Log("%s permissions for group '%s' in project '%s'", pterm.Red("🚫 Revoked"), group, projectKey)
 		}
 	}
 	return nil
@@ -65,13 +66,13 @@ func grantProjectPermissions(baseUrl string, projectKey string, token string, pe
 			if err := grantUserProjectPermission(baseUrl, projectKey, token, user, permission.Name); err != nil {
 				return err
 			}
-			pterm.Printfln("%s user '%s' permission '%s' for project %s", pterm.Green("🧑 Granted"), user, permission.Name, projectKey)
+			logger.Log("%s user '%s' permission '%s' for project %s", pterm.Green("🧑 Granted"), user, permission.Name, projectKey)
 		}
 		for _, group := range permission.Entities.Groups {
 			if err := grantGroupProjectPermission(baseUrl, projectKey, token, group, permission.Name); err != nil {
 				return err
 			}
-			pterm.Printfln("%s group '%s' permission '%s' for project %s", pterm.Green("👥 Granted"), group, permission.Name, projectKey)
+			logger.Log("%s group '%s' permission '%s' for project %s", pterm.Green("👥 Granted"), group, permission.Name, projectKey)
 		}
 	}
 	return nil

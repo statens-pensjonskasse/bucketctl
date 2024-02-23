@@ -3,6 +3,7 @@ package webhooks
 import (
 	. "bucketctl/pkg/api/v1alpha1"
 	"bucketctl/pkg/common"
+	"bucketctl/pkg/logger"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -42,7 +43,7 @@ func createProjectWebhook(baseUrl string, projectKey string, token string, webho
 	if _, err := common.PostRequest(url, token, bytes.NewReader(payload), nil); err != nil {
 		return err
 	}
-	pterm.Printfln("%s webhook %s in project %s", pterm.Green("🪝 Created"), webhook.Name, projectKey)
+	logger.Log("%s webhook %s in project %s", pterm.Green("🪝 Created"), webhook.Name, projectKey)
 	return nil
 }
 
@@ -66,7 +67,7 @@ func updateProjectWebhook(baseUrl string, projectKey string, token string, webho
 	if _, err := common.PutRequest(url, token, bytes.NewReader(payload), nil); err != nil {
 		return err
 	}
-	pterm.Printfln("%s webhook %s in project %s", pterm.Blue("♻️ Updated"), webhook.Name, projectKey)
+	logger.Log("%s webhook %s in project %s", pterm.Blue("♻️ Updated"), webhook.Name, projectKey)
 	return nil
 }
 
@@ -86,6 +87,6 @@ func deleteProjectWebhook(baseUrl string, projectKey string, token string, webho
 	if _, err := common.DeleteRequest(url, token, nil); err != nil {
 		return err
 	}
-	pterm.Printfln("%s webhook %s in project %s", pterm.Red("🛑 Deleted"), webhook.Name, projectKey)
+	logger.Log("%s webhook %s in project %s", pterm.Red("🛑 Deleted"), webhook.Name, projectKey)
 	return nil
 }

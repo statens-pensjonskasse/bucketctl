@@ -4,9 +4,9 @@ import (
 	"bucketctl/pkg/api/bitbucket/types"
 	. "bucketctl/pkg/api/v1alpha1"
 	"bucketctl/pkg/common"
+	"bucketctl/pkg/logger"
 	"encoding/json"
 	"fmt"
-	"github.com/pterm/pterm"
 )
 
 var (
@@ -78,7 +78,7 @@ func getBranchRestrictions(url string, token string) ([]*types.Restriction, erro
 	}
 
 	if !restrictions.IsLastPage {
-		pterm.Warning.Println("Not all restrictions fetched, try with a higher limit")
+		logger.Warn("Not all restrictions fetched, try with a higher limit")
 	}
 
 	return restrictions.Values, nil

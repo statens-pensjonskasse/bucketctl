@@ -3,9 +3,9 @@ package bitbucket
 import (
 	types2 "bucketctl/pkg/api/bitbucket/types"
 	"bucketctl/pkg/common"
+	"bucketctl/pkg/logger"
 	"encoding/json"
 	"fmt"
-	"github.com/pterm/pterm"
 )
 
 func GetProjectRepositories(baseUrl string, projectKey string, limit int, token string) ([]*types2.Repository, error) {
@@ -22,7 +22,7 @@ func GetProjectRepositories(baseUrl string, projectKey string, limit int, token 
 	}
 
 	if !repoResponse.IsLastPage {
-		pterm.Warning.Println("Not all repositories fetched, try with a higher limit")
+		logger.Warn("Not all repositories fetched, try with a higher limit")
 	}
 	return repoResponse.Values, nil
 }
