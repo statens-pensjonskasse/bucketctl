@@ -33,7 +33,11 @@ func updateDefaultBranch(url string, token string, defaultBranch *string, scope 
 			return err
 		}
 
-		if _, err := common.PutRequest(url, token, bytes.NewReader(payload), nil); err != nil {
+		if resp, err := common.PutRequest(url, token, bytes.NewReader(payload), nil); err != nil {
+			if resp.StatusCode == 404 {
+				logger.Warn("%s not found, can't update default branch to %s", url, *defaultBranch)
+				return nil
+			}
 			return err
 		}
 

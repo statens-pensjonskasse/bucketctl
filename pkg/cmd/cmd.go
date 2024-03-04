@@ -39,7 +39,7 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, common.ConfigFlag, "", "Base config file (default $HOME/.bucketctl/config.yaml")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, common.ConfigFlag, "", "Base config file (default $HOME/.config/bucketctl/config.yaml")
 	rootCmd.PersistentFlags().StringVarP(&context, common.ContextFlag, common.ContextFlagShorthand, "", "Context to use for overriding base config")
 	rootCmd.PersistentFlags().String(common.BaseUrlFlag, "", "Base url for BitBucket instance")
 	rootCmd.PersistentFlags().String(common.GitUrlFlag, "", "Base url for Git-commands")

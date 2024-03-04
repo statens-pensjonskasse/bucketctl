@@ -1,7 +1,7 @@
 package git
 
 import (
-	bitbucket2 "bucketctl/pkg/api/bitbucket"
+	"bucketctl/pkg/api/bitbucket"
 	"bucketctl/pkg/api/bitbucket/types"
 	"bucketctl/pkg/common"
 	"bucketctl/pkg/logger"
@@ -63,11 +63,11 @@ func clone(cmd *cobra.Command, args []string) error {
 
 	repos := make(map[string]*types.Repository)
 	if repoSlug == "" {
-		projectRepos, err := bitbucket2.GetProjectRepositoriesMap(baseUrl, projectKey, limit, token)
+		projectRepos, err := bitbucket.GetProjectRepositoriesMap(baseUrl, projectKey, limit, token)
 		cobra.CheckErr(err)
 		repos = projectRepos
 	} else {
-		repoInfo, err := bitbucket2.GetRepository(baseUrl, projectKey, repoSlug, token)
+		repoInfo, err := bitbucket.GetRepository(baseUrl, projectKey, repoSlug, token)
 		cobra.CheckErr(err)
 		repos[repoSlug] = repoInfo
 	}
@@ -108,7 +108,7 @@ func clone(cmd *cobra.Command, args []string) error {
 				if !update {
 					logger.Log("🚀 Skipping already existing repository " + projectKey + "/" + slug)
 				} else {
-					defaultBranch, err := bitbucket2.GetDefaultBranch(baseUrl, projectKey, slug, token)
+					defaultBranch, err := bitbucket.GetDefaultBranch(baseUrl, projectKey, slug, token)
 					if err != nil {
 						logger.Err("⚠️ Error fetching default branch for " + projectKey + "/" + slug)
 						progressBar.Increment()
