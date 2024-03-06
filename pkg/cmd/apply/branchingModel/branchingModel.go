@@ -76,15 +76,7 @@ func createBranchingModel(url string, token string, branchingModel *BranchingMod
 			productionBranch.RefId = branchingModel.Production.RefId
 			productionBranch.UseDefault = branchingModel.Production.UseDefault
 		}
-		var branchTypes []*types.BranchType
-		for _, t := range *branchingModel.Types {
-			branchTypes = append(branchTypes, &types.BranchType{
-				Id:          t.Name,
-				DisplayName: t.Name,
-				Enabled:     true,
-				Prefix:      t.Prefix,
-			})
-		}
+		branchTypes := getBranchTypesFromBranchingModel(branchingModel)
 		scopeType := &types.Scope{}
 		if strings.Contains(scope, "/") {
 			scopeType.Type = "REPOSITORY"
@@ -110,6 +102,20 @@ func createBranchingModel(url string, token string, branchingModel *BranchingMod
 		logger.Log("%s branching model (dev: %s, prod: %s) for %s", action, branchingModelBranchAsString(developmentBranch), branchingModelBranchAsString(productionBranch), scope)
 	}
 	return nil
+}
+
+func getBranchTypesFromBranchingModel(branchingModel *BranchingModel) (branchTypes []*types.BranchType) {
+	if branchingModel.Types != nil && len(*branchingModel.Types) > 0 {
+		for _, t := range *branchingModel.Types {
+			branchTypes = append(branchTypes, &types.BranchType{
+				Id:          t.Name,
+				DisplayName: t.Name,
+				Enabled:     true,
+				Prefix:      t.Prefix,
+			})
+		}
+	}
+	return branchTypes
 }
 
 func branchingModelBranchAsString(branch *types.Branch) string {
