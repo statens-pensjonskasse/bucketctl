@@ -524,7 +524,7 @@ func TestRestriction_Copy(t *testing.T) {
 			want: &Restriction{
 				Id:           0,
 				Type:         "",
-				ExemptUsers: nil,
+				ExemptUsers:  nil,
 				ExemptGroups: nil,
 			},
 		},
@@ -560,7 +560,7 @@ func TestRestrictions_Copy(t *testing.T) {
 					ExemptGroups: []string{""},
 				},
 			},
-			want:  &Restrictions{
+			want: &Restrictions{
 				&Restriction{
 					Id:           0,
 					Type:         "",
