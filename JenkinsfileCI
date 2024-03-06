@@ -1,7 +1,7 @@
 @Library('jenkins-pipeline-library@latest_develop')
 import no.spk.jenkins.pipeline.ci.config.CIPipelineConfig
 
-String BUILD_IMAGE='old-dockerhub.spk.no:5000/jenkins-slave-docker/master'
+String BUILD_IMAGE='old-dockerhub.spk.no:5000/jenkins-agent-docker/master'
 
 ciPipeline {
     config = CIPipelineConfig.get()
