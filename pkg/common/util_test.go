@@ -79,3 +79,48 @@ func TestSlicesContainsSameElements(t *testing.T) {
 		})
 	}
 }
+
+func TestSlicesContainsSameElementsIgnoreCase(t *testing.T) {
+	type args struct {
+		a []string
+		b []string
+	}
+	type testCase struct {
+		name string
+		args args
+		want bool
+	}
+	stringTests := []testCase{
+		{
+			name: "Same casing",
+			args: args{
+				a: []string{"aaaBBB", "AAAbbb"},
+				b: []string{"aaaBBB", "AAAbbb"},
+			},
+			want: true,
+		},
+		{
+			name: "Different casing",
+			args: args{
+				a: []string{"AAACcC", "AaaBbB"},
+				b: []string{"aaabbb", "AAAccc"},
+			},
+			want: true,
+		},
+		{
+			name: "Different Elements",
+			args: args{
+				a: []string{"AAACCC", "AAABBB"},
+				b: []string{"AAABBB", "AAABBB"},
+			},
+			want: false,
+		},
+	}
+	for _, tt := range stringTests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := SlicesContainsSameElementsIgnoringCase(tt.args.a, tt.args.b); got != tt.want {
+				t.Errorf("SlicesContainsSameElementsIgnoringCase() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

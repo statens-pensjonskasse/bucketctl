@@ -1,6 +1,9 @@
 package v1alpha1
 
-import "bucketctl/pkg/common"
+import (
+	"bucketctl/pkg/common"
+	"strings"
+)
 
 type Entities struct {
 	Groups []string `json:"groups,omitempty" yaml:"groups,omitempty"`
@@ -44,7 +47,7 @@ func UpdateDefaultProjectPermissionProperty(desired *ProjectConfigSpec, actual *
 
 func (e *Entities) ContainsUser(user string) bool {
 	for _, u := range e.Users {
-		if user == u {
+		if strings.ToLower(user) == strings.ToLower(u) {
 			return true
 		}
 	}
@@ -53,7 +56,7 @@ func (e *Entities) ContainsUser(user string) bool {
 
 func (e *Entities) ContainsGroup(group string) bool {
 	for _, g := range e.Groups {
-		if group == g {
+		if strings.ToLower(group) == strings.ToLower(g) {
 			return true
 		}
 	}
@@ -188,10 +191,10 @@ func (e *Entities) Equals(cmp *Entities) bool {
 	if cmp == nil {
 		return false
 	}
-	if !common.SlicesContainsSameElements(e.Groups, cmp.Groups) {
+	if !common.SlicesContainsSameElementsIgnoringCase(e.Groups, cmp.Groups) {
 		return false
 	}
-	if !common.SlicesContainsSameElements(e.Users, cmp.Users) {
+	if !common.SlicesContainsSameElementsIgnoringCase(e.Users, cmp.Users) {
 		return false
 	}
 	return true

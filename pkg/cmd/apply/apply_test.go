@@ -169,3 +169,59 @@ func Test_removeBranchRestriction(t *testing.T) {
 		})
 	}
 }
+
+func Test_caseInsensitivePermissions(t *testing.T) {
+	type args struct {
+		desired *ProjectConfigSpec
+		actual  *ProjectConfigSpec
+	}
+	type want struct {
+		toCreate *ProjectConfigSpec
+		toUpdate *ProjectConfigSpec
+		toDelete *ProjectConfigSpec
+	}
+
+	desired, err := readProjectConfig("../../../testdata/cmd/apply/projectConfig/caseInsensitiveNamesInPermissions/desired.yaml")
+	if err != nil {
+		t.Errorf("Error reading testdata")
+	}
+	actual, err := readProjectConfig("../../../testdata/cmd/apply/projectConfig/caseInsensitiveNamesInPermissions/actual.yaml")
+	if err != nil {
+		t.Errorf("Error reading testdata")
+	}
+
+	noChange := &ProjectConfigSpec{
+		ProjectKey:         "TEST",
+		Permissions:        new(Permissions),
+		BranchRestrictions: new(BranchRestrictions),
+		Webhooks:           new(Webhooks),
+		Repositories:       new(RepositoriesProperties),
+	}
+
+	tests := []struct {
+		name string
+		args args
+		want want
+	}{
+		{
+			name: "integration test",
+			args: args{&desired.Spec, &actual.Spec},
+			want: want{noChange, noChange, noChange},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotToCreate, gotToUpdate, gotToDelete := findProjectConfigChanges(tt.args.desired, tt.args.actual)
+			if !gotToCreate.Equals(tt.want.toCreate) {
+				t.Errorf("findProjectConfigChanges() gotToCreate = %v, want %v", gotToCreate, tt.want.toCreate)
+			}
+			if !gotToUpdate.Equals(tt.want.toUpdate) {
+				t.Errorf("findProjectConfigChanges() gotToUpdate = %v, want %v", gotToUpdate, tt.want.toUpdate)
+			}
+			if !gotToDelete.Equals(tt.want.toDelete) {
+				t.Errorf("findProjectConfigChanges() gotToDelete = %v, want %v", gotToDelete, tt.want.toDelete)
+			}
+		})
+	}
+}

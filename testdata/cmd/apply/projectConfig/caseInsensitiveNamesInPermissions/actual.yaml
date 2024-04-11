@@ -1,0 +1,17 @@
+kind: ProjectConfig
+apiVersion: bucketctl.spk.no/v1alpha1
+metadata:
+  name: test_case_insensitive
+spec:
+  projectKey: TEST
+  permissions:
+    - name: PROJECT_ADMIN
+      groups:
+        - kings of rohan
+  repositories:
+    - name: gondor
+      defaultBranch: horse
+      permissions:
+        - name: REPO_ADMIN
+          users:
+            - aragorn
