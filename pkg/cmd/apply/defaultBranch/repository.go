@@ -21,7 +21,7 @@ func setRepositoriesDefaultBranch(baseUrl string, projectKey string, token strin
 }
 
 func updateRepositoryDefaultBranch(baseUrl string, projectKey string, repoSlug string, token string, defaultBranch *string) error {
-	url := fmt.Sprintf("%s/projects/%s/repos/%s/default-branch", baseUrl, projectKey, repoSlug)
+	url := fmt.Sprintf("%s/rest/api/latest/projects/%s/repos/%s/default-branch", baseUrl, projectKey, repoSlug)
 	return updateDefaultBranch(url, token, defaultBranch, "repository "+projectKey+"/"+repoSlug)
 }
 
