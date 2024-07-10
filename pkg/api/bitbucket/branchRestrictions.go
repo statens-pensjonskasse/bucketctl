@@ -78,7 +78,7 @@ func getBranchRestrictions(url string, token string) ([]*types.Restriction, erro
 	}
 
 	if !restrictions.IsLastPage {
-		logger.Warn("Not all restrictions fetched, try with a higher limit")
+		logger.Warn("not all restrictions fetched, try with a higher limit")
 	}
 
 	return restrictions.Values, nil

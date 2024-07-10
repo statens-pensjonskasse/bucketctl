@@ -54,7 +54,7 @@ func getWebhooks(url string, token string) (*Webhooks, error) {
 	}
 
 	if !webhooksResponse.IsLastPage {
-		logger.Warn("Not all webhooks fetched, try with a higher limit")
+		logger.Warn("not all webhooks fetched, try with a higher limit")
 	}
 
 	webhooks := new(Webhooks)

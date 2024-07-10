@@ -1,6 +1,7 @@
 package defaultBranch
 
 import (
+	"bucketctl/pkg/api/bitbucket"
 	"bucketctl/pkg/api/bitbucket/types"
 	. "bucketctl/pkg/api/v1alpha1"
 	"bucketctl/pkg/common"
@@ -13,6 +14,15 @@ import (
 
 func setRepositoriesDefaultBranch(baseUrl string, projectKey string, token string, toUpdate *RepositoriesProperties) error {
 	for _, r := range *toUpdate {
+		branches, err := bitbucket.GetRepositoryBranches(baseUrl, projectKey, r.RepoSlug, token)
+		if err != nil {
+			return err
+		}
+		if !branches.ContainsBranchDisplayId(r.DefaultBranch) {
+			logger.Warn("repository %s does not have branch called %s, can't update default branch to a non-existent branch", r.RepoSlug, *r.DefaultBranch)
+			return nil
+		}
+
 		if err := updateRepositoryDefaultBranch(baseUrl, projectKey, r.RepoSlug, token, r.DefaultBranch); err != nil {
 			return err
 		}
@@ -20,9 +30,9 @@ func setRepositoriesDefaultBranch(baseUrl string, projectKey string, token strin
 	return nil
 }
 
-func updateRepositoryDefaultBranch(baseUrl string, projectKey string, repoSlug string, token string, defaultBranch *string) error {
+func updateRepositoryDefaultBranch(baseUrl string, projectKey string, repoSlug string, token string, newDefaultBranch *string) error {
 	url := fmt.Sprintf("%s/rest/api/latest/projects/%s/repos/%s/default-branch", baseUrl, projectKey, repoSlug)
-	return updateDefaultBranch(url, token, defaultBranch, "repository "+projectKey+"/"+repoSlug)
+	return updateDefaultBranch(url, token, newDefaultBranch, "repository "+projectKey+"/"+repoSlug)
 }
 
 func updateDefaultBranch(url string, token string, defaultBranch *string, scope string) error {
@@ -33,11 +43,7 @@ func updateDefaultBranch(url string, token string, defaultBranch *string, scope 
 			return err
 		}
 
-		if resp, err := common.PutRequest(url, token, bytes.NewReader(payload), nil); err != nil {
-			if resp.StatusCode == 404 {
-				logger.Warn("%s not found, can't update default branch to %s", url, *defaultBranch)
-				return nil
-			}
+		if _, err := common.PutRequest(url, token, bytes.NewReader(payload), nil); err != nil {
 			return err
 		}
 

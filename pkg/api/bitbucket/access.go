@@ -47,7 +47,7 @@ func getGroupPermissions(url string, token string) ([]*types.GroupPermission, er
 	}
 
 	if !groups.IsLastPage {
-		logger.Warn("Not all Group permissions fetched, try with a higher limit")
+		logger.Warn("not all Group permissions fetched, try with a higher limit")
 	}
 
 	return groups.Values, nil
@@ -75,7 +75,7 @@ func getUserPermissions(url string, token string) ([]*types.UserPermission, erro
 	}
 
 	if !users.IsLastPage {
-		logger.Warn("Not all User permissions fetched, try with a higher limit")
+		logger.Warn("not all User permissions fetched, try with a higher limit")
 	}
 
 	return users.Values, nil

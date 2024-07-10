@@ -24,7 +24,7 @@ func GetProjects(baseUrl string, limit int, token string) (map[string]*types.Pro
 	}
 
 	if !projectsResponse.IsLastPage {
-		logger.Warn("Not all projects fetched, try with a higher limit")
+		logger.Warn("not all projects fetched, try with a higher limit")
 	}
 
 	projects := make(map[string]*types.Project)

@@ -59,3 +59,8 @@ func (branch *Branch) Equals(cmp *Branch) bool {
 
 	return true
 }
+
+type BranchesResponse struct {
+	response
+	Values []*Branch `json:"values"`
+}
