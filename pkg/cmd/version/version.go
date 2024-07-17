@@ -1,7 +1,7 @@
 package version
 
 import (
-	"bucketctl/pkg/logger"
+	"git.spk.no/infra/bucketctl/pkg/logger"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 )

@@ -1,7 +1,7 @@
 package v1alpha1
 
 import (
-	"bucketctl/pkg/common"
+	"git.spk.no/infra/bucketctl/pkg/common"
 )
 
 const (

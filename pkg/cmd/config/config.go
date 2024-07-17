@@ -1,8 +1,8 @@
 package config
 
 import (
-	"bucketctl/pkg/cmd/config/context"
-	"bucketctl/pkg/common"
+	"git.spk.no/infra/bucketctl/pkg/cmd/config/context"
+	"git.spk.no/infra/bucketctl/pkg/common"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )

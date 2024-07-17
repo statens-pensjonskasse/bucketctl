@@ -1,8 +1,8 @@
 package printer
 
 import (
-	. "bucketctl/pkg/api/v1alpha1"
-	"bucketctl/pkg/common"
+	. "git.spk.no/infra/bucketctl/pkg/api/v1alpha1"
+	"git.spk.no/infra/bucketctl/pkg/common"
 	"sort"
 	"strconv"
 )

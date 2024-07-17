@@ -1,4 +1,4 @@
-module bucketctl
+module git.spk.no/infra/bucketctl
 
 go 1.22.2
 

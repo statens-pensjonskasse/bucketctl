@@ -1,8 +1,8 @@
 package context
 
 import (
-	"bucketctl/pkg/common"
-	"bucketctl/pkg/printer"
+	"git.spk.no/infra/bucketctl/pkg/common"
+	"git.spk.no/infra/bucketctl/pkg/printer"
 	"github.com/spf13/cobra"
 )
 

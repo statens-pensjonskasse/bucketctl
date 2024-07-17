@@ -1,11 +1,11 @@
 package bitbucket
 
 import (
-	"bucketctl/pkg/api/bitbucket/types"
-	. "bucketctl/pkg/api/v1alpha1"
-	"bucketctl/pkg/common"
 	"encoding/json"
 	"fmt"
+	"git.spk.no/infra/bucketctl/pkg/api/bitbucket/types"
+	. "git.spk.no/infra/bucketctl/pkg/api/v1alpha1"
+	"git.spk.no/infra/bucketctl/pkg/common"
 )
 
 func GetRepositoryDefaultBranch(baseUrl string, projectKey string, repoSlug string, token string) (*types.Branch, error) {

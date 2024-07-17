@@ -1,15 +1,15 @@
 package apply
 
 import (
-	. "bucketctl/pkg/api/v1alpha1"
-	"bucketctl/pkg/cmd/apply/access"
-	"bucketctl/pkg/cmd/apply/branchRestrictions"
-	"bucketctl/pkg/cmd/apply/branchingModel"
-	"bucketctl/pkg/cmd/apply/defaultBranch"
-	"bucketctl/pkg/cmd/apply/webhooks"
-	"bucketctl/pkg/cmd/get"
-	"bucketctl/pkg/common"
-	"bucketctl/pkg/logger"
+	. "git.spk.no/infra/bucketctl/pkg/api/v1alpha1"
+	"git.spk.no/infra/bucketctl/pkg/cmd/apply/access"
+	"git.spk.no/infra/bucketctl/pkg/cmd/apply/branchRestrictions"
+	"git.spk.no/infra/bucketctl/pkg/cmd/apply/branchingModel"
+	"git.spk.no/infra/bucketctl/pkg/cmd/apply/defaultBranch"
+	"git.spk.no/infra/bucketctl/pkg/cmd/apply/webhooks"
+	"git.spk.no/infra/bucketctl/pkg/cmd/get"
+	"git.spk.no/infra/bucketctl/pkg/common"
+	"git.spk.no/infra/bucketctl/pkg/logger"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )

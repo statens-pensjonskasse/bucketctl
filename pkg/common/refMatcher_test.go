@@ -1,7 +1,7 @@
 package common
 
 import (
-	types2 "bucketctl/pkg/api/bitbucket/types"
+	types2 "git.spk.no/infra/bucketctl/pkg/api/bitbucket/types"
 	"testing"
 )
 

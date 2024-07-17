@@ -1,7 +1,7 @@
 package main
 
 import (
-	"bucketctl/pkg/cmd"
+	"git.spk.no/infra/bucketctl/pkg/cmd"
 )
 
 func main() {

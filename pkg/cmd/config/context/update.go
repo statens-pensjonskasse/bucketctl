@@ -1,8 +1,8 @@
 package context
 
 import (
-	"bucketctl/pkg/common"
 	"errors"
+	"git.spk.no/infra/bucketctl/pkg/common"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 	"path/filepath"

@@ -1,8 +1,8 @@
 package git
 
 import (
-	"bucketctl/pkg/common"
 	"fmt"
+	"git.spk.no/infra/bucketctl/pkg/common"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/transport/ssh"

@@ -1,10 +1,10 @@
 package common
 
 import (
-	"bucketctl/pkg/api/bitbucket/types"
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
+	"git.spk.no/infra/bucketctl/pkg/api/bitbucket/types"
 	"io"
 	"net/http"
 	"strconv"

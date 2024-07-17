@@ -1,7 +1,7 @@
 package get
 
 import (
-	. "bucketctl/pkg/api/v1alpha1"
+	. "git.spk.no/infra/bucketctl/pkg/api/v1alpha1"
 	"testing"
 )
 

@@ -1,6 +1,6 @@
 package v1alpha1
 
-import "bucketctl/pkg/api/bitbucket/types"
+import "git.spk.no/infra/bucketctl/pkg/api/bitbucket/types"
 
 type Branch struct {
 	Id              string  `json:"id,omitempty" yaml:"id,omitempty"`

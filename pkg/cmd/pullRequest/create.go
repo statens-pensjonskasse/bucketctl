@@ -1,13 +1,13 @@
 package pullRequest
 
 import (
-	"bucketctl/pkg/api/bitbucket"
-	"bucketctl/pkg/api/bitbucket/types"
-	"bucketctl/pkg/common"
-	"bucketctl/pkg/logger"
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"git.spk.no/infra/bucketctl/pkg/api/bitbucket"
+	"git.spk.no/infra/bucketctl/pkg/api/bitbucket/types"
+	"git.spk.no/infra/bucketctl/pkg/common"
+	"git.spk.no/infra/bucketctl/pkg/logger"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"io"

@@ -1,9 +1,9 @@
 package logger
 
 import (
-	"bucketctl/pkg/common"
 	"errors"
 	"fmt"
+	"git.spk.no/infra/bucketctl/pkg/common"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"

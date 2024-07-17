@@ -1,8 +1,8 @@
 package printer
 
 import (
-	"bucketctl/pkg/api/bitbucket/types"
-	"bucketctl/pkg/common"
+	"git.spk.no/infra/bucketctl/pkg/api/bitbucket/types"
+	"git.spk.no/infra/bucketctl/pkg/common"
 	"strconv"
 )
 

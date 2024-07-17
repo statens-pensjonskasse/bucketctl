@@ -1,9 +1,9 @@
 package get
 
 import (
-	"bucketctl/pkg/api/bitbucket"
-	"bucketctl/pkg/common"
-	"bucketctl/pkg/printer"
+	"git.spk.no/infra/bucketctl/pkg/api/bitbucket"
+	"git.spk.no/infra/bucketctl/pkg/common"
+	"git.spk.no/infra/bucketctl/pkg/printer"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )

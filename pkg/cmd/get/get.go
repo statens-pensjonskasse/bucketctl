@@ -1,7 +1,7 @@
 package get
 
 import (
-	"bucketctl/pkg/common"
+	"git.spk.no/infra/bucketctl/pkg/common"
 	"github.com/spf13/cobra"
 )
 

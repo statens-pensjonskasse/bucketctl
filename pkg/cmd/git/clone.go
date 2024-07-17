@@ -1,12 +1,12 @@
 package git
 
 import (
-	"bucketctl/pkg/api/bitbucket"
-	"bucketctl/pkg/api/bitbucket/types"
-	"bucketctl/pkg/common"
-	"bucketctl/pkg/logger"
 	"errors"
 	"fmt"
+	"git.spk.no/infra/bucketctl/pkg/api/bitbucket"
+	"git.spk.no/infra/bucketctl/pkg/api/bitbucket/types"
+	"git.spk.no/infra/bucketctl/pkg/common"
+	"git.spk.no/infra/bucketctl/pkg/logger"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/transport"
 	"github.com/pterm/pterm"

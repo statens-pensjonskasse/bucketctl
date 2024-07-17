@@ -1,10 +1,10 @@
 package access
 
 import (
-	. "bucketctl/pkg/api/v1alpha1"
-	"bucketctl/pkg/common"
-	"bucketctl/pkg/logger"
 	"fmt"
+	. "git.spk.no/infra/bucketctl/pkg/api/v1alpha1"
+	"git.spk.no/infra/bucketctl/pkg/common"
+	"git.spk.no/infra/bucketctl/pkg/logger"
 	"github.com/pterm/pterm"
 )
 
