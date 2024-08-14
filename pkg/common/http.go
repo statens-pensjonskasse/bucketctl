@@ -1,7 +1,6 @@
 package common
 
 import (
-	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"git.spk.no/infra/bucketctl/pkg/api/bitbucket/types"
@@ -13,12 +12,7 @@ import (
 )
 
 func HttpRequest(method string, url string, payload io.Reader, token string, params ...map[string]string) (*http.Response, error) {
-	// TODO: DON'T SKIP TLS VERIFICATION!!!
-	// Temporary workaround for Cert-issues on Mac
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
-	client := &http.Client{Transport: tr}
+	client := &http.Client{}
 	req, _ := http.NewRequest(method, url, payload)
 
 	if token != "" {
