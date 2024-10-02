@@ -1,10 +1,11 @@
 @Library('jenkins-pipeline-library@latest_develop')
 import no.spk.jenkins.pipeline.ci.config.CIPipelineConfig
 
-String BUILD_IMAGE='old-dockerhub.spk.no:5000/jenkins-agent-docker/master'
+String BUILD_IMAGE='cr.spk.no/infra/jenkins-agent-docker'
 
 ciPipeline {
-    config = CIPipelineConfig.get()
+    config = CIPipelineConfig
+            .getTrunkBasedConfig(trunk: 'main', useHarbor: true)
             .useMake(
                 buildImage: BUILD_IMAGE,
                 build: 'build-ci',
@@ -13,10 +14,5 @@ ciPipeline {
                 buildContainerArgs: '-e DOCKER_HOST=${DOCKER_HOST}'
             )
             .withSonarQube()
-            .withVersionStrategy(strategy: 'semver')
-            .withGitTaggingStrategy(semantic: 'main')
-            .withPublish(fromBranches: 'feature/, hotfix/')
-            .withRelease(fromBranch: 'main')
             .withSlackNotifications(channels: 'applikasjonsplattform-ci')
-            .withLog(level: 'all')
 }

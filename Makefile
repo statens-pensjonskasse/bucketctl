@@ -1,7 +1,7 @@
-GO_IMAGE=old-dockerhub.spk.no:5000/base-golang/golang
+GO_IMAGE=cr.spk.no/base/go
 
 IMAGE_NAME=bucketctl
-CREATED_IMAGE=old-dockerhub.spk.no:5000/$(IMAGE_NAME)
+CREATED_IMAGE=cr.spk.no/infra/$(IMAGE_NAME)
 
 .PHONY: help
 help:
@@ -53,7 +53,10 @@ publish-ci: build-image ## Publiser util-image fra CI-pipeline
 		echo ">> pusher $(CREATED_IMAGE):latest" && \
 		docker tag $(IMAGE_NAME) "$(CREATED_IMAGE):latest" && \
 		docker push "$(CREATED_IMAGE):latest"; \
+		echo ">> pusher $(CREATED_IMAGE):prod" && \
+		docker tag $(IMAGE_NAME) "$(CREATED_IMAGE):prod" && \
+		docker push "$(CREATED_IMAGE):prod"; \
 	fi; \
-	echo ">> pusher $(CREATED_IMAGE):$$NORMALISED_BRANCH" && \
-	docker tag $(IMAGE_NAME) "$(CREATED_IMAGE):$$NORMALISED_BRANCH" && \
-	docker push "$(CREATED_IMAGE):$$NORMALISED_BRANCH"
+	echo ">> pusher $(CREATED_IMAGE):latest_$$NORMALISED_BRANCH" && \
+	docker tag $(IMAGE_NAME) "$(CREATED_IMAGE):latest_$$NORMALISED_BRANCH" && \
+	docker push "$(CREATED_IMAGE):latest_$$NORMALISED_BRANCH"
