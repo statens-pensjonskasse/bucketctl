@@ -1,4 +1,4 @@
-FROM cr.spk.no/base/k8s-tools:20250126014859@sha256:dc9bb7c7881ec37aea3117e4fda923e91a64cf93e87f3a2dccaaa7e9fe18fb95
+FROM cr.spk.no/base/k8s-tools:20250202014912@sha256:6e4ea913860a55f032e2ca7d2c886817269c8aaf465fd295608333284e7aebc6
 
 COPY ./bin/bucketctl /usr/local/bin/
 
