@@ -8,7 +8,7 @@ require (
 	github.com/go-git/go-git/v5 v5.14.0
 	github.com/pterm/pterm v0.12.80
 	github.com/spf13/cobra v1.9.1
-	github.com/spf13/viper v1.20.0
+	github.com/spf13/viper v1.20.1
 	github.com/vibrantbyte/go-antpath v1.1.1
 	golang.org/x/term v0.31.0
 	gopkg.in/yaml.v3 v3.0.1
