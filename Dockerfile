@@ -1,4 +1,4 @@
-FROM cr.spk.no/docker-hub/alpine/helm:3.18.2 AS helm
+FROM cr.spk.no/docker-hub/alpine/helm:3.18.3 AS helm
 
 FROM cr.spk.no/base/rockylinux:9.20250622014452-minimal@sha256:81b1af65ece0e1950583670b89be34b827b585d451ba110575e9ed8d6cda59b5
 
