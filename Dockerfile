@@ -1,6 +1,6 @@
 FROM cr.spk.no/docker-hub/alpine/helm:3.18.3 AS helm
 
-FROM cr.spk.no/base/rockylinux:9.20250629014451-minimal@sha256:0c3dc2e4dc6ae7bcc23c8b4c523bdb4644ba89a7b953059b9f6682aef3ac6c91
+FROM cr.spk.no/base/rockylinux:9.20250706014447-minimal@sha256:1298472ab5cee8a1925cf4c6ee22d64b3c8d5e9d82acb8ae10fef68ef826c0ca
 
 # Installerer helm ved å kopiere fra alpine/helm image
 COPY --from=helm /usr/bin/helm /usr/bin/helm
