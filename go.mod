@@ -10,7 +10,7 @@ require (
 	github.com/spf13/cobra v1.9.1
 	github.com/spf13/viper v1.20.1
 	github.com/vibrantbyte/go-antpath v1.1.1
-	golang.org/x/term v0.32.0
+	golang.org/x/term v0.33.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
@@ -59,7 +59,7 @@ require (
 	golang.org/x/mod v0.25.0 // indirect
 	golang.org/x/net v0.40.0 // indirect
 	golang.org/x/sync v0.15.0 // indirect
-	golang.org/x/sys v0.33.0 // indirect
+	golang.org/x/sys v0.34.0 // indirect
 	golang.org/x/text v0.26.0 // indirect
 	golang.org/x/tools v0.33.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
