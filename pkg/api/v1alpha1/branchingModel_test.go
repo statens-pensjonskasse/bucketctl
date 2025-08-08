@@ -1,8 +1,9 @@
 package v1alpha1
 
 import (
-	"git.spk.no/infra/bucketctl/pkg/api/bitbucket/types"
 	"testing"
+
+	"git.spk.no/infra/bucketctl/pkg/api/bitbucket/types"
 )
 
 func Test_BranchingModel_isEmpty(t *testing.T) {

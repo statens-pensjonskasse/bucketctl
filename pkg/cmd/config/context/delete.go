@@ -2,10 +2,11 @@ package context
 
 import (
 	"errors"
+	"path/filepath"
+
 	"git.spk.no/infra/bucketctl/pkg/common"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
-	"path/filepath"
 )
 
 var deleteCmd = &cobra.Command{

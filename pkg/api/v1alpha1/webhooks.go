@@ -1,9 +1,10 @@
 package v1alpha1
 
 import (
-	"git.spk.no/infra/bucketctl/pkg/api/bitbucket/types"
 	"reflect"
 	"sort"
+
+	"git.spk.no/infra/bucketctl/pkg/api/bitbucket/types"
 )
 
 type Webhook struct {

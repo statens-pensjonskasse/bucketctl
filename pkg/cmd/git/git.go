@@ -2,15 +2,16 @@ package git
 
 import (
 	"fmt"
+	"os"
+	"strings"
+	"syscall"
+
 	"git.spk.no/infra/bucketctl/pkg/common"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/transport/ssh"
 	"github.com/spf13/cobra"
 	"golang.org/x/term"
-	"os"
-	"strings"
-	"syscall"
 )
 
 var (

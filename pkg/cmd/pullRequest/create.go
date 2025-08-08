@@ -4,14 +4,15 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
+	"strings"
+
 	"git.spk.no/infra/bucketctl/pkg/api/bitbucket"
 	"git.spk.no/infra/bucketctl/pkg/api/bitbucket/types"
 	"git.spk.no/infra/bucketctl/pkg/common"
 	"git.spk.no/infra/bucketctl/pkg/logger"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"io"
-	"strings"
 )
 
 var (

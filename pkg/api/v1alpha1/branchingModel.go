@@ -1,8 +1,9 @@
 package v1alpha1
 
 import (
-	"git.spk.no/infra/bucketctl/pkg/api/bitbucket/types"
 	"strings"
+
+	"git.spk.no/infra/bucketctl/pkg/api/bitbucket/types"
 )
 
 type BranchingModel struct {

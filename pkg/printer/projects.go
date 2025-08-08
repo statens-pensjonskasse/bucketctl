@@ -1,9 +1,10 @@
 package printer
 
 import (
+	"strconv"
+
 	"git.spk.no/infra/bucketctl/pkg/api/bitbucket/types"
 	"git.spk.no/infra/bucketctl/pkg/common"
-	"strconv"
 )
 
 func PrettyFormatProjects(projectsMap map[string]*types.Project) [][]string {

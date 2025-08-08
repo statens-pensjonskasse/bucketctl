@@ -2,6 +2,7 @@ package access
 
 import (
 	"fmt"
+
 	. "git.spk.no/infra/bucketctl/pkg/api/v1alpha1"
 	"git.spk.no/infra/bucketctl/pkg/common"
 	"git.spk.no/infra/bucketctl/pkg/logger"

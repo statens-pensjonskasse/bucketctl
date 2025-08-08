@@ -3,12 +3,13 @@ package common
 import (
 	"encoding/json"
 	"fmt"
-	"git.spk.no/infra/bucketctl/pkg/api/bitbucket/types"
 	"io"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
+
+	"git.spk.no/infra/bucketctl/pkg/api/bitbucket/types"
 )
 
 func HttpRequest(method string, url string, payload io.Reader, token string, params ...map[string]string) (*http.Response, error) {

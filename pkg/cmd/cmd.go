@@ -1,6 +1,9 @@
 package cmd
 
 import (
+	"os"
+	"path/filepath"
+
 	"git.spk.no/infra/bucketctl/pkg/cmd/apply"
 	"git.spk.no/infra/bucketctl/pkg/cmd/config"
 	"git.spk.no/infra/bucketctl/pkg/cmd/get"
@@ -12,8 +15,6 @@ import (
 	"git.spk.no/infra/bucketctl/pkg/printer"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"os"
-	"path/filepath"
 )
 
 var (

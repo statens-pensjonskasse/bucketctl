@@ -3,6 +3,7 @@ package pullRequest
 import (
 	"encoding/json"
 	"fmt"
+
 	"git.spk.no/infra/bucketctl/pkg/api/bitbucket/types"
 	"git.spk.no/infra/bucketctl/pkg/common"
 	"github.com/go-git/go-git/v5"

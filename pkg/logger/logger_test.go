@@ -1,8 +1,9 @@
 package logger
 
 import (
-	"github.com/pterm/pterm"
 	"testing"
+
+	"github.com/pterm/pterm"
 )
 
 func TestPlainSprintf(t *testing.T) {

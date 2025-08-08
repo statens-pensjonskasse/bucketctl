@@ -2,11 +2,12 @@ package context
 
 import (
 	"errors"
+	"os"
+	"path/filepath"
+
 	"git.spk.no/infra/bucketctl/pkg/common"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"os"
-	"path/filepath"
 )
 
 var (
