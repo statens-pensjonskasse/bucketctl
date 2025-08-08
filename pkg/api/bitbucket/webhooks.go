@@ -3,11 +3,12 @@ package bitbucket
 import (
 	"encoding/json"
 	"fmt"
+	"io"
+
 	"git.spk.no/infra/bucketctl/pkg/api/bitbucket/types"
 	. "git.spk.no/infra/bucketctl/pkg/api/v1alpha1"
 	"git.spk.no/infra/bucketctl/pkg/common"
 	"git.spk.no/infra/bucketctl/pkg/logger"
-	"io"
 )
 
 func getWebhook(url string, token string) (*Webhook, error) {

@@ -1,10 +1,11 @@
 package v1alpha1
 
 import (
-	"git.spk.no/infra/bucketctl/pkg/common"
-	"gopkg.in/yaml.v3"
 	"reflect"
 	"testing"
+
+	"git.spk.no/infra/bucketctl/pkg/common"
+	"gopkg.in/yaml.v3"
 )
 
 var (

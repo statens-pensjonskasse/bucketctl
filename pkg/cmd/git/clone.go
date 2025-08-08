@@ -3,6 +3,10 @@ package git
 import (
 	"errors"
 	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
+
 	"git.spk.no/infra/bucketctl/pkg/api/bitbucket"
 	"git.spk.no/infra/bucketctl/pkg/api/bitbucket/types"
 	"git.spk.no/infra/bucketctl/pkg/common"
@@ -12,9 +16,6 @@ import (
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"os"
-	"path/filepath"
-	"strings"
 )
 
 var cloneCmd = &cobra.Command{

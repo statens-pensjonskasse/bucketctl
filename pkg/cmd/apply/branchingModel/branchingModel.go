@@ -3,12 +3,13 @@ package branchingModel
 import (
 	"bytes"
 	"encoding/json"
+	"strings"
+
 	"git.spk.no/infra/bucketctl/pkg/api/bitbucket/types"
 	. "git.spk.no/infra/bucketctl/pkg/api/v1alpha1"
 	"git.spk.no/infra/bucketctl/pkg/common"
 	"git.spk.no/infra/bucketctl/pkg/logger"
 	"github.com/pterm/pterm"
-	"strings"
 )
 
 func FindBranchingModelChanges(desired *ProjectConfigSpec, actual *ProjectConfigSpec) (toCreate *ProjectConfigSpec, toUpdate *ProjectConfigSpec, toDelete *ProjectConfigSpec) {

@@ -1,9 +1,10 @@
 package common
 
 import (
-	types2 "git.spk.no/infra/bucketctl/pkg/api/bitbucket/types"
-	"github.com/vibrantbyte/go-antpath/antpath"
 	"strings"
+
+	"git.spk.no/infra/bucketctl/pkg/api/bitbucket/types"
+	"github.com/vibrantbyte/go-antpath/antpath"
 )
 
 const (
@@ -14,7 +15,7 @@ const (
 	ModelCategory = "MODEL_CATEGORY"
 )
 
-func RefMatcher(matcher *types2.Matcher, branchModel *types2.BranchingModel, ref string) bool {
+func RefMatcher(matcher *types.Matcher, branchModel *types.BranchingModel, ref string) bool {
 	matcherTypeId := matcher.Type.Id
 
 	switch matcherTypeId {
@@ -33,11 +34,11 @@ func RefMatcher(matcher *types2.Matcher, branchModel *types2.BranchingModel, ref
 	}
 }
 
-func branchMatcher(matcher *types2.Matcher, ref string) bool {
+func branchMatcher(matcher *types.Matcher, ref string) bool {
 	return matcher.Id == ref
 }
 
-func patternMatcher(matcher *types2.Matcher, ref string) bool {
+func patternMatcher(matcher *types.Matcher, ref string) bool {
 	// https://confluence.atlassian.com/bitbucketserver088/branch-permission-patterns-1216582116.html
 	pattern := matcher.Id
 
@@ -66,7 +67,7 @@ func patternMatcher(matcher *types2.Matcher, ref string) bool {
 	return false
 }
 
-func modelBranchMatcher(matcher *types2.Matcher, branchModel *types2.BranchingModel, ref string) bool {
+func modelBranchMatcher(matcher *types.Matcher, branchModel *types.BranchingModel, ref string) bool {
 	switch matcher.Id {
 	case "production":
 		if branchModel.Production == nil {
@@ -86,7 +87,7 @@ func modelBranchMatcher(matcher *types2.Matcher, branchModel *types2.BranchingMo
 	return false
 }
 
-func modelCategoryMatcher(matcher *types2.Matcher, branchModel *types2.BranchingModel, ref string) bool {
+func modelCategoryMatcher(matcher *types.Matcher, branchModel *types.BranchingModel, ref string) bool {
 	// Branch is fetched in the form "refs/heads/<branch>", e.g. "refs/heads/feature/myAwesomeFeature"
 	branch := strings.TrimPrefix(ref, "refs/heads/")
 

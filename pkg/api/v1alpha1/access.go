@@ -1,8 +1,9 @@
 package v1alpha1
 
 import (
-	"git.spk.no/infra/bucketctl/pkg/common"
 	"strings"
+
+	"git.spk.no/infra/bucketctl/pkg/common"
 )
 
 type Entities struct {

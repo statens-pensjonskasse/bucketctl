@@ -1,6 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "local>statens-pensjonskasse/renovate-presets-internal:temporary-preset-from-spk-self-service-bot"
+    "local>statens-pensjonskasse/renovate-presets-internal:daily-automerge-non-major"
   ]
 }

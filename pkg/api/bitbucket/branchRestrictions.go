@@ -3,6 +3,7 @@ package bitbucket
 import (
 	"encoding/json"
 	"fmt"
+
 	"git.spk.no/infra/bucketctl/pkg/api/bitbucket/types"
 	. "git.spk.no/infra/bucketctl/pkg/api/v1alpha1"
 	"git.spk.no/infra/bucketctl/pkg/common"

@@ -47,31 +47,27 @@ matchers:
         exempt-users: <[]string>
 ```
 
-Branch restriction unntak er _permissive_.
-Det vil si at dersom skriv til en branch uten PR (`pull-request-only`) er satt på prosjektnivå uten unntak,
-men også er anngitt på repo-nivå med et unntak for en gruppe, så vil dette unntaket gjelde for den gruppa i det gitte
-repoet.
-
-Dersom samme branch dekkes av to forskjellige restrictions gjelder samme regler.
-I eksempelet under er `main` er angitt som `development`-branch i `foo`- og `bar`-repoene.
-Her vil `ci`-brukeren ha lov til å pushe endringer direkte til `main`-branch i både `foo` og `bar`-repoene uten en PR,
-mens andre brukere vil bli stoppet. `ci`-brukeren har også mulighet til å skrive om Git-loggen (e.g. ved force-push)
-i `main`-branch i `bar`-repoet, men blir stoppet i `foo`-repoet.
+Branch restriction exemptions are permissive.
+This means that if a branch is write-protected (`pull-request-only`) without exemptions on project level,
+but with an exemption on repository level, then that exemption holds true.
+If a branch is covered by two rules and an exemption is given in one of them,
+that exemption also holds true.
 
 ### MatcherType
 
-* `BRANCH` – Navn på branch
-* `MODEL_BRANCH` – Type branch (`production`/`development`)
-* `MODEL_CATEGORY` – Branch-kategori (`FEATURE`/`BUGFIX`/`HOTFIX`/`RELEASE`)
-* `PATTERN` – Match på pattern (
-  se [Bitbucket docs](https://confluence.atlassian.com/bitbucketserver/branch-permission-patterns-776639814.html))
+* `BRANCH` – Branch name
+* `MODEL_BRANCH` – Type of branch (`production`/`development`)
+* `MODEL_CATEGORY` – Branch category (`FEATURE`/`BUGFIX`/`HOTFIX`/`RELEASE`)
+* `PATTERN` – Pattern,
+  see [Bitbucket docs](https://confluence.atlassian.com/bitbucketserver/branch-permission-patterns-776639814.html) for
+  details
 
 ### Restriction
 
-* `fast-forward-only` – Hindre omskriving av Git-loggen
-* `no-deletes` – Hindre sletting av branch
-* `pull-request-only` – Hindre endring av branch utenom PR
-* `read-only` – Hindre alle endringer
+* `fast-forward-only` – Prevent rewriting Git history
+* `no-deletes` – Prevent branch deletion
+* `pull-request-only` – Prevent branch changes, except through PRs
+* `read-only` – Prevent all changes
 
 ## Webhook
 
@@ -104,4 +100,3 @@ permissions: <[]Permission>
 branchRestrictions: <[]BranchRestriction>
 webhooks: <[]Webhook>
 ```
-

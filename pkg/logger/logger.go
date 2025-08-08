@@ -3,12 +3,13 @@ package logger
 import (
 	"errors"
 	"fmt"
+	"regexp"
+	"strings"
+
 	"git.spk.no/infra/bucketctl/pkg/common"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"regexp"
-	"strings"
 )
 
 type LogFormatType string

@@ -2,11 +2,12 @@ package context
 
 import (
 	"errors"
+	"path/filepath"
+
 	"git.spk.no/infra/bucketctl/pkg/common"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
-	"path/filepath"
 )
 
 var createCmd = &cobra.Command{

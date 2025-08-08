@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+
 	"git.spk.no/infra/bucketctl/pkg/common"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"

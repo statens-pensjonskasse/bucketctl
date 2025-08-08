@@ -1,6 +1,6 @@
 # bucketctl
 
-Et CLI-verktøy for BitBucket-APIet skrevet i Go
+A simple CLI-tool written i Go for interacting with the BitBucket API.
 
 Config blir lagret under `$HOME/.config/bucketctl/config.yaml`
 
@@ -10,78 +10,79 @@ Config blir lagret under `$HOME/.config/bucketctl/config.yaml`
 make install
 ```
 
-## Hjelp
+## Help
 
-`bucketctl` har en innebygd hjelpekommando
+`bucketctl` has a built-in help command
 
 ```shell 
 bucketctl help
 ```
 
-For å kunne bruke noen av funksjonene trenger du et access-token,
-dette kan lages under profilen din i Bitbucket.
-For enkelhestsskyld kan dette lagres i config sammen med base url og Git url
+## Configuration
+
+To use some of the functions you will need an access-token.
+This token can be generated in your profile settings in Bitbucket.
+
+For easy of use this token can be stored in a config file together with the rest of the configuration, e.g.
 
 ```shell
 bucketctl config set --token <token> --base-url <url> --git-url <ssh>
 ```
 
-Det er også mulig å lage forskjellige kontekster som bygger oppå basisconfig.
-En ny kontekst kan f.eks. lages med
+It's also possible to create different contexts based on this base config.
+To create a new context you can e.g. run
 
 ```shell
 bucketctl config context create --context infra --key INFRA --include-repos
 ```
 
-for å heller bruke kunne konteksten `-x infra` enn å skrive `--project INFRA --include-repos` hver gang.
+This lets you use the context `-x infra` instead of having to write `--project INFRA --include-repos`.
 
-## Eksempler
+## Examples
 
 ### Basic
 
-Hent alle prosjekter
+Fetch all projects
 
 ```shell
 bucketctl get projects
 ```
 
-Hent alle repositories under `PROJ`-prosjektet
+Fetch all repositories under the `PROJ`-project
 
 ```shell
 bucketctl get repos -p PROJ
 ```
 
-For å klone alle repositories i et prosjekt
+To clone every repository in a project, run
 
 ```shell
 bucketctl git clone -p PROJ
 ```
 
-### Git
+All repositories will then be cloned into a folder name `PROJ` unless another folder is specified.
 
-brukes.
-Alle repositories blir da klonet inn under `PROJ`-mappa hvis ingen andre mapper er gitt.
-
-For å synkronisere hovedbranchen i alle repositories i et prosjekt som ligger i mappa `prosjekt` kjøres kommandoen
+To update the main brain of all repositories in a project, use the `--update flag`
 
 ```shell
 bucketctl git clone -p PROJ --update
 ```
 
-### Prosjektkonfigurasjon
+### Project Configuration
 
-`bucketctl` kan brukes til å endre prosjektkonfigurasjon
-
-Sjekk gjeldende konfigurasjon for et prosjekt med
+Run
 
 ```shell
 bucketctl get project-config -p PROJ
 ```
 
-Etter å ha endret prosjektkonfigurasjonen kan forskjell fra gjeldende konfigurasjon sjekkes ved
+to fetch the current project configuration.
+New project configuration can be applied by running
 
 ```shell
-bucketctl apply -f <PROJ>.yaml --dry-run
+bucketctl apply -f <PROJ>.yaml
 ```
 
-Se [dokumentasjon](./docs/PROJECT_CONFIG.md) for flere detaljer.
+To check which changes are to be made you can add the `--dry-run` flag.
+
+Read the [project config documentation](./docs/PROJECT_CONFIG.md) for additional details.

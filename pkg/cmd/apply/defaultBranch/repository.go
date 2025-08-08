@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+
 	"git.spk.no/infra/bucketctl/pkg/api/bitbucket"
 	"git.spk.no/infra/bucketctl/pkg/api/bitbucket/types"
 	. "git.spk.no/infra/bucketctl/pkg/api/v1alpha1"

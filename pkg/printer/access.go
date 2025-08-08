@@ -1,9 +1,10 @@
 package printer
 
 import (
+	"strings"
+
 	. "git.spk.no/infra/bucketctl/pkg/api/v1alpha1"
 	"git.spk.no/infra/bucketctl/pkg/common"
-	"strings"
 )
 
 func PrettyFormatAccess(projectConfig *ProjectConfig) [][]string {

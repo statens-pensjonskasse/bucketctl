@@ -1,8 +1,9 @@
 package access
 
 import (
-	. "git.spk.no/infra/bucketctl/pkg/api/v1alpha1"
 	"testing"
+
+	. "git.spk.no/infra/bucketctl/pkg/api/v1alpha1"
 )
 
 var (

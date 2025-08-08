@@ -4,10 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
+
 	"git.spk.no/infra/bucketctl/pkg/api/bitbucket/types"
 	"git.spk.no/infra/bucketctl/pkg/common"
 	"git.spk.no/infra/bucketctl/pkg/logger"
-	"io"
 )
 
 func GetProjects(baseUrl string, limit int, token string) (map[string]*types.Project, error) {

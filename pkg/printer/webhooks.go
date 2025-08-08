@@ -1,10 +1,11 @@
 package printer
 
 import (
-	. "git.spk.no/infra/bucketctl/pkg/api/v1alpha1"
-	"git.spk.no/infra/bucketctl/pkg/common"
 	"sort"
 	"strconv"
+
+	. "git.spk.no/infra/bucketctl/pkg/api/v1alpha1"
+	"git.spk.no/infra/bucketctl/pkg/common"
 )
 
 func PrettyFormatProjectWebhooks(projectConfig *ProjectConfig) [][]string {
