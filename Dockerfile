@@ -1,6 +1,6 @@
 FROM cr.spk.no/docker-hub/alpine/helm:3.18.3 AS helm
 
-FROM ghcr.io/statens-pensjonskasse/rockylinux:9-minimal@sha256:166c7fe29a6e7edfc5ad712cbf925307644a4be71a98016bbb2dd7a2af33a88a
+FROM ghcr.io/statens-pensjonskasse/rockylinux:9-minimal@sha256:8a65405cd71601dc82cf7bfa6cf8e6f57f1fe41f3fe1521cb91a449ad3b0deb6
 
 # Installerer helm ved å kopiere fra alpine/helm image
 COPY --from=helm /usr/bin/helm /usr/bin/helm
