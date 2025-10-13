@@ -7,7 +7,7 @@ toolchain go1.25.2
 require (
 	github.com/go-git/go-git/v5 v5.16.3
 	github.com/pterm/pterm v0.12.81
-	github.com/spf13/cobra v1.9.1
+	github.com/spf13/cobra v1.10.1
 	github.com/spf13/viper v1.21.0
 	github.com/vibrantbyte/go-antpath v1.1.1
 	golang.org/x/term v0.36.0
