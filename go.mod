@@ -2,7 +2,7 @@ module git.spk.no/infra/bucketctl
 
 go 1.24.0
 
-toolchain go1.25.3
+toolchain go1.25.5
 
 require (
 	github.com/go-git/go-git/v5 v5.16.3
